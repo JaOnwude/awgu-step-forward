@@ -13,6 +13,7 @@ import {
   opportunityTypeLabel,
 } from "@/lib/opportunity-labels";
 import { ListingStatusBadge, StatusBadge, VerificationBadge } from "@/components/shared/status-badge";
+import { SaveListingButton } from "@/features/discovery/save-listing-button";
 import { primaryButton, secondaryButton } from "@/lib/ui";
 
 type Params = Promise<{ id: string }>;
@@ -175,7 +176,11 @@ export default async function OpportunityPage({ params }: { params: Params }) {
       </section>
 
       <section className="mt-8 flex flex-wrap items-center gap-3">
-        {opportunity.external_url ? (
+        {opportunity.application_route === "platform" && !opportunity.is_expired ? (
+          <Link href={`/opportunities/${opportunity.id}/apply`} className={primaryButton}>
+            Apply in-platform
+          </Link>
+        ) : opportunity.external_url && !opportunity.is_expired ? (
           <a
             href={opportunity.external_url}
             target="_blank"
@@ -186,9 +191,12 @@ export default async function OpportunityPage({ params }: { params: Params }) {
           </a>
         ) : (
           <span className={`${primaryButton} pointer-events-none opacity-70`}>
-            Apply in-platform (sign in required)
+            {opportunity.is_expired ? "Applications closed" : "Apply in person"}
           </span>
         )}
+        {!opportunity.is_expired ? (
+          <SaveListingButton opportunityId={opportunity.id} />
+        ) : null}
         <Link href="/opportunities" className={secondaryButton}>
           Browse more
         </Link>
