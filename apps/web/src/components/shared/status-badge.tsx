@@ -1,6 +1,13 @@
 import type { ReactNode } from "react";
 
-type Tone = "neutral" | "verified" | "success" | "warning" | "danger" | "accent" | "primary";
+export type Tone =
+  | "neutral"
+  | "verified"
+  | "success"
+  | "warning"
+  | "danger"
+  | "accent"
+  | "primary";
 
 const toneClasses: Record<Tone, string> = {
   neutral: "border-border bg-surface-muted text-muted-foreground",
@@ -61,3 +68,36 @@ export function ListingStatusBadge({ status }: { status: string }) {
   };
   return <StatusBadge tone={meta.tone}>{meta.label}</StatusBadge>;
 }
+
+export const applicationStatusMeta: Record<
+  string,
+  { tone: Tone; label: string }
+> = {
+  draft: { tone: "neutral", label: "Draft" },
+  submitted: { tone: "primary", label: "Submitted" },
+  under_review: { tone: "warning", label: "Under review" },
+  interview: { tone: "accent", label: "Interview" },
+  offered: { tone: "success", label: "Offered" },
+  accepted: { tone: "success", label: "Accepted" },
+  rejected: { tone: "danger", label: "Not successful" },
+  withdrawn: { tone: "neutral", label: "Withdrawn" },
+  closed: { tone: "neutral", label: "Closed" },
+};
+
+export function applicationStatusLabel(status: string): string {
+  return applicationStatusMeta[status]?.label ?? status;
+}
+
+export function ApplicationStatusBadge({ status }: { status: string }) {
+  const meta = applicationStatusMeta[status] ?? {
+    tone: "neutral" as Tone,
+    label: status,
+  };
+  return <StatusBadge tone={meta.tone}>{meta.label}</StatusBadge>;
+}
+
+export const applicationStatusSourceLabels: Record<string, string> = {
+  applicant: "You",
+  provider: "Provider",
+  staff: "Support team",
+};

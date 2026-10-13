@@ -39,14 +39,18 @@ export interface RequestOptions {
   method?: "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
   body?: unknown;
   csrf?: boolean;
+  headers?: Record<string, string>;
 }
 
 export async function apiRequest<T>(
   path: string,
   options: RequestOptions = {},
 ): Promise<T> {
-  const { method = "GET", body, csrf = false } = options;
-  const headers: Record<string, string> = { Accept: "application/json" };
+  const { method = "GET", body, csrf = false, headers: extraHeaders } = options;
+  const headers: Record<string, string> = {
+    Accept: "application/json",
+    ...extraHeaders,
+  };
 
   if (body !== undefined) headers["Content-Type"] = "application/json";
   if (csrf) {

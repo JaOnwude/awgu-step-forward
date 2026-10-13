@@ -6,11 +6,16 @@ from datetime import UTC, datetime
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.features.identity.models import User, UserRole, UserSession
+from app.features.identity.models import OtpChallenge, User, UserRole, UserSession
 
 
 async def get_user_by_email(db: AsyncSession, email: str) -> User | None:
     result = await db.execute(select(User).where(User.email == email))
+    return result.scalar_one_or_none()
+
+
+async def get_user_by_phone(db: AsyncSession, phone: str) -> User | None:
+    result = await db.execute(select(User).where(User.phone == phone))
     return result.scalar_one_or_none()
 
 
@@ -21,14 +26,18 @@ async def get_user_by_id(db: AsyncSession, user_id: uuid.UUID) -> User | None:
 async def create_user(
     db: AsyncSession,
     *,
-    email: str,
+    email: str | None = None,
+    phone: str | None = None,
     account_status: str = "active",
     email_verified_at: datetime | None = None,
+    phone_verified_at: datetime | None = None,
 ) -> User:
     user = User(
         email=email,
+        phone=phone,
         account_status=account_status,
         email_verified_at=email_verified_at,
+        phone_verified_at=phone_verified_at,
     )
     db.add(user)
     await db.flush()
@@ -83,3 +92,43 @@ async def get_session_by_token_hash(
 async def revoke_session(db: AsyncSession, session: UserSession) -> None:
     session.revoked_at = datetime.now(UTC)
     await db.flush()
+
+
+async def create_otp_challenge(
+    db: AsyncSession,
+    *,
+    channel: str,
+    destination: str,
+    code_hash: str,
+    purpose: str,
+    expires_at: datetime,
+    max_attempts: int,
+) -> OtpChallenge:
+    challenge = OtpChallenge(
+        channel=channel,
+        destination=destination,
+        code_hash=code_hash,
+        purpose=purpose,
+        expires_at=expires_at,
+        max_attempts=max_attempts,
+    )
+    db.add(challenge)
+    await db.flush()
+    return challenge
+
+
+async def latest_otp_challenge(
+    db: AsyncSession, *, channel: str, destination: str, purpose: str
+) -> OtpChallenge | None:
+    result = await db.execute(
+        select(OtpChallenge)
+        .where(
+            OtpChallenge.channel == channel,
+            OtpChallenge.destination == destination,
+            OtpChallenge.purpose == purpose,
+            OtpChallenge.consumed_at.is_(None),
+        )
+        .order_by(OtpChallenge.created_at.desc())
+        .limit(1)
+    )
+    return result.scalar_one_or_none()
