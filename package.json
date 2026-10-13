@@ -6,11 +6,11 @@
     "packages/*"
   ],
   "scripts": {
-    "dev:web": "bun --cwd apps/web dev",
-    "build:web": "bun --cwd apps/web run build",
-    "lint:web": "bun --cwd apps/web run lint",
-    "typecheck:web": "bun --cwd apps/web run typecheck",
-    "dev:mobile": "bun --cwd apps/mobile start",
-    "typecheck:mobile": "bun --cwd apps/mobile run typecheck"
+    "dev:web": "bun run --filter web dev",
+    "build:web": "bun run --filter web build",
+    "lint:web": "bun run --filter web lint",
+    "typecheck:web": "bun run --filter web typecheck",
+    "dev:mobile": "bun run --filter mobile start",
+    "typecheck:mobile": "bun run --filter mobile typecheck"
   }
 }
