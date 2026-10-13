@@ -1,0 +1,60 @@
+from __future__ import annotations
+
+from datetime import UTC, datetime
+
+import pytest_asyncio
+from httpx import ASGITransport, AsyncClient
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.pool import StaticPool
+
+import app.features.audit.models  # noqa: F401
+import app.features.identity.models  # noqa: F401
+from app.api.deps import get_db
+from app.db.base import Base
+from app.features.identity import repository as repo
+from app.main import app
+
+
+@pytest_asyncio.fixture
+async def test_engine():
+    engine = create_async_engine(
+        "sqlite+aiosqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    yield engine
+    await engine.dispose()
+
+
+@pytest_asyncio.fixture
+async def session_factory(test_engine):
+    return async_sessionmaker(test_engine, expire_on_commit=False)
+
+
+@pytest_asyncio.fixture
+async def seeded_admin(session_factory):
+    email = "admin@test.local"
+    async with session_factory() as db:
+        user = await repo.create_user(
+            db, email=email, email_verified_at=datetime.now(UTC)
+        )
+        await repo.ensure_role(db, user.id, "admin")
+        await db.commit()
+    return email
+
+
+@pytest_asyncio.fixture
+async def client(session_factory):
+    async def override_get_db():
+        async with session_factory() as session:
+            yield session
+
+    app.dependency_overrides[get_db] = override_get_db
+    transport = ASGITransport(app=app)
+    async with AsyncClient(
+        transport=transport, base_url="http://testserver"
+    ) as test_client:
+        yield test_client
+    app.dependency_overrides.clear()
