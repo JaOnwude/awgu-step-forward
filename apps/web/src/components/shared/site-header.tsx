@@ -22,24 +22,24 @@ export function SiteHeader() {
           className="hidden items-center gap-6 md:flex"
         >
           {primaryNav.map((item) => (
-            <a
+            <Link
               key={item.href}
               href={item.href}
               className="text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               {item.label}
-            </a>
+            </Link>
           ))}
         </nav>
 
         <div className="flex items-center gap-3">
           <ThemeToggle />
-          <a
-            href="#demo"
+          <Link
+            href="/providers"
             className="hidden rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:inline-block"
           >
             Sign in
-          </a>
+          </Link>
         </div>
       </div>
     </header>
