@@ -1,0 +1,33 @@
+from __future__ import annotations
+
+from fastapi import APIRouter, Depends, Request
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.api.deps import AuthContext, require_roles
+from app.db.session import get_db
+from app.features.audit.service import record_event
+from app.features.identity.router import router as identity_router
+
+api_router = APIRouter()
+api_router.include_router(identity_router)
+
+
+@api_router.get("/admin/ping", tags=["admin"])
+async def admin_ping(
+    request: Request,
+    ctx: AuthContext = Depends(require_roles("admin")),
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, object]:
+    await record_event(
+        db,
+        action="admin.ping",
+        actor_user_id=ctx.user.id,
+        target_type="system",
+        request_id=getattr(request.state, "request_id", None),
+    )
+    await db.commit()
+    return {
+        "status": "ok",
+        "user_id": str(ctx.user.id),
+        "roles": sorted(ctx.roles),
+    }
