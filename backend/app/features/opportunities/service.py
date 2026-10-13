@@ -1,8 +1,12 @@
 from __future__ import annotations
 
+from datetime import UTC, datetime, timedelta
+
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import (
+    AuthRequiredError,
     ConflictError,
     NotFoundError,
     PermissionDeniedError,
@@ -13,16 +17,30 @@ from app.features.audit.service import record_event
 from app.features.identity.models import User, utcnow
 from app.features.opportunities import repository as repo
 from app.features.opportunities.models import (
+    DELIVERY_MODES,
     MATERIAL_FIELDS,
+    OPPORTUNITY_TYPES,
     ListingRevision,
     Opportunity,
 )
-from app.features.opportunities.schemas import OpportunityCreate, OpportunityUpdate
+from app.features.opportunities.schemas import (
+    OpportunityCard,
+    OpportunityCreate,
+    OpportunityDetail,
+    OpportunityListResponse,
+    OpportunityUpdate,
+    ProviderRef,
+)
 from app.features.providers import repository as provider_repo
 from app.features.providers import service as provider_service
 from app.features.providers.models import Organization
 
 SUBMITTABLE_STATUSES = ("draft", "changes_requested")
+SORT_OPTIONS = ("relevance", "deadline", "newest")
+PUBLIC_STATUSES = ("approved", "expired")
+
+#: Listings closing within this window are labelled "closing soon".
+CLOSING_SOON_DAYS = 14
 
 
 async def _resolve_org(
@@ -61,24 +79,172 @@ def serialize_snapshot(opp: Opportunity) -> dict:
     }
 
 
-async def get_opportunity_for_read(
+def _as_aware(value: datetime | None) -> datetime | None:
+    if value is None:
+        return None
+    return value if value.tzinfo is not None else value.replace(tzinfo=UTC)
+
+
+def is_expired(opp: Opportunity, *, now: datetime | None = None) -> bool:
+    if opp.status == "expired":
+        return True
+    deadline = _as_aware(opp.deadline_at)
+    if deadline is None:
+        return False
+    return deadline < (now or utcnow())
+
+
+def is_closing_soon(opp: Opportunity, *, now: datetime | None = None) -> bool:
+    if opp.status == "expired" or is_expired(opp, now=now):
+        return False
+    deadline = _as_aware(opp.deadline_at)
+    if deadline is None:
+        return False
+    moment = now or utcnow()
+    return timedelta(0) <= (deadline - moment) <= timedelta(days=CLOSING_SOON_DAYS)
+
+
+def _provider_ref(org: Organization | None) -> ProviderRef | None:
+    if org is None:
+        return None
+    return ProviderRef(
+        id=org.id,
+        name=org.name,
+        verification_status=org.verification_status,
+        verified_at=org.verified_at,
+        public_contact=org.public_contact,
+    )
+
+
+def _card(
+    opp: Opportunity, org: Organization | None, *, now: datetime
+) -> OpportunityCard:
+    return OpportunityCard(
+        id=opp.id,
+        organization_id=opp.organization_id,
+        opportunity_type=opp.opportunity_type,
+        title=opp.title,
+        location=opp.location,
+        delivery_mode=opp.delivery_mode,
+        cost_details=opp.cost_details,
+        pay_details=opp.pay_details,
+        deadline_at=opp.deadline_at,
+        status=opp.status,
+        is_expired=is_expired(opp, now=now),
+        is_closing_soon=is_closing_soon(opp, now=now),
+        updated_at=opp.updated_at,
+        provider=_provider_ref(org),
+    )
+
+
+def _detail(
+    opp: Opportunity, org: Organization | None, *, now: datetime
+) -> OpportunityDetail:
+    return OpportunityDetail(
+        **_card(opp, org, now=now).model_dump(),
+        description=opp.description,
+        eligibility=opp.eligibility,
+        application_route=opp.application_route,
+        external_url=opp.external_url,
+        min_age=opp.min_age,
+        submitted_at=opp.submitted_at,
+        reviewed_at=opp.reviewed_at,
+        published_at=opp.published_at,
+        decision_reason=opp.decision_reason,
+    )
+
+
+async def list_public_opportunities(
     db: AsyncSession,
     *,
-    user: User,
+    q: str | None = None,
+    category: str | None = None,
+    location: str | None = None,
+    delivery_mode: str | None = None,
+    sort: str = "relevance",
+    page: int = 1,
+    page_size: int = 12,
+) -> OpportunityListResponse:
+    if sort not in SORT_OPTIONS:
+        raise ValidationError(f"Unknown sort. Allowed: {', '.join(SORT_OPTIONS)}")
+    if category is not None and category not in OPPORTUNITY_TYPES:
+        raise ValidationError(
+            f"Unknown category. Allowed: {', '.join(OPPORTUNITY_TYPES)}"
+        )
+    if delivery_mode is not None and delivery_mode not in DELIVERY_MODES:
+        raise ValidationError(
+            f"Unknown delivery_mode. Allowed: {', '.join(DELIVERY_MODES)}"
+        )
+
+    rows, total = await repo.search_public(
+        db,
+        q=q,
+        category=category,
+        location=location,
+        delivery_mode=delivery_mode,
+        sort=sort,
+        page=page,
+        page_size=page_size,
+    )
+
+    now = utcnow()
+    orgs: dict = {}
+    items: list[OpportunityCard] = []
+    for opp in rows:
+        org = orgs.get(opp.organization_id)
+        if org is None:
+            org = await provider_repo.get_organization(db, opp.organization_id)
+            orgs[opp.organization_id] = org
+        items.append(_card(opp, org, now=now))
+
+    return OpportunityListResponse(
+        items=items, total=total, page=page, page_size=page_size
+    )
+
+
+async def get_opportunity_detail(
+    db: AsyncSession,
+    *,
+    user: User | None,
     roles: set[str],
     opportunity_id,
-) -> Opportunity:
+) -> OpportunityDetail:
     opp = await repo.get_opportunity(db, opportunity_id)
     if opp is None:
         raise NotFoundError("Listing not found.")
-    if opp.status == "approved":
-        return opp
-    if roles & STAFF_ROLES:
-        return opp
-    await provider_service.require_membership(
-        db, user_id=user.id, organization_id=opp.organization_id
+    if opp.status not in PUBLIC_STATUSES:
+        if user is None:
+            raise AuthRequiredError()
+        if not (roles & STAFF_ROLES):
+            await provider_service.require_membership(
+                db, user_id=user.id, organization_id=opp.organization_id
+            )
+    org = await provider_repo.get_organization(db, opp.organization_id)
+    return _detail(opp, org, now=utcnow())
+
+
+async def expire_overdue_listings(db: AsyncSession) -> int:
+    now = utcnow()
+    result = await db.execute(
+        select(Opportunity).where(
+            Opportunity.status == "approved",
+            Opportunity.deadline_at.is_not(None),
+            Opportunity.deadline_at < now,
+        )
     )
-    return opp
+    rows = list(result.scalars().all())
+    for opp in rows:
+        opp.status = "expired"
+        await record_event(
+            db,
+            action="listing.expired",
+            actor_user_id=None,
+            target_type="opportunity",
+            target_id=opp.id,
+        )
+    if rows:
+        await db.commit()
+    return len(rows)
 
 
 async def get_opportunity_for_write(
