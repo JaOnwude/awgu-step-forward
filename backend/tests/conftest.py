@@ -7,6 +7,8 @@ from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.pool import StaticPool
 
+import app.features.applicant.models  # noqa: F401
+import app.features.applications.models  # noqa: F401
 import app.features.audit.models  # noqa: F401
 import app.features.identity.models  # noqa: F401
 import app.features.opportunities.models  # noqa: F401
