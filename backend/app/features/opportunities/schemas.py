@@ -124,6 +124,52 @@ class OpportunityView(BaseModel):
     updated_at: datetime
 
 
+class ProviderRef(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    name: str
+    verification_status: str
+    verified_at: datetime | None = None
+    public_contact: str | None = None
+
+
+class OpportunityCard(BaseModel):
+    id: uuid.UUID
+    organization_id: uuid.UUID
+    opportunity_type: str
+    title: str
+    location: str
+    delivery_mode: str
+    cost_details: str | None = None
+    pay_details: str | None = None
+    deadline_at: datetime | None = None
+    status: str
+    is_expired: bool = False
+    is_closing_soon: bool = False
+    updated_at: datetime
+    provider: ProviderRef | None = None
+
+
+class OpportunityListResponse(BaseModel):
+    items: list[OpportunityCard]
+    total: int
+    page: int
+    page_size: int
+
+
+class OpportunityDetail(OpportunityCard):
+    description: str
+    eligibility: str | None = None
+    application_route: str
+    external_url: str | None = None
+    min_age: int | None = None
+    submitted_at: datetime | None = None
+    reviewed_at: datetime | None = None
+    published_at: datetime | None = None
+    decision_reason: str | None = None
+
+
 class ModerationDecisionRequest(BaseModel):
     decision: Literal["approve", "reject", "request_changes", "suspend"]
     reason: str | None = Field(default=None, max_length=2000)
