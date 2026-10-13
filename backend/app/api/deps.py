@@ -40,6 +40,21 @@ async def get_current_context(
     return context
 
 
+async def get_optional_context(
+    request: Request, db: AsyncSession = Depends(get_db)
+) -> AuthContext | None:
+    raw_token = request.cookies.get(_settings.session_cookie_name)
+    if not raw_token:
+        return None
+    resolved = await service.resolve_session(db, raw_token)
+    if resolved is None:
+        return None
+    user, session = resolved
+    context = AuthContext(user=user, session=session)
+    request.state.auth = context
+    return context
+
+
 def require_roles(*roles: str):
     async def _dependency(
         ctx: AuthContext = Depends(get_current_context),
