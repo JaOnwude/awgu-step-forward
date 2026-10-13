@@ -8,6 +8,7 @@ export const primaryNav: NavItem[] = [
   { label: "How it works", href: "/#how-it-works" },
   { label: "Support sessions", href: "/#support-sessions" },
   { label: "For providers", href: "/providers" },
+  { label: "My account", href: "/account" },
   { label: "Staff", href: "/admin" },
 ];
 
@@ -16,5 +17,6 @@ export const footerNav: NavItem[] = [
   { label: "How it works", href: "/#how-it-works" },
   { label: "Support sessions", href: "/#support-sessions" },
   { label: "For providers", href: "/providers" },
+  { label: "My account", href: "/account" },
   { label: "Staff workspace", href: "/admin" },
 ];
