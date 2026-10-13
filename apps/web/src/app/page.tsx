@@ -1,4 +1,13 @@
+import Link from "next/link";
+import { Suspense } from "react";
+
 import { AdminCheck } from "@/features/demo/admin-check";
+import { OpportunityCardView } from "@/features/discovery/opportunity-card";
+import {
+  fetchOpportunityDirectory,
+  type OpportunityCard,
+} from "@/lib/api/discovery";
+import { secondaryButton } from "@/lib/ui";
 
 const categories = [
   { name: "Scholarships", note: "Tuition and study support" },
@@ -23,6 +32,79 @@ const steps = [
   },
 ];
 
+async function FeaturedListings() {
+  let featured: OpportunityCard[] = [];
+  let failed = false;
+  try {
+    const data = await fetchOpportunityDirectory({ page_size: 3 });
+    featured = data.items;
+  } catch {
+    failed = true;
+  }
+
+  if (failed) {
+    return (
+      <div
+        role="alert"
+        className="rounded-2xl border border-danger/40 bg-danger/5 p-6"
+      >
+        <h3 className="font-medium">We couldn’t load featured listings.</h3>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Open the directory to browse opportunities directly.
+        </p>
+        <Link
+          href="/opportunities"
+          className={`mt-4 inline-block ${secondaryButton}`}
+        >
+          Open the directory
+        </Link>
+      </div>
+    );
+  }
+
+  if (featured.length === 0) {
+    return (
+      <div className="rounded-2xl border border-dashed border-border bg-surface p-10 text-center">
+        <h3 className="font-medium">No listings published yet.</h3>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Verified opportunities appear here as providers publish them.
+        </p>
+        <Link
+          href="/opportunities"
+          className={`mt-4 inline-block ${secondaryButton}`}
+        >
+          Browse the directory
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid gap-5 md:grid-cols-3">
+      {featured.map((opportunity) => (
+        <OpportunityCardView key={opportunity.id} opportunity={opportunity} />
+      ))}
+    </div>
+  );
+}
+
+function FeaturedSkeleton() {
+  return (
+    <div className="grid gap-5 md:grid-cols-3">
+      {Array.from({ length: 3 }).map((_, index) => (
+        <div
+          key={index}
+          className="space-y-3 rounded-2xl border border-border bg-surface p-5"
+        >
+          <div className="h-5 w-32 animate-pulse rounded-full bg-surface-muted" />
+          <div className="h-6 w-3/4 animate-pulse rounded bg-surface-muted" />
+          <div className="h-4 w-1/2 animate-pulse rounded bg-surface-muted" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function HomePage() {
   return (
     <>
@@ -41,12 +123,12 @@ export default function HomePage() {
               Every listing is reviewed before it appears.
             </p>
             <div className="flex flex-wrap gap-3">
-              <a
-                href="#opportunities"
+              <Link
+                href="/opportunities"
                 className="rounded-lg bg-primary px-5 py-3 text-sm font-medium text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 Browse opportunities
-              </a>
+              </Link>
               <a
                 href="#for-providers"
                 className="rounded-lg border border-border bg-background px-5 py-3 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -87,44 +169,21 @@ export default function HomePage() {
               Featured listings
             </h2>
             <p className="text-sm text-muted-foreground">
-              Sample content for the week-1 demo. Real listings appear from Day 3.
+              Verified opportunities, with Awgu prioritised.
             </p>
           </div>
-          <span className="rounded-full border border-warning/40 bg-surface px-3 py-1 text-xs font-medium text-warning">
-            Sample data
-          </span>
+          <Link
+            href="/opportunities"
+            className="text-sm font-medium text-primary hover:underline"
+          >
+            View all opportunities →
+          </Link>
         </div>
 
-        <div className="mt-6 grid gap-5 md:grid-cols-3">
-          {[
-            {
-              title: "State scholarship application support",
-              provider: "Enugu education office",
-              meta: "Deadline 30 Nov · Awgu",
-            },
-            {
-              title: "Solar installation apprenticeship",
-              provider: "Awgu skills centre",
-              meta: "Starts Jan · Awgu",
-            },
-            {
-              title: "Market stall build — paid day work",
-              provider: "Community project",
-              meta: "Adults only · 2 days",
-            },
-          ].map((card) => (
-            <article
-              key={card.title}
-              className="flex flex-col gap-3 rounded-2xl border border-border bg-surface p-5"
-            >
-              <span className="inline-flex w-fit items-center gap-1 rounded-full bg-verified/10 px-2 py-0.5 text-xs font-medium text-verified">
-                Verified provider
-              </span>
-              <h3 className="text-lg font-medium">{card.title}</h3>
-              <p className="text-sm text-muted-foreground">{card.provider}</p>
-              <p className="mt-auto text-sm text-muted-foreground">{card.meta}</p>
-            </article>
-          ))}
+        <div className="mt-6">
+          <Suspense fallback={<FeaturedSkeleton />}>
+            <FeaturedListings />
+          </Suspense>
         </div>
       </section>
 

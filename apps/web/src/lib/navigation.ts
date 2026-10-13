@@ -4,7 +4,7 @@ export interface NavItem {
 }
 
 export const primaryNav: NavItem[] = [
-  { label: "Opportunities", href: "/#opportunities" },
+  { label: "Opportunities", href: "/opportunities" },
   { label: "How it works", href: "/#how-it-works" },
   { label: "Support sessions", href: "/#support-sessions" },
   { label: "For providers", href: "/providers" },
@@ -12,7 +12,7 @@ export const primaryNav: NavItem[] = [
 ];
 
 export const footerNav: NavItem[] = [
-  { label: "Opportunities", href: "/#opportunities" },
+  { label: "Opportunities", href: "/opportunities" },
   { label: "How it works", href: "/#how-it-works" },
   { label: "Support sessions", href: "/#support-sessions" },
   { label: "For providers", href: "/providers" },
