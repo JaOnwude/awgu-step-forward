@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: #f8f6f1;
+  --foreground: #191c1a;
+
+  --surface: #ffffff;
+  --surface-muted: #efece3;
+  --border: #d9d5c9;
+
+  --muted-foreground: #57605a;
+
+  --primary: #14735a;
+  --primary-foreground: #ffffff;
+  --primary-muted: #e3f0eb;
+
+  --accent: #a9551f;
+  --accent-foreground: #ffffff;
+
+  --success: #14735a;
+  --warning: #8a5a12;
+  --danger: #b3261e;
+  --verified: #16588f;
+
+  --ring: #14735a;
+  --radius: 0.75rem;
+}
+
+.dark {
+  --background: #11150f;
+  --foreground: #eceee8;
+
+  --surface: #1a1e18;
+  --surface-muted: #232821;
+  --border: #333a30;
+
+  --muted-foreground: #a3aa9f;
+
+  --primary: #4cc39b;
+  --primary-foreground: #06231a;
+  --primary-muted: #1c3a30;
+
+  --accent: #e08a4e;
+  --accent-foreground: #2a1505;
+
+  --success: #4cc39b;
+  --warning: #e0b45e;
+  --danger: #f2837c;
+  --verified: #7fb6e6;
+
+  --ring: #4cc39b;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-border: var(--border);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-muted: var(--primary-muted);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-verified: var(--verified);
+  --color-ring: var(--ring);
+  --radius-lg: var(--radius);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
