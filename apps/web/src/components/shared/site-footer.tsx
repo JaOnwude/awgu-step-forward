@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { footerNav } from "@/lib/navigation";
 
 export function SiteFooter() {
@@ -14,13 +16,13 @@ export function SiteFooter() {
 
         <nav aria-label="Footer" className="flex flex-wrap gap-x-6 gap-y-2">
           {footerNav.map((item) => (
-            <a
+            <Link
               key={item.href}
               href={item.href}
               className="text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
               {item.label}
-            </a>
+            </Link>
           ))}
         </nav>
       </div>
