@@ -76,3 +76,15 @@ These spec requirements were not in the original week-1 plan and were not listed
 ### D18 — Backend tests run on SQLite in memory
 **Status:** Adopted for week 1
 Tests use `sqlite+aiosqlite` for speed. Production and local dev use PostgreSQL, so Postgres-specific behaviour (constraints, timezone handling) is checked by running the app locally against Docker Postgres. Add a Postgres CI job before pilot.
+
+### D20 — How application-support sessions work in week 1
+**Status:** Adopted (2026-10-14)
+**Spec says:** approved organizers submit sessions, staff approve before public listing, capacity is enforced, reminders follow channel preferences, and the organizer roster omits unneeded applicant data (R33–R38, A5).
+**Built** (`backend/app/features/sessions/`):
+- **Organizers are members of verified providers.** There is no separate mentor role yet; a provider member proposes sessions for their organisation.
+- **Approval:** new sessions are `pending_review` and appear only to the organisation and staff until approved. Staff can approve, reject (with reason) or suspend, and every decision is audited.
+- **Capacity:** registration locks the session row (`SELECT … FOR UPDATE` on PostgreSQL) and counts active registrations before inserting, so two people cannot take the last place. The database also enforces `capacity > 0`.
+- **Who can register:** adults with an applicant profile only (D7). Registering twice returns the same registration. Registration and cancelling close when the session starts.
+- **Roster (R38):** shows the preferred name, registration status and attendance only — no contact details, date of birth or profile. Viewing a roster and recording attendance are audited (R44).
+- **Reminders (R34):** the applicant's opt-in is stored on the registration; sending is part of the Day 6 notifications slice.
+- **Not built yet:** printable roster, sessions for minors (needs the guardian flow), editing a session after submission, and organizer follow-up resources.
