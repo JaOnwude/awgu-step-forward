@@ -3,6 +3,7 @@ import Link from "next/link";
 import { SearchX, X } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
+import { AssistantPanel } from "@/features/discovery/assistant-panel";
 import { CategoryChips, FilterForm } from "@/features/discovery/filter-form";
 import { OpportunityCardView } from "@/features/discovery/opportunity-card";
 import {
@@ -89,6 +90,7 @@ export default async function OpportunitiesPage({
       </header>
 
       <div className="mt-8 grid gap-4">
+        <AssistantPanel />
         <FilterForm query={query} />
         <CategoryChips
           query={query}
