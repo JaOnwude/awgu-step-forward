@@ -22,12 +22,20 @@ Status values: **Adopted** (in force), **Deferred** (spec requirement postponed 
 
 ## Deviations and later decisions
 
-### D11 — shadcn/ui and TanStack Query deferred for week 1
-**Status:** Proposed (owner to confirm or reverse)
+### D11 — shadcn/ui and TanStack Query adopted
+**Status:** Adopted (2026-10-14, owner decision — replaces the earlier proposal to defer them)
 **Spec says:** the web client uses shadcn/ui primitives and TanStack Query for server state (`spec.md` Web and PWA; `frontend-spec.md` §3).
-**Built:** Tailwind CSS v4 with hand-built components, Server Components for public reads, and small typed fetch clients in `apps/web/src/lib/api/`.
-**Why:** Days 1–4 shipped without them. Retrofitting every page mid-sprint would put the Day 5–7 slices at risk, and the demo does not need client-side caching to meet the week-1 exit checks.
-**Revisit:** straight after the week-1 demo, before offline/PWA work (R39/R40), where TanStack Query's caching earns its place. If the owner wants spec compliance first, add both in a Day 7 slice instead.
+**Built:**
+- shadcn/ui (new-york style) in `apps/web/src/components/ui/`, configured by `apps/web/components.json`. shadcn token names (`card`, `muted`, `accent`, `destructive`, `input`…) are aliases of the existing brand tokens in `globals.css`, so Light/Dark and contrast are unchanged. Because shadcn uses `accent` for hover backgrounds, the brand orange is now `highlight`.
+- A `NativeSelect` primitive is used instead of the Radix `Select` for ordinary choices: it is lighter on low-end phones and uses the platform picker.
+- TanStack Query owns all browser-side server state. The provider is `src/lib/query/provider.tsx` (one client per browser, a fresh one per server request; 4xx errors are not retried; writes are never auto-retried). Keys live in `src/lib/query/keys.ts`; account hooks in `src/features/account/queries.ts`. Sign-in and sign-out reset every private query so one user's data never shows for another.
+- Shared loading, error, offline and permission states are in `src/components/shared/query-states.tsx` (spec R49–R51).
+- Public pages stay as Server Components that fetch directly; the directory filter stays a plain GET form, so it works without JavaScript.
+
+### D19 — Web app must call the API on `localhost`, not `127.0.0.1`
+**Status:** Adopted (2026-10-14)
+**Found:** the web app defaulted to `http://127.0.0.1:8000` while it runs on `http://localhost:3000`. Browsers treat these as different sites, so the `SameSite=Lax` session cookie was not sent and the page could not read the CSRF cookie. Sign-in appeared to succeed but did not stick.
+**Fix:** the default API URL and `.env.example` now use `http://localhost:8000`. For deployment, the web and API must share a site (for example `app.example.ng` and `api.example.ng`), or the cookie settings need an ADR.
 
 ### D12 — No generated OpenAPI client or shared packages yet
 **Status:** Deferred
