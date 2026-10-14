@@ -4,6 +4,7 @@ import uuid
 
 from sqlalchemy import case, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.features.identity.models import utcnow
 from app.features.opportunities.models import ListingRevision, Opportunity
@@ -12,7 +13,13 @@ from app.features.opportunities.models import ListingRevision, Opportunity
 async def get_opportunity(
     db: AsyncSession, opportunity_id: uuid.UUID
 ) -> Opportunity | None:
-    return await db.get(Opportunity, opportunity_id)
+    # Eager-load work terms: lazy loads raise MissingGreenlet under asyncio.
+    result = await db.execute(
+        select(Opportunity)
+        .options(selectinload(Opportunity.work_terms))
+        .where(Opportunity.id == opportunity_id)
+    )
+    return result.scalar_one_or_none()
 
 
 async def list_by_status(
