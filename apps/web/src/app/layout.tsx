@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { SiteFooter } from "@/components/shared/site-footer";
 import { SiteHeader } from "@/components/shared/site-header";
+import { QueryProvider } from "@/lib/query/provider";
 import { ThemeProvider } from "@/theme/theme-provider";
 
 const geistSans = Geist({
@@ -40,11 +41,13 @@ export default function RootLayout({
       </head>
       <body className="min-h-full font-sans">
         <ThemeProvider>
-          <div className="flex min-h-dvh flex-col">
-            <SiteHeader />
-            <main className="flex-1">{children}</main>
-            <SiteFooter />
-          </div>
+          <QueryProvider>
+            <div className="flex min-h-dvh flex-col">
+              <SiteHeader />
+              <main className="flex-1">{children}</main>
+              <SiteFooter />
+            </div>
+          </QueryProvider>
         </ThemeProvider>
       </body>
     </html>

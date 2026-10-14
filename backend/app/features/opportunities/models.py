@@ -3,7 +3,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 
-from sqlalchemy import JSON, DateTime, ForeignKey, Integer, String, Text, Uuid
+from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer, String, Text, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -31,6 +31,10 @@ OPPORTUNITY_STATUSES = (
     "suspended",
     "expired",
 )
+
+#: Listing types that are adults-only (18+) under the initial work policy.
+ADULT_ONLY_TYPES = ("local_work", "contract")
+ADULT_MIN_AGE = 18
 
 #: Fields whose change on an approved listing must return it to review.
 MATERIAL_FIELDS = (
@@ -92,6 +96,11 @@ class Opportunity(Base):
         cascade="all, delete-orphan",
         order_by="ListingRevision.revision_number",
     )
+    work_terms: Mapped[WorkTerms | None] = relationship(
+        back_populates="opportunity",
+        cascade="all, delete-orphan",
+        uselist=False,
+    )
 
 
 class ListingRevision(Base):
@@ -121,3 +130,33 @@ class ListingRevision(Base):
     )
 
     opportunity: Mapped[Opportunity] = relationship(back_populates="revisions")
+
+
+class WorkTerms(Base):
+    __tablename__ = "work_terms"
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    opportunity_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("opportunities.id", ondelete="CASCADE"),
+        unique=True,
+        index=True,
+        nullable=False,
+    )
+    task_scope: Mapped[str | None] = mapped_column(Text)
+    pay_rate: Mapped[str | None] = mapped_column(String(200))
+    payment_timing: Mapped[str | None] = mapped_column(String(100))
+    hours_expected: Mapped[str | None] = mapped_column(String(100))
+    work_dates: Mapped[str | None] = mapped_column(String(200))
+    worksite: Mapped[str | None] = mapped_column(String(200))
+    supervisor_contact: Mapped[str | None] = mapped_column(String(200))
+    safety_ppe: Mapped[str | None] = mapped_column(Text)
+    hazards_reviewed: Mapped[bool] = mapped_column(Boolean, default=False)
+    adult_only_construction: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utcnow, nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utcnow, onupdate=utcnow, nullable=False
+    )
+
+    opportunity: Mapped[Opportunity] = relationship(back_populates="work_terms")

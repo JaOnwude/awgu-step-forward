@@ -7,7 +7,7 @@ import {
   fetchOpportunityDirectory,
   type OpportunityCard,
 } from "@/lib/api/discovery";
-import { secondaryButton } from "@/lib/ui";
+import { buttonVariants } from "@/components/ui/button";
 
 const categories = [
   { name: "Scholarships", note: "Tuition and study support" },
@@ -54,7 +54,7 @@ async function FeaturedListings() {
         </p>
         <Link
           href="/opportunities"
-          className={`mt-4 inline-block ${secondaryButton}`}
+          className={buttonVariants({ variant: "outline", className: "mt-4" })}
         >
           Open the directory
         </Link>
@@ -71,7 +71,7 @@ async function FeaturedListings() {
         </p>
         <Link
           href="/opportunities"
-          className={`mt-4 inline-block ${secondaryButton}`}
+          className={buttonVariants({ variant: "outline", className: "mt-4" })}
         >
           Browse the directory
         </Link>
@@ -232,6 +232,12 @@ export default function HomePage() {
               practice, and digital skills. These are workshops and help desks,
               not health services.
             </p>
+            <Link
+              href="/sessions"
+              className={buttonVariants({ variant: "outline", className: "mt-4" })}
+            >
+              Find a session
+            </Link>
           </div>
         </div>
 

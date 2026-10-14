@@ -1,108 +1,68 @@
 "use client";
 
-import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 
-import {
-  adminPing,
-  devLogin,
-  fetchCurrentUser,
-  logout,
-  type UserPublic,
-} from "@/lib/api/auth";
-import { ApiError } from "@/lib/api/client";
-
-type StatusKind = "idle" | "busy" | "ok" | "error";
-
-interface Status {
-  kind: StatusKind;
-  message: string;
-}
-
-const IDLE: Status = { kind: "idle", message: "" };
-
-function describe(error: unknown): string {
-  if (error instanceof ApiError) {
-    return `${error.code} (${error.status}): ${error.message}`;
-  }
-  return "Unexpected error.";
-}
+import { InlineError } from "@/components/shared/query-states";
+import { Button } from "@/components/ui/button";
+import { useCurrentUser, useSignOut, useSignedIn } from "@/features/account/queries";
+import { adminPing, devLogin } from "@/lib/api/auth";
 
 export function AdminCheck() {
-  const [user, setUser] = useState<UserPublic | null>(null);
-  const [ping, setPing] = useState<string | null>(null);
-  const [status, setStatus] = useState<Status>(IDLE);
+  const userQuery = useCurrentUser();
+  const user = userQuery.data ?? null;
+  const signedIn = useSignedIn();
+  const signOut = useSignOut();
 
-  async function signIn() {
-    setStatus({ kind: "busy", message: "Signing in as the demo admin…" });
-    try {
-      await devLogin("admin@awgu.local");
-      const current = await fetchCurrentUser();
-      setUser(current);
-      setStatus({ kind: "ok", message: "Signed in. Session cookie is set." });
-    } catch (error) {
-      setUser(null);
-      setStatus({ kind: "error", message: describe(error) });
-    }
-  }
+  const signIn = useMutation({
+    mutationFn: () => devLogin("admin@awgu.local"),
+    onSuccess: (result) => signedIn(result.user),
+  });
+  const ping = useMutation({ mutationFn: adminPing });
 
-  async function callAdminPing() {
-    setStatus({ kind: "busy", message: "Calling the admin-only endpoint…" });
-    try {
-      const result = await adminPing();
-      setPing(JSON.stringify(result, null, 2));
-      setStatus({ kind: "ok", message: "Admin endpoint responded." });
-    } catch (error) {
-      setPing(null);
-      setStatus({ kind: "error", message: describe(error) });
-    }
-  }
-
-  async function signOut() {
-    setStatus({ kind: "busy", message: "Signing out…" });
-    try {
-      await logout();
-      setUser(null);
-      setPing(null);
-      setStatus({ kind: "ok", message: "Signed out." });
-    } catch (error) {
-      setStatus({ kind: "error", message: describe(error) });
-    }
-  }
+  const status = signIn.isPending
+    ? "Signing in as the demo admin…"
+    : ping.isPending
+      ? "Calling the admin-only endpoint…"
+      : ping.isSuccess
+        ? "Admin endpoint responded."
+        : user
+          ? "Signed in. Session cookie is set."
+          : "";
 
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-3">
-        <button
-          type="button"
-          onClick={signIn}
-          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        >
+        <Button type="button" onClick={() => signIn.mutate()} disabled={signIn.isPending}>
           Sign in as demo admin
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
-          onClick={callAdminPing}
-          disabled={!user}
-          className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          variant="outline"
+          onClick={() => ping.mutate()}
+          disabled={!user || ping.isPending}
         >
           Call admin-only endpoint
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
-          onClick={signOut}
+          variant="outline"
+          onClick={() => {
+            ping.reset();
+            signOut.mutate();
+          }}
           disabled={!user}
-          className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           Sign out
-        </button>
+        </Button>
       </div>
 
       <p role="status" aria-live="polite" className="text-sm text-muted-foreground">
-        {status.message}
+        {status}
       </p>
+      <InlineError error={signIn.error ?? ping.error} />
 
       {user ? (
-        <dl className="grid gap-1 rounded-lg border border-border bg-surface p-4 text-sm">
+        <dl className="grid gap-1 rounded-lg border border-border bg-card p-4 text-sm">
           <div className="flex gap-2">
             <dt className="text-muted-foreground">Signed in as</dt>
             <dd className="font-medium">{user.email}</dd>
@@ -114,9 +74,9 @@ export function AdminCheck() {
         </dl>
       ) : null}
 
-      {ping ? (
-        <pre className="overflow-x-auto rounded-lg border border-border bg-surface-muted p-4 text-xs">
-          {ping}
+      {ping.data ? (
+        <pre className="overflow-x-auto rounded-lg border border-border bg-muted p-4 text-xs">
+          {JSON.stringify(ping.data, null, 2)}
         </pre>
       ) : null}
     </div>

@@ -6,7 +6,7 @@ export interface NavItem {
 export const primaryNav: NavItem[] = [
   { label: "Opportunities", href: "/opportunities" },
   { label: "How it works", href: "/#how-it-works" },
-  { label: "Support sessions", href: "/#support-sessions" },
+  { label: "Support sessions", href: "/sessions" },
   { label: "For providers", href: "/providers" },
   { label: "My account", href: "/account" },
   { label: "Staff", href: "/admin" },
@@ -15,7 +15,7 @@ export const primaryNav: NavItem[] = [
 export const footerNav: NavItem[] = [
   { label: "Opportunities", href: "/opportunities" },
   { label: "How it works", href: "/#how-it-works" },
-  { label: "Support sessions", href: "/#support-sessions" },
+  { label: "Support sessions", href: "/sessions" },
   { label: "For providers", href: "/providers" },
   { label: "My account", href: "/account" },
   { label: "Staff workspace", href: "/admin" },

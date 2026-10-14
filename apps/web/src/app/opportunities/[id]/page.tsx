@@ -13,8 +13,12 @@ import {
   opportunityTypeLabel,
 } from "@/lib/opportunity-labels";
 import { ListingStatusBadge, StatusBadge, VerificationBadge } from "@/components/shared/status-badge";
+import { ShieldAlert } from "lucide-react";
+
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { buttonVariants } from "@/components/ui/button";
 import { SaveListingButton } from "@/features/discovery/save-listing-button";
-import { primaryButton, secondaryButton } from "@/lib/ui";
+import { ADULT_ONLY_TYPES } from "@/lib/api/opportunities";
 
 type Params = Promise<{ id: string }>;
 
@@ -45,7 +49,7 @@ function DetailItem({
 }) {
   if (!value) return null;
   return (
-    <div className="rounded-lg border border-border bg-surface px-4 py-3">
+    <div className="rounded-lg border border-border bg-card px-4 py-3">
       <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
         {label}
       </dt>
@@ -90,6 +94,10 @@ export default async function OpportunityPage({ params }: { params: Params }) {
   const reviewed = formatWatDate(opportunity.reviewed_at);
   const updated = formatWatDate(opportunity.updated_at);
   const provider = opportunity.provider;
+  const terms = opportunity.work_terms;
+  const isWork =
+    ADULT_ONLY_TYPES.includes(opportunity.opportunity_type) ||
+    Boolean(terms?.adult_only_construction);
 
   return (
     <article className="mx-auto w-full max-w-4xl px-4 py-12">
@@ -157,7 +165,50 @@ export default async function OpportunityPage({ params }: { params: Params }) {
         </dl>
       </section>
 
-      <section className="mt-8 rounded-2xl border border-border bg-surface p-6">
+      {isWork ? (
+        <Alert className="mt-8">
+          <ShieldAlert aria-hidden />
+          <AlertTitle>Adults only (18+)</AlertTitle>
+          <AlertDescription>
+            {terms?.adult_only_construction
+              ? "This is construction-site work. It is open to verified adults aged 18 and over only."
+              : "Paid work listings are open to adults aged 18 and over only."}{" "}
+            Never pay to apply, and report a listing if anything feels unsafe.
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
+      {terms ? (
+        <section className="mt-8">
+          <h2 className="text-lg font-medium">Work terms and safety</h2>
+          <dl className="mt-4 grid gap-3 sm:grid-cols-2">
+            <DetailItem label="Task and scope" value={terms.task_scope ?? "Not stated"} />
+            <DetailItem label="Pay" value={terms.pay_rate ?? "Not stated"} />
+            <DetailItem label="When pay is made" value={terms.payment_timing ?? "Not stated"} />
+            <DetailItem label="Expected hours" value={terms.hours_expected ?? "Not stated"} />
+            <DetailItem label="Work dates" value={terms.work_dates ?? "Not stated"} />
+            <DetailItem label="Worksite area" value={terms.worksite ?? "Not stated"} />
+            <DetailItem
+              label="Supervisor / contact"
+              value={terms.supervisor_contact ?? "Not stated"}
+            />
+            <DetailItem
+              label="Site hazards reviewed"
+              value={terms.hazards_reviewed ? "Yes" : "Not confirmed"}
+            />
+          </dl>
+          <div className="mt-3 rounded-lg border border-border bg-card px-4 py-3">
+            <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+              Safety and PPE
+            </p>
+            <p className="mt-1 text-sm whitespace-pre-line">
+              {terms.safety_ppe ?? "Not stated — ask the provider before starting work."}
+            </p>
+          </div>
+        </section>
+      ) : null}
+
+      <section className="mt-8 rounded-xl border border-border bg-card p-6">
         <h2 className="text-lg font-medium">Provider &amp; freshness</h2>
         <dl className="mt-4 grid gap-3 sm:grid-cols-2">
           <DetailItem label="Provider" value={provider?.name ?? "Unknown"} />
@@ -177,7 +228,7 @@ export default async function OpportunityPage({ params }: { params: Params }) {
 
       <section className="mt-8 flex flex-wrap items-center gap-3">
         {opportunity.application_route === "platform" && !opportunity.is_expired ? (
-          <Link href={`/opportunities/${opportunity.id}/apply`} className={primaryButton}>
+          <Link href={`/opportunities/${opportunity.id}/apply`} className={buttonVariants()}>
             Apply in-platform
           </Link>
         ) : opportunity.external_url && !opportunity.is_expired ? (
@@ -185,19 +236,19 @@ export default async function OpportunityPage({ params }: { params: Params }) {
             href={opportunity.external_url}
             target="_blank"
             rel="noopener noreferrer"
-            className={primaryButton}
+            className={buttonVariants()}
           >
             Apply on provider site
           </a>
         ) : (
-          <span className={`${primaryButton} pointer-events-none opacity-70`}>
+          <span className={buttonVariants({ className: "pointer-events-none opacity-70" })}>
             {opportunity.is_expired ? "Applications closed" : "Apply in person"}
           </span>
         )}
         {!opportunity.is_expired ? (
           <SaveListingButton opportunityId={opportunity.id} />
         ) : null}
-        <Link href="/opportunities" className={secondaryButton}>
+        <Link href="/opportunities" className={buttonVariants({ variant: "outline" })}>
           Browse more
         </Link>
       </section>

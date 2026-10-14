@@ -11,6 +11,7 @@ from app.features.identity import repository as identity_repo
 from app.features.identity.models import User
 from app.features.opportunities.models import Opportunity
 from app.features.providers.models import Organization, ProviderMembership
+from app.features.sessions.models import ApplicationSupportSession
 
 NOW = datetime.now(UTC)
 
@@ -90,6 +91,31 @@ async def ensure_listing(
     )
 
 
+async def ensure_session(
+    db: AsyncSession, *, org: Organization, user: User, data: dict
+) -> bool:
+    """Create an approved demo session once; return True when created."""
+    exists = await db.scalar(
+        select(ApplicationSupportSession.id).where(
+            ApplicationSupportSession.organization_id == org.id,
+            ApplicationSupportSession.topic == data["topic"],
+        )
+    )
+    if exists is not None:
+        return False
+    db.add(
+        ApplicationSupportSession(
+            organization_id=org.id,
+            created_by_user_id=user.id,
+            status="approved",
+            submitted_at=NOW - timedelta(days=2),
+            reviewed_at=NOW - timedelta(days=1),
+            **data,
+        )
+    )
+    return True
+
+
 def approved(**overrides) -> dict:
     base = {
         "status": "approved",
@@ -142,6 +168,36 @@ DEMO = [
                 application_route="platform",
                 deadline_at=NOW + timedelta(days=45),
             ),
+        ],
+        "sessions": [
+            {
+                "topic": "Application help desk: forms and documents",
+                "description": (
+                    "Drop in for help filling application forms, checking which "
+                    "documents a listing really needs, and spotting fee scams."
+                ),
+                "starts_at": NOW + timedelta(days=5, hours=2),
+                "ends_at": NOW + timedelta(days=5, hours=5),
+                "delivery_mode": "onsite",
+                "location": "Awgu Skills Centre, main hall",
+                "capacity": 25,
+                "accessibility_notes": "Step-free entrance. Seating provided.",
+                "organizer_contact": "hello@awgu-skills.test",
+            },
+            {
+                "topic": "Writing a strong scholarship essay (online)",
+                "description": (
+                    "A short online workshop on planning and editing a "
+                    "scholarship essay, with time for questions."
+                ),
+                "starts_at": NOW + timedelta(days=12, hours=1),
+                "ends_at": NOW + timedelta(days=12, hours=2),
+                "delivery_mode": "remote",
+                "location": "Online video call (link sent after registering)",
+                "capacity": 2,
+                "accessibility_notes": "Captions on; works on low data.",
+                "organizer_contact": "hello@awgu-skills.test",
+            },
         ],
     },
     {
@@ -237,6 +293,7 @@ async def seed_demo() -> None:
     async with SessionLocal() as db:
         created_orgs = 0
         created_listings = 0
+        created_sessions = 0
         for entry in DEMO:
             user = await ensure_user(db, entry["email"])
             org_existed = await db.scalar(
@@ -259,11 +316,15 @@ async def seed_demo() -> None:
                 await ensure_listing(db, org=org, user=user, data=data)
                 if exists is None:
                     created_listings += 1
+            for data in entry.get("sessions", []):
+                if await ensure_session(db, org=org, user=user, data=data):
+                    created_sessions += 1
 
         await db.commit()
         print(
-            f"Demo seed complete: {created_orgs} provider(s) and "
-            f"{created_listings} listing(s) created."
+            f"Demo seed complete: {created_orgs} provider(s), "
+            f"{created_listings} listing(s) and {created_sessions} session(s) "
+            "created."
         )
 
 

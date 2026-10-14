@@ -40,7 +40,7 @@ from app.features.applications.schemas import (
 from app.features.audit.service import record_event
 from app.features.identity.models import User
 from app.features.opportunities import repository as opp_repo
-from app.features.opportunities.service import is_expired
+from app.features.opportunities.service import effective_min_age, is_expired
 
 SHARED_PROFILE_FIELDS = (
     "preferred_name",
@@ -135,9 +135,10 @@ async def create_or_get_draft(
         raise ConflictError("This listing has closed and is no longer accepting.")
     if opp.application_route != "platform":
         raise ValidationError("This listing does not use in-platform applications.")
-    if opp.min_age is not None and age_years(profile.date_of_birth) < opp.min_age:
+    min_age = effective_min_age(opp)
+    if min_age is not None and age_years(profile.date_of_birth) < min_age:
         raise PermissionDeniedError(
-            f"This opportunity is open to applicants aged {opp.min_age} and over."
+            f"This opportunity is open to applicants aged {min_age} and over."
         )
 
     existing = await repo.get_by_applicant_listing(

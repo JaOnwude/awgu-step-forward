@@ -13,6 +13,57 @@ from app.features.opportunities.models import (
 )
 
 
+class WorkTermsCreate(BaseModel):
+    task_scope: str | None = Field(default=None, max_length=4000)
+    pay_rate: str | None = Field(default=None, max_length=200)
+    payment_timing: str | None = Field(default=None, max_length=100)
+    hours_expected: str | None = Field(default=None, max_length=100)
+    work_dates: str | None = Field(default=None, max_length=200)
+    worksite: str | None = Field(default=None, max_length=200)
+    supervisor_contact: str | None = Field(default=None, max_length=200)
+    safety_ppe: str | None = Field(default=None, max_length=4000)
+    hazards_reviewed: bool = False
+    adult_only_construction: bool = False
+
+
+class WorkTermsUpdate(BaseModel):
+    task_scope: str | None = Field(default=None, max_length=4000)
+    pay_rate: str | None = Field(default=None, max_length=200)
+    payment_timing: str | None = Field(default=None, max_length=100)
+    hours_expected: str | None = Field(default=None, max_length=100)
+    work_dates: str | None = Field(default=None, max_length=200)
+    worksite: str | None = Field(default=None, max_length=200)
+    supervisor_contact: str | None = Field(default=None, max_length=200)
+    safety_ppe: str | None = Field(default=None, max_length=4000)
+    hazards_reviewed: bool | None = None
+    adult_only_construction: bool | None = None
+
+
+class WorkTermsOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    task_scope: str | None
+    pay_rate: str | None
+    payment_timing: str | None
+    hours_expected: str | None
+    work_dates: str | None
+    worksite: str | None
+    supervisor_contact: str | None
+    safety_ppe: str | None
+    hazards_reviewed: bool
+    adult_only_construction: bool
+
+
+class ProviderRef(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    name: str
+    verification_status: str
+    verified_at: datetime | None = None
+    public_contact: str | None = None
+
+
 class OpportunityCreate(BaseModel):
     organization_id: uuid.UUID | None = None
     opportunity_type: str
@@ -27,6 +78,7 @@ class OpportunityCreate(BaseModel):
     external_url: str | None = Field(default=None, max_length=500)
     min_age: int | None = Field(default=None, ge=10, le=100)
     deadline_at: datetime | None = None
+    work_terms: WorkTermsCreate | None = None
 
     @field_validator("opportunity_type")
     @classmethod
@@ -69,6 +121,7 @@ class OpportunityUpdate(BaseModel):
     external_url: str | None = Field(default=None, max_length=500)
     min_age: int | None = Field(default=None, ge=10, le=100)
     deadline_at: datetime | None = None
+    work_terms: WorkTermsUpdate | None = None
 
     @field_validator("opportunity_type")
     @classmethod
@@ -98,40 +151,38 @@ class OpportunityUpdate(BaseModel):
         return value
 
 
-class OpportunityView(BaseModel):
+class OpportunityOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: uuid.UUID
     organization_id: uuid.UUID
     opportunity_type: str
     title: str
-    description: str
-    eligibility: str | None = None
-    cost_details: str | None = None
-    pay_details: str | None = None
     location: str
     delivery_mode: str
+    cost_details: str | None = None
+    pay_details: str | None = None
+    deadline_at: datetime | None = None
+    status: str
     application_route: str
     external_url: str | None = None
     min_age: int | None = None
-    deadline_at: datetime | None = None
-    status: str
+    created_at: datetime
+    updated_at: datetime
     submitted_at: datetime | None = None
     reviewed_at: datetime | None = None
     published_at: datetime | None = None
     decision_reason: str | None = None
-    created_at: datetime
-    updated_at: datetime
 
 
-class ProviderRef(BaseModel):
+class OpportunitySummary(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: uuid.UUID
-    name: str
-    verification_status: str
-    verified_at: datetime | None = None
-    public_contact: str | None = None
+    title: str
+    organization_id: uuid.UUID
+    status: str
+    opportunity_type: str
 
 
 class OpportunityCard(BaseModel):
@@ -168,8 +219,11 @@ class OpportunityDetail(OpportunityCard):
     reviewed_at: datetime | None = None
     published_at: datetime | None = None
     decision_reason: str | None = None
+    work_terms: WorkTermsOut | None = None
 
 
 class ModerationDecisionRequest(BaseModel):
     decision: Literal["approve", "reject", "request_changes", "suspend"]
     reason: str | None = Field(default=None, max_length=2000)
+
+OpportunityView = OpportunityOut

@@ -1,7 +1,16 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/*
+ * Semantic design tokens. Brand values live here once; shadcn/ui token names
+ * (card, popover, muted, secondary, accent, destructive, input) map onto them
+ * so primitives and feature UI share one palette in Light and Dark.
+ *
+ * Note: shadcn uses `accent` for hover/selection backgrounds, so the brand
+ * orange is exposed as `highlight` instead.
+ */
 :root {
   --background: #f8f6f1;
   --foreground: #191c1a;
@@ -16,8 +25,8 @@
   --primary-foreground: #ffffff;
   --primary-muted: #e3f0eb;
 
-  --accent: #a9551f;
-  --accent-foreground: #ffffff;
+  --highlight: #a9551f;
+  --highlight-foreground: #ffffff;
 
   --success: #14735a;
   --warning: #8a5a12;
@@ -26,6 +35,19 @@
 
   --ring: #14735a;
   --radius: 0.75rem;
+
+  /* shadcn/ui aliases */
+  --card: var(--surface);
+  --card-foreground: var(--foreground);
+  --popover: var(--surface);
+  --popover-foreground: var(--foreground);
+  --secondary: var(--surface-muted);
+  --secondary-foreground: var(--foreground);
+  --muted: var(--surface-muted);
+  --accent: var(--surface-muted);
+  --accent-foreground: var(--foreground);
+  --destructive: var(--danger);
+  --input: var(--border);
 }
 
 .dark {
@@ -42,8 +64,8 @@
   --primary-foreground: #06231a;
   --primary-muted: #1c3a30;
 
-  --accent: #e08a4e;
-  --accent-foreground: #2a1505;
+  --highlight: #e08a4e;
+  --highlight-foreground: #2a1505;
 
   --success: #4cc39b;
   --warning: #e0b45e;
@@ -63,16 +85,39 @@
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary-muted: var(--primary-muted);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
+  --color-highlight: var(--highlight);
+  --color-highlight-foreground: var(--highlight-foreground);
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-danger: var(--danger);
   --color-verified: var(--verified);
   --color-ring: var(--ring);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-input: var(--input);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
 }
 
 body {

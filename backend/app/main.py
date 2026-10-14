@@ -14,6 +14,7 @@ from app.core.errors import AppError
 from app.core.logging import configure_logging
 
 _settings = get_settings()
+configure_logging()
 
 
 @asynccontextmanager

@@ -9,7 +9,7 @@ import {
   type OpportunityListResponse,
 } from "@/lib/api/discovery";
 import { deliveryModeLabel, opportunityTypeLabel } from "@/lib/opportunity-labels";
-import { secondaryButton } from "@/lib/ui";
+import { buttonVariants } from "@/components/ui/button";
 
 export const metadata: Metadata = {
   title: "Opportunities — Awgu StepForward",
@@ -103,7 +103,7 @@ export default async function OpportunitiesPage({
             The directory service did not respond. Check your connection and try
             again.
           </p>
-          <Link href={buildHref(query)} className={`mt-4 inline-block ${secondaryButton}`}>
+          <Link href={buildHref(query)} className={buttonVariants({ variant: "outline", className: "mt-4" })}>
             Try again
           </Link>
         </div>
@@ -168,7 +168,7 @@ function DirectoryResults({
           <p className="mt-1 text-sm text-muted-foreground">
             Try a wider location, a different category, or clear your filters.
           </p>
-          <Link href="/opportunities" className={`mt-4 inline-block ${secondaryButton}`}>
+          <Link href="/opportunities" className={buttonVariants({ variant: "outline", className: "mt-4" })}>
             Clear all filters
           </Link>
         </div>
@@ -188,7 +188,7 @@ function DirectoryResults({
               {page > 1 ? (
                 <Link
                   href={buildHref({ ...query, page: page - 1 })}
-                  className={secondaryButton}
+                  className={buttonVariants({ variant: "outline" })}
                 >
                   Previous
                 </Link>
@@ -201,7 +201,7 @@ function DirectoryResults({
               {page < totalPages ? (
                 <Link
                   href={buildHref({ ...query, page: page + 1 })}
-                  className={secondaryButton}
+                  className={buttonVariants({ variant: "outline" })}
                 >
                   Next
                 </Link>

@@ -35,6 +35,22 @@ export interface Opportunity {
   updated_at: string;
 }
 
+/** Listing types the API treats as adults-only work (18+). */
+export const ADULT_ONLY_TYPES: readonly string[] = ["local_work", "contract"];
+
+export interface WorkTerms {
+  task_scope: string | null;
+  pay_rate: string | null;
+  payment_timing: string | null;
+  hours_expected: string | null;
+  work_dates: string | null;
+  worksite: string | null;
+  supervisor_contact: string | null;
+  safety_ppe: string | null;
+  hazards_reviewed: boolean;
+  adult_only_construction: boolean;
+}
+
 export interface OpportunityInput {
   organization_id?: string;
   opportunity_type: string;
@@ -43,8 +59,10 @@ export interface OpportunityInput {
   location: string;
   eligibility?: string | null;
   cost_details?: string | null;
+  pay_details?: string | null;
   deadline_at?: string | null;
   min_age?: number | null;
+  work_terms?: Partial<WorkTerms> | null;
 }
 
 export function createOpportunity(
