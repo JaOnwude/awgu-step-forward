@@ -1,32 +1,43 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-
 import {
-  fetchOpportunityDetail,
-  type OpportunityDetail,
-} from "@/lib/api/discovery";
+  ArrowRight,
+  Banknote,
+  CalendarDays,
+  Check,
+  ChevronLeft,
+  CircleDashed,
+  Clock,
+  ExternalLink,
+  HardHat,
+  Info,
+  MapPin,
+  type LucideIcon,
+} from "lucide-react";
+
+import { CategoryIcon } from "@/components/shared/category-icon";
+import {
+  AdultsOnlyBadge,
+  ListingStatusBadge,
+  StatusBadge,
+  VerificationBadge,
+} from "@/components/shared/status-badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { buttonVariants } from "@/components/ui/button";
+import { SaveListingButton } from "@/features/discovery/save-listing-button";
+import { fetchOpportunityDetail, type OpportunityDetail } from "@/lib/api/discovery";
+import { ADULT_ONLY_TYPES } from "@/lib/api/opportunities";
 import { formatWatDate, formatWatDateTime } from "@/lib/format";
 import {
   applicationRouteLabel,
   deliveryModeLabel,
   opportunityTypeLabel,
 } from "@/lib/opportunity-labels";
-import { ListingStatusBadge, StatusBadge, VerificationBadge } from "@/components/shared/status-badge";
-import { ShieldAlert } from "lucide-react";
-
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { buttonVariants } from "@/components/ui/button";
-import { SaveListingButton } from "@/features/discovery/save-listing-button";
-import { ADULT_ONLY_TYPES } from "@/lib/api/opportunities";
 
 type Params = Promise<{ id: string }>;
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Params;
-}): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { id } = await params;
   try {
     const opportunity = await fetchOpportunityDetail(id);
@@ -40,21 +51,86 @@ export async function generateMetadata({
   }
 }
 
-function DetailItem({
+function FactCard({
+  icon: Icon,
   label,
   value,
+  note,
 }: {
+  icon: LucideIcon;
   label: string;
-  value: string | null | undefined;
+  value: string;
+  note?: string | null;
 }) {
+  return (
+    <div className="grid content-start gap-1.5 rounded-2xl border bg-card p-5">
+      <Icon aria-hidden className="size-5 text-primary" />
+      <p className="eyebrow text-muted-foreground">{label}</p>
+      <p className="text-lg leading-snug font-bold">{value}</p>
+      {note ? <p className="text-xs text-muted-foreground">{note}</p> : null}
+    </div>
+  );
+}
+
+function Detail({ label, value }: { label: string; value: string | null | undefined }) {
   if (!value) return null;
   return (
-    <div className="rounded-lg border border-border bg-card px-4 py-3">
-      <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        {label}
-      </dt>
-      <dd className="mt-1 text-sm">{value}</dd>
+    <div className="grid gap-1 border-b border-dashed py-3 last:border-b-0 sm:grid-cols-[11rem_1fr] sm:gap-4">
+      <dt className="text-sm font-semibold text-muted-foreground">{label}</dt>
+      <dd className="text-sm whitespace-pre-line">{value}</dd>
     </div>
+  );
+}
+
+function SafetyItem({ ok, title, note }: { ok: boolean; title: string; note: string }) {
+  return (
+    <li className="flex items-start gap-3">
+      <span
+        className={`mt-0.5 grid size-7 shrink-0 place-items-center rounded-full ${
+          ok ? "bg-success-muted text-success" : "bg-muted text-muted-foreground"
+        }`}
+      >
+        {ok ? <Check aria-hidden className="size-4" /> : <CircleDashed aria-hidden className="size-4" />}
+      </span>
+      <span>
+        <span className="block text-sm font-semibold">{title}</span>
+        <span className="block text-xs text-muted-foreground">{note}</span>
+      </span>
+    </li>
+  );
+}
+
+function ApplyAction({ opportunity }: { opportunity: OpportunityDetail }) {
+  if (opportunity.is_expired) {
+    return (
+      <span className={buttonVariants({ size: "lg", variant: "secondary", className: "pointer-events-none w-full" })}>
+        Applications closed
+      </span>
+    );
+  }
+  if (opportunity.application_route === "platform") {
+    return (
+      <Link href={`/opportunities/${opportunity.id}/apply`} className={buttonVariants({ size: "lg", className: "w-full" })}>
+        Apply in-platform <ArrowRight aria-hidden />
+      </Link>
+    );
+  }
+  if (opportunity.external_url) {
+    return (
+      <a
+        href={opportunity.external_url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={buttonVariants({ size: "lg", className: "w-full" })}
+      >
+        Apply on provider site <ExternalLink aria-hidden />
+      </a>
+    );
+  }
+  return (
+    <span className={buttonVariants({ size: "lg", variant: "secondary", className: "pointer-events-none w-full" })}>
+      Apply in person
+    </span>
   );
 }
 
@@ -71,18 +147,15 @@ export default async function OpportunityPage({ params }: { params: Params }) {
 
   if (failed) {
     return (
-      <section className="mx-auto w-full max-w-4xl px-4 py-12">
-        <Link href="/opportunities" className="text-sm font-medium text-primary hover:underline">
-          ← Back to opportunities
-        </Link>
-        <div
-          role="alert"
-          className="mt-6 rounded-2xl border border-danger/40 bg-danger/5 p-6"
-        >
-          <h1 className="font-medium">We couldn’t load this listing.</h1>
+      <section className="mx-auto w-full max-w-4xl px-4 py-12 sm:px-6">
+        <div role="alert" className="rounded-2xl border border-danger/40 bg-danger-muted p-6">
+          <h1 className="font-semibold">We couldn’t load this listing.</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             The directory service did not respond. Please try again.
           </p>
+          <Link href="/opportunities" className={buttonVariants({ variant: "outline", className: "mt-4" })}>
+            Back to opportunities
+          </Link>
         </div>
       </section>
     );
@@ -90,174 +163,214 @@ export default async function OpportunityPage({ params }: { params: Params }) {
 
   if (!opportunity) notFound();
 
-  const deadline = formatWatDateTime(opportunity.deadline_at);
-  const reviewed = formatWatDate(opportunity.reviewed_at);
-  const updated = formatWatDate(opportunity.updated_at);
+  const deadline = formatWatDate(opportunity.deadline_at);
+  const deadlineTime = formatWatDateTime(opportunity.deadline_at);
   const provider = opportunity.provider;
   const terms = opportunity.work_terms;
   const isWork =
-    ADULT_ONLY_TYPES.includes(opportunity.opportunity_type) ||
-    Boolean(terms?.adult_only_construction);
+    ADULT_ONLY_TYPES.includes(opportunity.opportunity_type) || Boolean(terms?.adult_only_construction);
+  const money = opportunity.pay_details ?? terms?.pay_rate ?? opportunity.cost_details;
 
   return (
-    <article className="mx-auto w-full max-w-4xl px-4 py-12">
+    <article className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
       <Link
         href="/opportunities"
-        className="text-sm font-medium text-primary hover:underline"
+        className="inline-flex items-center gap-1 rounded text-sm text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        ← Back to opportunities
+        <ChevronLeft aria-hidden className="size-4" /> All opportunities
       </Link>
 
-      <header className="mt-6 space-y-4">
-        <div className="flex flex-wrap items-center gap-2">
-          {provider ? <VerificationBadge status={provider.verification_status} /> : null}
-          {opportunity.is_expired ? (
-            <ListingStatusBadge status="expired" />
-          ) : opportunity.is_closing_soon ? (
-            <StatusBadge tone="warning">Closing soon</StatusBadge>
-          ) : null}
-        </div>
-        <h1 className="text-3xl font-semibold tracking-tight">
-          {opportunity.title}
-        </h1>
-        <p className="text-muted-foreground">
-          {provider?.name ?? "Unknown provider"} · {opportunity.location} ·{" "}
-          {opportunityTypeLabel(opportunity.opportunity_type)}
-        </p>
-      </header>
-
-      {opportunity.is_expired ? (
-        <div
-          role="status"
-          className="mt-6 rounded-2xl border border-warning/40 bg-warning/5 p-4 text-sm"
-        >
-          <strong className="font-medium">This listing has expired.</strong> It
-          is kept for reference and no longer appears in default results. Check
-          for similar active opportunities.
-        </div>
-      ) : null}
-
-      <section className="mt-8 space-y-4">
-        <h2 className="text-lg font-medium">About this opportunity</h2>
-        <p className="whitespace-pre-line text-sm leading-relaxed">
-          {opportunity.description}
-        </p>
-      </section>
-
-      <section className="mt-8">
-        <h2 className="text-lg font-medium">Key details</h2>
-        <dl className="mt-4 grid gap-3 sm:grid-cols-2">
-          <DetailItem label="Category" value={opportunityTypeLabel(opportunity.opportunity_type)} />
-          <DetailItem label="Location" value={opportunity.location} />
-          <DetailItem label="Delivery mode" value={deliveryModeLabel(opportunity.delivery_mode)} />
-          <DetailItem label="How to apply" value={applicationRouteLabel(opportunity.application_route)} />
-          <DetailItem label="Eligibility" value={opportunity.eligibility} />
-          <DetailItem
-            label="Minimum age"
-            value={opportunity.min_age ? `${opportunity.min_age}+` : null}
-          />
-          <DetailItem label="Costs" value={opportunity.cost_details} />
-          <DetailItem label="Stipend / pay" value={opportunity.pay_details} />
-          <DetailItem
-            label="Deadline"
-            value={deadline ? `${deadline} (WAT, Africa/Lagos)` : null}
-          />
-        </dl>
-      </section>
-
-      {isWork ? (
-        <Alert className="mt-8">
-          <ShieldAlert aria-hidden />
-          <AlertTitle>Adults only (18+)</AlertTitle>
-          <AlertDescription>
-            {terms?.adult_only_construction
-              ? "This is construction-site work. It is open to verified adults aged 18 and over only."
-              : "Paid work listings are open to adults aged 18 and over only."}{" "}
-            Never pay to apply, and report a listing if anything feels unsafe.
-          </AlertDescription>
-        </Alert>
-      ) : null}
-
-      {terms ? (
-        <section className="mt-8">
-          <h2 className="text-lg font-medium">Work terms and safety</h2>
-          <dl className="mt-4 grid gap-3 sm:grid-cols-2">
-            <DetailItem label="Task and scope" value={terms.task_scope ?? "Not stated"} />
-            <DetailItem label="Pay" value={terms.pay_rate ?? "Not stated"} />
-            <DetailItem label="When pay is made" value={terms.payment_timing ?? "Not stated"} />
-            <DetailItem label="Expected hours" value={terms.hours_expected ?? "Not stated"} />
-            <DetailItem label="Work dates" value={terms.work_dates ?? "Not stated"} />
-            <DetailItem label="Worksite area" value={terms.worksite ?? "Not stated"} />
-            <DetailItem
-              label="Supervisor / contact"
-              value={terms.supervisor_contact ?? "Not stated"}
-            />
-            <DetailItem
-              label="Site hazards reviewed"
-              value={terms.hazards_reviewed ? "Yes" : "Not confirmed"}
-            />
-          </dl>
-          <div className="mt-3 rounded-lg border border-border bg-card px-4 py-3">
-            <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-              Safety and PPE
+      <div className="mt-5 grid items-start gap-10 lg:grid-cols-[1fr_22rem] lg:gap-12">
+        <div className="grid gap-8">
+          <header className="grid gap-4">
+            <div className="flex flex-wrap gap-2">
+              {provider ? (
+                <VerificationBadge
+                  status={provider.verification_status}
+                  label={isWork && provider.verification_status === "verified" ? "Verified employer" : undefined}
+                />
+              ) : null}
+              {isWork ? <AdultsOnlyBadge /> : null}
+              {opportunity.is_expired ? (
+                <ListingStatusBadge status="expired" />
+              ) : opportunity.is_closing_soon ? (
+                <StatusBadge tone="warning" icon={Clock}>
+                  Closing soon
+                </StatusBadge>
+              ) : null}
+              <StatusBadge tone="primary" icon={MapPin}>
+                {opportunity.location}
+              </StatusBadge>
+            </div>
+            <h1 className="font-display text-4xl leading-[1.08] font-semibold sm:text-5xl">
+              {opportunity.title}
+            </h1>
+            <p className="flex flex-wrap items-center gap-2 text-muted-foreground">
+              <CategoryIcon type={opportunity.opportunity_type} size="sm" />
+              {provider?.name ?? "Unknown provider"} · {opportunityTypeLabel(opportunity.opportunity_type)}
+              {opportunity.reviewed_at ? ` · Reviewed ${formatWatDate(opportunity.reviewed_at)}` : ""}
             </p>
-            <p className="mt-1 text-sm whitespace-pre-line">
-              {terms.safety_ppe ?? "Not stated — ask the provider before starting work."}
+          </header>
+
+          {opportunity.is_expired ? (
+            <Alert>
+              <Clock aria-hidden />
+              <AlertTitle>This listing has closed</AlertTitle>
+              <AlertDescription>
+                It is kept here so you can follow an application you already made. It no
+                longer appears in search results.
+              </AlertDescription>
+            </Alert>
+          ) : null}
+
+          {isWork ? (
+            <div className="flex gap-3 rounded-2xl border border-highlight/35 bg-highlight-muted p-4">
+              <HardHat aria-hidden className="mt-0.5 size-5 shrink-0 text-highlight" />
+              <div className="text-sm">
+                <p className="font-bold">Adults only (18+)</p>
+                <p>
+                  {terms?.adult_only_construction
+                    ? "This is construction-site work, open to verified adults only."
+                    : "Paid work listings are open to verified adults only."}{" "}
+                  Never pay anyone to get this job — report it if they ask.
+                </p>
+              </div>
+            </div>
+          ) : null}
+
+          <div className="grid gap-3 sm:grid-cols-3">
+            <FactCard
+              icon={Banknote}
+              label={isWork || opportunity.pay_details ? "Pay" : "Cost"}
+              value={money ?? "Not stated"}
+              note={terms?.payment_timing}
+            />
+            <FactCard
+              icon={CalendarDays}
+              label={isWork ? "Dates & hours" : "Format"}
+              value={isWork ? (terms?.work_dates ?? "Not stated") : deliveryModeLabel(opportunity.delivery_mode)}
+              note={isWork ? terms?.hours_expected : applicationRouteLabel(opportunity.application_route)}
+            />
+            <FactCard
+              icon={MapPin}
+              label={isWork ? "Worksite" : "Where"}
+              value={(isWork ? terms?.worksite : null) ?? opportunity.location}
+              note={isWork ? "Exact spot shared after you’re accepted" : null}
+            />
+          </div>
+
+          <section className="grid gap-3">
+            <h2 className="font-display text-3xl font-semibold">
+              {isWork ? "The work" : "About this opportunity"}
+            </h2>
+            <p className="leading-relaxed whitespace-pre-line text-muted-foreground">
+              {terms?.task_scope ?? opportunity.description}
+            </p>
+            {terms?.task_scope ? (
+              <p className="leading-relaxed whitespace-pre-line text-muted-foreground">
+                {opportunity.description}
+              </p>
+            ) : null}
+          </section>
+
+          {terms ? (
+            <section className="grid gap-4 rounded-2xl border bg-card p-6">
+              <h2 className="text-xl font-bold">Safety &amp; supervision</h2>
+              <ul className="grid gap-4 sm:grid-cols-2">
+                <SafetyItem
+                  ok={Boolean(terms.safety_ppe)}
+                  title="Safety gear (PPE)"
+                  note={terms.safety_ppe ?? "Not stated — ask before starting work"}
+                />
+                <SafetyItem
+                  ok={terms.hazards_reviewed}
+                  title="Site hazards reviewed"
+                  note={terms.hazards_reviewed ? "Confirmed by the employer" : "Not yet confirmed"}
+                />
+                <SafetyItem
+                  ok={Boolean(terms.supervisor_contact)}
+                  title="Named supervisor"
+                  note={terms.supervisor_contact ?? "Not stated"}
+                />
+                <SafetyItem
+                  ok={Boolean(terms.payment_timing)}
+                  title="Clear pay timing"
+                  note={terms.payment_timing ?? "Not stated"}
+                />
+              </ul>
+            </section>
+          ) : null}
+
+          <section className="grid gap-2">
+            <h2 className="text-xl font-bold">Details</h2>
+            <dl className="rounded-2xl border bg-card px-5">
+              <Detail label="Eligibility" value={opportunity.eligibility} />
+              <Detail label="Minimum age" value={opportunity.min_age ? `${opportunity.min_age}+` : null} />
+              <Detail label="Costs" value={opportunity.cost_details} />
+              <Detail label="Stipend / pay" value={opportunity.pay_details} />
+              <Detail label="Delivery" value={deliveryModeLabel(opportunity.delivery_mode)} />
+              <Detail label="How to apply" value={applicationRouteLabel(opportunity.application_route)} />
+              <Detail label="Last updated" value={formatWatDate(opportunity.updated_at)} />
+            </dl>
+          </section>
+        </div>
+
+        <aside className="grid gap-4 lg:sticky lg:top-24">
+          <div className="grid gap-4 rounded-2xl border bg-card p-6 shadow-[var(--shadow-soft)]">
+            <div className="flex items-center justify-between gap-2">
+              <p className="eyebrow text-muted-foreground">Apply by</p>
+              {opportunity.is_closing_soon && !opportunity.is_expired ? (
+                <StatusBadge tone="warning" icon={Clock}>
+                  Closing soon
+                </StatusBadge>
+              ) : null}
+            </div>
+            <div>
+              <p className="font-display text-3xl font-semibold">{deadline ?? "No fixed deadline"}</p>
+              {deadlineTime ? (
+                <p className="text-xs text-muted-foreground">{deadlineTime} West Africa Time</p>
+              ) : null}
+            </div>
+            <hr />
+            <ApplyAction opportunity={opportunity} />
+            {!opportunity.is_expired ? <SaveListingButton opportunityId={opportunity.id} /> : null}
+            <p className="flex gap-2 text-xs text-muted-foreground">
+              <Info aria-hidden className="mt-0.5 size-3.5 shrink-0" />
+              Applying is always free. You’ll see exactly what is shared before anything
+              is sent.
             </p>
           </div>
-        </section>
-      ) : null}
 
-      <section className="mt-8 rounded-xl border border-border bg-card p-6">
-        <h2 className="text-lg font-medium">Provider &amp; freshness</h2>
-        <dl className="mt-4 grid gap-3 sm:grid-cols-2">
-          <DetailItem label="Provider" value={provider?.name ?? "Unknown"} />
-          <DetailItem
-            label="Verification"
-            value={provider ? `${provider.verification_status}` : null}
-          />
-          <DetailItem
-            label="Verified on"
-            value={provider ? formatWatDate(provider.verified_at) : null}
-          />
-          <DetailItem label="Contact" value={provider?.public_contact} />
-          <DetailItem label="Listing reviewed" value={reviewed} />
-          <DetailItem label="Last updated" value={updated} />
-        </dl>
-      </section>
+          {provider ? (
+            <div className="grid gap-3 rounded-2xl border bg-card p-6">
+              <p className="text-sm font-bold">About the {isWork ? "employer" : "provider"}</p>
+              <div className="flex items-center gap-3">
+                <span className="grid size-11 place-items-center rounded-xl bg-highlight-muted font-display text-lg font-semibold text-highlight">
+                  {provider.name
+                    .split(" ")
+                    .slice(0, 2)
+                    .map((word) => word.charAt(0))
+                    .join("")}
+                </span>
+                <div>
+                  <p className="text-sm font-semibold">{provider.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {provider.verified_at ? `Verified ${formatWatDate(provider.verified_at)}` : "Not yet verified"}
+                  </p>
+                </div>
+              </div>
+              {provider.public_contact ? (
+                <p className="text-sm text-muted-foreground">Contact: {provider.public_contact}</p>
+              ) : null}
+            </div>
+          ) : null}
 
-      <section className="mt-8 flex flex-wrap items-center gap-3">
-        {opportunity.application_route === "platform" && !opportunity.is_expired ? (
-          <Link href={`/opportunities/${opportunity.id}/apply`} className={buttonVariants()}>
-            Apply in-platform
-          </Link>
-        ) : opportunity.external_url && !opportunity.is_expired ? (
-          <a
-            href={opportunity.external_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={buttonVariants()}
-          >
-            Apply on provider site
-          </a>
-        ) : (
-          <span className={buttonVariants({ className: "pointer-events-none opacity-70" })}>
-            {opportunity.is_expired ? "Applications closed" : "Apply in person"}
-          </span>
-        )}
-        {!opportunity.is_expired ? (
-          <SaveListingButton opportunityId={opportunity.id} />
-        ) : null}
-        <Link href="/opportunities" className={buttonVariants({ variant: "outline" })}>
-          Browse more
-        </Link>
-      </section>
-
-      <p className="mt-8 text-xs text-muted-foreground">
-        Verification means a staff member reviewed the provider. It is not a
-        government endorsement or a guarantee of a place. Never send payment or
-        personal documents that a listing did not ask for.
-      </p>
+          <p className="px-1 text-xs text-muted-foreground">
+            Verification means our team reviewed this provider. It is not a government
+            endorsement or a guaranteed place.
+          </p>
+        </aside>
+      </div>
     </article>
   );
 }
