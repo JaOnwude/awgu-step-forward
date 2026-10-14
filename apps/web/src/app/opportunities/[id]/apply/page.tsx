@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 
 import { ApplyFlow } from "@/features/discovery/apply-flow";
 import { fetchOpportunityDetail } from "@/lib/api/discovery";
-import { secondaryButton } from "@/lib/ui";
+import { buttonVariants } from "@/components/ui/button";
 
 type Params = Promise<{ id: string }>;
 
@@ -45,7 +45,7 @@ export default async function ApplyPage({ params }: { params: Params }) {
           <p className="mt-1 text-sm text-muted-foreground">
             The directory service did not respond. Please try again.
           </p>
-          <Link href="/opportunities" className={`mt-4 inline-block ${secondaryButton}`}>
+          <Link href="/opportunities" className={buttonVariants({ variant: "outline", className: "mt-4" })}>
             Back to opportunities
           </Link>
         </div>
@@ -86,7 +86,7 @@ export default async function ApplyPage({ params }: { params: Params }) {
             </p>
             <Link
               href={`/opportunities/${opportunity.id}`}
-              className={`mt-4 inline-block ${secondaryButton}`}
+              className={buttonVariants({ variant: "outline", className: "mt-4" })}
             >
               View listing details
             </Link>
