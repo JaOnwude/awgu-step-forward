@@ -17,6 +17,20 @@ async def get_profile(
     return result.scalar_one_or_none()
 
 
+async def preferred_names(
+    db: AsyncSession, user_ids: list[uuid.UUID]
+) -> dict[uuid.UUID, str]:
+    """Preferred names only, for rosters that must not see other profile data."""
+    if not user_ids:
+        return {}
+    result = await db.execute(
+        select(ApplicantProfile.user_id, ApplicantProfile.preferred_name).where(
+            ApplicantProfile.user_id.in_(user_ids)
+        )
+    )
+    return {row[0]: row[1] for row in result.all()}
+
+
 async def get_saved(
     db: AsyncSession, *, user_id: uuid.UUID, opportunity_id: uuid.UUID
 ) -> SavedOpportunity | None:
