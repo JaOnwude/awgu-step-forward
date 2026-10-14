@@ -32,6 +32,11 @@ OPPORTUNITY_STATUSES = (
     "expired",
 )
 
+#: Listing types that are adults-only (18+) under the initial work policy.
+ADULT_ONLY_TYPES = ("local_work", "contract")
+ADULT_MIN_AGE = 18
+
+#: Fields whose change on an approved listing must return it to review.
 MATERIAL_FIELDS = (
     "cost_details",
     "deadline_at",
