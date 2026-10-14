@@ -25,6 +25,7 @@ import { Label } from "@/components/ui/label";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { useCurrentUser, useSignOut, useSignedIn } from "@/features/account/queries";
+import { OrganizerPanel } from "@/features/sessions/organizer-panel";
 import { devLogin } from "@/lib/api/auth";
 import {
   ADULT_ONLY_TYPES,
@@ -532,6 +533,8 @@ export function ProviderWorkspace() {
           ) : null}
         </CardContent>
       </Card>
+
+      <OrganizerPanel organizationId={activeId} canPropose={canCreate} />
     </div>
   );
 }
