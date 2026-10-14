@@ -23,8 +23,10 @@ export function SaveListingButton({
 
   if (userQuery.isSuccess && !signedIn) {
     return (
-      <Button asChild variant="outline">
-        <Link href="/account">Sign in to save</Link>
+      <Button asChild variant="outline" className="w-full">
+        <Link href="/account">
+          <Bookmark aria-hidden /> Sign in to save
+        </Link>
       </Button>
     );
   }
@@ -35,10 +37,11 @@ export function SaveListingButton({
   const ready = signedIn && savedQuery.isSuccess;
 
   return (
-    <div className="flex flex-col items-start gap-1">
+    <div className="grid gap-1">
       <Button
         type="button"
-        variant={saved ? "outline" : "default"}
+        variant="outline"
+        className={saved ? "w-full border-primary/30 bg-primary-muted text-primary hover:bg-primary-muted/80" : "w-full"}
         aria-pressed={saved}
         onClick={() => toggle.mutate({ opportunityId, saved })}
         disabled={!ready || toggle.isPending}
