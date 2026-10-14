@@ -10,6 +10,7 @@ import {
 } from "@/components/shared/query-states";
 import {
   ApplicationStatusBadge,
+  StatusBadge,
   applicationStatusMeta,
   applicationStatusSourceLabels,
 } from "@/components/shared/status-badge";
@@ -22,10 +23,12 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { isTracked } from "@/lib/api/applications";
 import { isUnauthorized } from "@/lib/api/errors";
 import { formatWatDateTime } from "@/lib/format";
 
 import { useApplication, useWithdrawApplication } from "./queries";
+import { TrackingCard } from "./tracking-card";
 
 const WITHDRAWABLE = new Set(["draft", "submitted", "under_review"]);
 
@@ -61,17 +64,27 @@ export function ApplicationDetailView({ id }: { id: string }) {
   }
 
   const application = applicationQuery.data;
-  const canWithdraw = WITHDRAWABLE.has(application.status);
+  const tracked = isTracked(application);
+  const canWithdraw = !tracked && WITHDRAWABLE.has(application.status);
 
   return (
     <div className="space-y-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-sm text-muted-foreground">Reference {application.reference}</p>
-          <h1 className="font-display text-3xl leading-tight font-semibold sm:text-4xl">{application.opportunity_title}</h1>
+          <p className="text-sm text-muted-foreground">
+            {tracked ? "Tracked by you" : `Reference ${application.reference}`}
+          </p>
+          <h1 className="font-display text-3xl leading-tight font-semibold sm:text-4xl">
+            {application.opportunity_title}
+          </h1>
         </div>
-        <ApplicationStatusBadge status={application.status} />
+        <div className="flex flex-wrap gap-2">
+          <ApplicationStatusBadge status={application.status} />
+          {tracked ? <StatusBadge tone="outline">Reported by you · not confirmed</StatusBadge> : null}
+        </div>
       </div>
+
+      {tracked ? <TrackingCard application={application} /> : null}
 
       <Card>
         <CardHeader>
@@ -105,6 +118,7 @@ export function ApplicationDetailView({ id }: { id: string }) {
         </CardContent>
       </Card>
 
+      {tracked ? null : (
       <Card>
         <CardHeader>
           <h3 className="text-lg font-bold">Your answers</h3>
@@ -128,6 +142,7 @@ export function ApplicationDetailView({ id }: { id: string }) {
           )}
         </CardContent>
       </Card>
+      )}
 
       {canWithdraw ? (
         <Card>
