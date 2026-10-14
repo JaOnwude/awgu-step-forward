@@ -16,7 +16,7 @@ export function ApplicationsList() {
   return (
     <Card>
       <CardHeader>
-        <h2 className="text-lg font-medium">Your applications</h2>
+        <h2 className="text-lg font-bold">Your applications</h2>
       </CardHeader>
       <CardContent>
         {applicationsQuery.isPending ? (
@@ -36,7 +36,7 @@ export function ApplicationsList() {
             {rows.map((row) => (
               <li
                 key={row.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-background px-4 py-3"
+                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-background px-4 py-3"
               >
                 <div>
                   <Link

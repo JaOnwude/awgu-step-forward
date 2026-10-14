@@ -66,7 +66,7 @@ export function SignInCard({
   return (
     <Card>
       <CardHeader>
-        <h2 className="text-lg font-medium">Sign in or create an account</h2>
+        <h2 className="text-lg font-bold">Sign in or create an account</h2>
         <CardDescription>
           Use your email or phone number. We send a one-time code — no password
           to remember. Lost access? Just request a new code.
