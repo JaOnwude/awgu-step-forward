@@ -24,10 +24,10 @@ Read `IMPLEMENTATION_PLAN.md` before doing anything — it holds the locked scop
 | Day 2 — Provider + moderation | Done, merged to `main` |
 | Day 3 — Public discovery | Done, merged to `main` |
 | Day 4 — Applicant workflows | Done, merged to `main`, **pushed** (external-application tracking moved to Day 6) |
-| Day 5 — Local work + support sessions | **Partial**: WorkTerms, adults-only enforcement and work detail page done; support sessions NOT started |
+| Day 5 — Local work + support sessions | Done on `day-5-local-work`; **not merged yet** |
 | Day 6 — Notifications + AI slice | Not started |
 | Day 7 — Stabilize & demo | Not started |
-| Backend tests | `31 passed` (`uv run pytest -q`) |
+| Backend tests | `38 passed` (`uv run pytest -q`) |
 | Backend lint | `uv run ruff check .` — All checks passed |
 | Web lint / typecheck / build | `bun run lint`, `bun run typecheck` and `bun run build` pass (2026-10-14) |
 
@@ -53,17 +53,18 @@ Feature modules present under `backend/app/features/`:
 - `moderation/` — admin approve / reject-with-reason / request-changes / suspend; audit event per transition. (Restore and expire are scheduled for Day 7.)
 - `applicant/` — private profile (under-18 blocked), saved opportunities.
 - `applications/` — in-platform application workflow, idempotent submit, receipt + status history, min-age check. Has `form.py`.
+- `sessions/` — application-support sessions and registrations (Day 5, D20).
 - `audit/` — audit events.
 - `app/core/` — settings, security, errors, logging (now configured at startup in `main.py`).
 - `app/bootstrap.py` — dev-only auto migrate + seed when `environment == "development"` and `dev_bootstrap`.
 - `app/scripts/seed_demo.py` — synthetic demo seed.
 
 **Alembic revisions (in order):**
-`dc78e8d0fb51` (initial) → `83a952599a9d` (provider/verification/listings) → `111120522cba` (applicant + applications) → `4127bd0e7216` (work_terms — Day 5).
+`dc78e8d0fb51` (initial) → `83a952599a9d` (provider/verification/listings) → `111120522cba` (applicant + applications) → `4127bd0e7216` (work_terms — Day 5) → `b49cd38b41aa` (support sessions — Day 5).
 
-**Tests:** `backend/tests/{test_health,test_auth,test_provider_moderation,test_discovery,test_applicant,test_work_terms}.py` — 31 tests.
+**Tests:** `backend/tests/{test_health,test_auth,test_provider_moderation,test_discovery,test_applicant,test_work_terms,test_sessions}.py` — 38 tests.
 
-### 3a. Day 5 fixes made on 2026-10-14 (uncommitted on `day-5-local-work`)
+### 3a. Day 5 fixes made on 2026-10-14 (on `day-5-local-work`)
 - **Work terms were not actually saved or returned.** The service passed the raw `work_terms` dict into the `Opportunity` model (which crashes when work terms are sent), and the detail endpoint never returned them. The routers also had a `try/except` that fell back to `model_validate(opp.__dict__)`, hiding errors. Fixed: work terms are built as `WorkTerms` rows on create/update, eager-loaded in `repository.get_opportunity` (`selectinload`), returned on `OpportunityDetail`, and the router fallback is removed.
 - **Adults-only enforcement** (`DECISIONS.md` D15): `local_work`/`contract` listings and construction work terms default to `min_age` 18, reject `min_age` < 18 (422), and use an effective minimum of 18 at apply time. Becoming adults-only sends an approved listing back to review.
 - `configure_logging()` is now called in `app/main.py` (it was imported but never called).
@@ -91,9 +92,9 @@ Feature modules present under `backend/app/features/`:
 1. Done — `WorkTerms` fields + migration + schemas, saved and returned correctly.
 2. Done — **Adults-only enforcement in the API** for work listings (D15).
 3. Done — **Work detail page** shows work terms, safety/PPE and an adults-only notice; providers can enter work terms.
-4. **Support sessions**: `ApplicationSupportSession` + `SessionRegistration` models, list + register/cancel endpoints, minimal organizer view. Per `spec.md` A5/R33–R38: session requires **approval before publication**; **capacity enforced**; reminders follow channel preferences; organizer roster omits non-essential fields.
+4. Done — **Support sessions** (D20): verified providers propose, staff approve before listing, capacity enforced with a row lock, adults-only registration, register/cancel, minimal roster (preferred name + attendance, audited). Pages: `/sessions`, `/sessions/[id]`, account "Your support sessions", provider organizer panel, staff review queue. Reminder opt-in is stored; sending comes with Day 6 notifications.
 
-**Exit for Day 5:** under-18 cannot reach work apply (done); session capacity enforced (`A5` partial).
+**Exit for Day 5:** met — under-18 cannot reach work apply; session capacity enforced (`A5` partial: reminders pending Day 6).
 
 Then: one commit per file, `git merge --no-ff day-5-local-work` into `main`.
 
@@ -172,13 +173,13 @@ bun run build
 - Frontend truth: `frontend-spec.md`.
 - Docs: `docs/{SRS,TRD,API-CONTRACT,ERD}.md`.
 - Backend entry: `backend/app/main.py`; routes mounted in `backend/app/api/v1.py`.
-- Day 5 work: `backend/app/features/opportunities/{models,schemas,router,repository,service}.py`, `backend/app/features/applications/service.py`, `backend/alembic/versions/4127bd0e7216_add_work_terms.py`, `backend/tests/test_work_terms.py`.
+- Day 5 work: `backend/app/features/opportunities/{models,schemas,router,repository,service}.py`, `backend/app/features/applications/service.py`, `backend/alembic/versions/4127bd0e7216_add_work_terms.py`, `backend/tests/test_work_terms.py`; sessions in `backend/app/features/sessions/`, `backend/alembic/versions/b49cd38b41aa_add_support_sessions.py`, `backend/tests/test_sessions.py`, `apps/web/src/features/sessions/`, `apps/web/src/app/sessions/`.
 
 ---
 
 ## 8. Suggested next action for the picking-up agent
 
 1. Read `IMPLEMENTATION_PLAN.md`, `docs/DECISIONS.md`, and the `spec.md` sections cited above.
-2. On branch `day-5-local-work`: build support sessions (`ApplicationSupportSession`/`SessionRegistration`, approval-before-publish, capacity, minimal roster). Add tests; run `pytest` + `ruff`.
+2. Owner merges `day-5-local-work` into `main` (`git merge --no-ff`), then start `day-6-notify-ai`.
 3. One commit per file; hand the owner the `git add`/commit/merge commands (agent does not commit or push).
 4. Then proceed to Day 6 and Day 7 per the plan.
