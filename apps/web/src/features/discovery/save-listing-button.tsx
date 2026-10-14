@@ -1,84 +1,52 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { Bookmark, BookmarkCheck } from "lucide-react";
 
-import { fetchCurrentUser } from "@/lib/api/auth";
+import { InlineError } from "@/components/shared/query-states";
+import { Button } from "@/components/ui/button";
 import {
-  listSaved,
-  saveListing,
-  unsaveListing,
-} from "@/lib/api/applicant";
-import { describeApiError, isUnauthorized } from "@/lib/api/errors";
-import { primaryButton, secondaryButton } from "@/lib/ui";
+  useCurrentUser,
+  useSaveListing,
+  useSavedListings,
+} from "@/features/account/queries";
 
 export function SaveListingButton({
   opportunityId,
 }: {
   opportunityId: string;
 }) {
-  const [signedIn, setSignedIn] = useState<boolean | null>(null);
-  const [saved, setSaved] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
+  const userQuery = useCurrentUser();
+  const signedIn = Boolean(userQuery.data);
+  const savedQuery = useSavedListings(signedIn);
+  const toggle = useSaveListing();
 
-  useEffect(() => {
-    let active = true;
-    (async () => {
-      try {
-        await fetchCurrentUser();
-        const rows = await listSaved();
-        if (!active) return;
-        setSignedIn(true);
-        setSaved(rows.some((row) => row.opportunity_id === opportunityId));
-      } catch (caught) {
-        if (!active) return;
-        if (isUnauthorized(caught)) setSignedIn(false);
-        else setError(describeApiError(caught));
-      }
-    })();
-    return () => {
-      active = false;
-    };
-  }, [opportunityId]);
-
-  async function handleToggle() {
-    setBusy(true);
-    setError("");
-    try {
-      if (saved) {
-        await unsaveListing(opportunityId);
-        setSaved(false);
-      } else {
-        await saveListing(opportunityId);
-        setSaved(true);
-      }
-    } catch (caught) {
-      setError(describeApiError(caught));
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  if (signedIn === false) {
+  if (userQuery.isSuccess && !signedIn) {
     return (
-      <Link href="/account" className={secondaryButton}>
-        Sign in to save
-      </Link>
+      <Button asChild variant="outline">
+        <Link href="/account">Sign in to save</Link>
+      </Button>
     );
   }
 
+  const saved = Boolean(
+    savedQuery.data?.some((row) => row.opportunity_id === opportunityId),
+  );
+  const ready = signedIn && savedQuery.isSuccess;
+
   return (
     <div className="flex flex-col items-start gap-1">
-      <button
+      <Button
         type="button"
-        className={saved ? secondaryButton : primaryButton}
-        onClick={handleToggle}
-        disabled={busy || signedIn === null}
+        variant={saved ? "outline" : "default"}
+        aria-pressed={saved}
+        onClick={() => toggle.mutate({ opportunityId, saved })}
+        disabled={!ready || toggle.isPending}
       >
-        {saved ? "Saved ✓" : "Save listing"}
-      </button>
-      {error ? <span className="text-xs text-danger">{error}</span> : null}
+        {saved ? <BookmarkCheck aria-hidden /> : <Bookmark aria-hidden />}
+        {saved ? "Saved" : "Save listing"}
+      </Button>
+      <InlineError error={toggle.error ?? savedQuery.error} />
     </div>
   );
 }
