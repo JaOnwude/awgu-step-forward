@@ -31,6 +31,22 @@ APPLICATION_STATUSES = (
 
 APPLICATION_STATUS_SOURCES = ("applicant", "provider", "staff")
 
+#: Statuses an applicant can report for an application made outside the
+#: platform (provider site or in person). Always applicant-reported (R28).
+EXTERNAL_STATUSES = (
+    "started",
+    "submitted",
+    "interview",
+    "offered",
+    "accepted",
+    "rejected",
+    "withdrawn",
+    "completed",
+)
+
+#: Listing routes that are tracked by the applicant rather than the platform.
+TRACKED_ROUTES = ("external", "in_person")
+
 #: Statuses in which an applicant may still edit answers.
 EDITABLE_STATUSES = ("draft",)
 
@@ -74,6 +90,8 @@ class Application(Base):
     )
     submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     consent_snapshot: Mapped[dict | None] = mapped_column(JSON)
+    #: The applicant's own note on a tracked application. Never shared.
+    private_note: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=utcnow, nullable=False
     )
