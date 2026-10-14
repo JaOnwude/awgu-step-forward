@@ -20,6 +20,8 @@ from app.features.providers.schemas import (
     ProviderView,
     VerificationDecisionRequest,
 )
+from app.features.sessions import service as session_service
+from app.features.sessions.schemas import SessionDecisionRequest, SessionManageOut
 
 router = APIRouter(prefix="/admin/moderation", tags=["moderation"])
 
@@ -38,6 +40,24 @@ async def get_queue(
     return ModerationQueue(
         providers=[provider_service.serialize_provider(o) for o in providers],
         listings=[OpportunityView.model_validate(o) for o in listings],
+        sessions=await session_service.pending_sessions(db),
+    )
+
+
+@router.post("/sessions/{session_id}/decision", response_model=SessionManageOut)
+async def decide_session(
+    session_id: uuid.UUID,
+    payload: SessionDecisionRequest,
+    ctx: AuthContext = Depends(verify_csrf),
+    db: AsyncSession = Depends(get_db),
+) -> SessionManageOut:
+    _require_staff(ctx)
+    return await session_service.decide_session(
+        db,
+        admin=ctx.user,
+        session_id=session_id,
+        decision=payload.decision,
+        reason=payload.reason,
     )
 
 
