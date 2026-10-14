@@ -30,6 +30,30 @@ export function formatWatDate(value: string | null | undefined): string | null {
   return date ? watDate.format(date) : null;
 }
 
+const watPart = (options: Intl.DateTimeFormatOptions) =>
+  new Intl.DateTimeFormat("en-GB", { ...options, timeZone: "Africa/Lagos" });
+const watWeekday = watPart({ weekday: "short" });
+const watDay = watPart({ day: "numeric" });
+const watMonth = watPart({ month: "short" });
+const watTime = watPart({ hour: "2-digit", minute: "2-digit" });
+
+/** Calendar-block pieces in West Africa Time, e.g. { weekday: "Sat", day: "19", month: "Oct" }. */
+export function watDateParts(value: string | null | undefined) {
+  const date = parse(value);
+  if (!date) return null;
+  return {
+    weekday: watWeekday.format(date),
+    day: watDay.format(date),
+    month: watMonth.format(date),
+    time: watTime.format(date),
+  };
+}
+
+export function formatWatTime(value: string | null | undefined): string | null {
+  const date = parse(value);
+  return date ? watTime.format(date) : null;
+}
+
 export function daysUntil(value: string | null | undefined): number | null {
   const date = parse(value);
   if (!date) return null;
