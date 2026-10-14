@@ -10,7 +10,7 @@ This is a non-sensitive demo with synthetic data only. It is not production-read
 
 ## Technology and deployment baseline
 
-- Web/PWA: Next.js App Router, TypeScript, Tailwind CSS; deploy on Vercel. shadcn/ui and TanStack Query are specified but deferred for week 1 (see `docs/DECISIONS.md`).
+- Web/PWA: Next.js App Router, TypeScript, Tailwind CSS, shadcn/ui, and TanStack Query; deploy on Vercel.
 - Android: React Native with Expo and Expo Router (follow-on release; not yet scaffolded).
 - API: FastAPI modular monolith with feature-based folders; deploy on Render.
 - Database: PostgreSQL on Neon (Docker Postgres locally).
