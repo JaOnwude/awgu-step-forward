@@ -232,6 +232,12 @@ export default function HomePage() {
               practice, and digital skills. These are workshops and help desks,
               not health services.
             </p>
+            <Link
+              href="/sessions"
+              className={buttonVariants({ variant: "outline", className: "mt-4" })}
+            >
+              Find a session
+            </Link>
           </div>
         </div>
 
