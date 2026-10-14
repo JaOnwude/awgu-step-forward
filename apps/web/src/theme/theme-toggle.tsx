@@ -1,37 +1,41 @@
 "use client";
 
+import { Monitor, Moon, Sun, type LucideIcon } from "lucide-react";
+
+import { cn } from "@/lib/utils";
 import { useTheme, type ThemeMode } from "@/theme/theme-provider";
 
-const OPTIONS: { value: ThemeMode; label: string }[] = [
-  { value: "system", label: "System" },
-  { value: "light", label: "Light" },
-  { value: "dark", label: "Dark" },
+const OPTIONS: { value: ThemeMode; label: string; icon: LucideIcon }[] = [
+  { value: "system", label: "System", icon: Monitor },
+  { value: "light", label: "Light", icon: Sun },
+  { value: "dark", label: "Dark", icon: Moon },
 ];
 
-export function ThemeToggle() {
+export function ThemeToggle({ className }: { className?: string }) {
   const { mode, setMode } = useTheme();
 
   return (
     <div
       role="group"
       aria-label="Appearance"
-      className="inline-flex rounded-full border border-border bg-surface p-0.5"
+      className={cn("inline-flex rounded-full border bg-card p-0.5", className)}
     >
-      {OPTIONS.map((option) => {
-        const active = mode === option.value;
+      {OPTIONS.map(({ value, label, icon: Icon }) => {
+        const active = mode === value;
         return (
           <button
-            key={option.value}
+            key={value}
             type="button"
-            onClick={() => setMode(option.value)}
+            onClick={() => setMode(value)}
             aria-pressed={active}
-            className={`rounded-full px-3 py-1 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-              active
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
+            aria-label={label}
+            title={label}
+            className={cn(
+              "grid h-8 w-9 place-items-center rounded-full text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              active && "bg-muted text-foreground",
+            )}
           >
-            {option.label}
+            <Icon aria-hidden className="size-4" />
           </button>
         );
       })}
