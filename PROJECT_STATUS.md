@@ -24,12 +24,12 @@ Read `IMPLEMENTATION_PLAN.md` before doing anything — it holds the locked scop
 | Day 2 — Provider + moderation | Done, merged to `main` |
 | Day 3 — Public discovery | Done, merged to `main` |
 | Day 4 — Applicant workflows | Done, merged to `main`, **pushed** (external-application tracking moved to Day 6) |
-| Day 5 — Local work + support sessions | **Partial**: WorkTerms + adults-only enforcement done; work detail page and support sessions NOT started |
+| Day 5 — Local work + support sessions | **Partial**: WorkTerms, adults-only enforcement and work detail page done; support sessions NOT started |
 | Day 6 — Notifications + AI slice | Not started |
 | Day 7 — Stabilize & demo | Not started |
 | Backend tests | `31 passed` (`uv run pytest -q`) |
 | Backend lint | `uv run ruff check .` — All checks passed |
-| Web lint / typecheck | `bun run lint` and `bun run typecheck` pass (2026-10-14). `bun run build` not yet run this sprint. |
+| Web lint / typecheck / build | `bun run lint`, `bun run typecheck` and `bun run build` pass (2026-10-14) |
 
 **Branches:**
 - `main` — HEAD `bb3ebee` (includes Day 1–4 and the Day 4 PR merge). Pushed to `origin`.
@@ -69,12 +69,14 @@ Feature modules present under `backend/app/features/`:
 - `configure_logging()` is now called in `app/main.py` (it was imported but never called).
 - New tests: `backend/tests/test_work_terms.py` (5 tests).
 
-### Web (`apps/web/` — Next 16.4.0, App Router, Cache Components, Tailwind v4)
-- Routes: `/` (home), `/opportunities` (directory), `/opportunities/[id]` (detail), `/opportunities/[id]/apply`, `/account`, `/account/applications/[id]`, `/admin`, `/providers`.
-- Feature UI under `src/features/{discovery,account,admin,provider,demo}`.
+### Web (`apps/web/` — Next 16.4.0, App Router, Cache Components, Tailwind v4, shadcn/ui, TanStack Query)
+- Routes: `/` (home), `/opportunities` (directory), `/opportunities/[id]` (detail, now with work terms, safety/PPE and the adults-only notice), `/opportunities/[id]/apply` (now with a full answer review before submit), `/account`, `/account/applications/[id]`, `/admin`, `/providers` (listing form now collects work terms).
+- Feature UI under `src/features/{discovery,account,admin,provider,demo}`; account query hooks in `src/features/account/queries.ts`.
+- shadcn/ui primitives in `src/components/ui/` (`components.json`); shared loading/error/offline states in `src/components/shared/query-states.tsx` (`DECISIONS.md` D11).
+- TanStack Query provider and keys in `src/lib/query/`.
 - API/data clients under `src/lib/api/{client,auth,discovery,opportunities,applicant,applications,moderation,providers,errors}.ts` (hand-written — `DECISIONS.md` D12).
 - Theme provider `src/theme/` (System/Light/Dark, persisted in localStorage).
-- **Not used yet:** shadcn/ui and TanStack Query (`DECISIONS.md` D11 — needs owner confirmation).
+- The API URL must use `localhost`, not `127.0.0.1` (D19). If you have an old `apps/web/.env.local`, update it.
 
 **Not present:** `apps/mobile/` (no Expo scaffold yet — D13) and anything under `packages/` (D12). The root `package.json` mobile scripts will work once `apps/mobile` exists.
 
@@ -88,7 +90,7 @@ Feature modules present under `backend/app/features/`:
 
 1. Done — `WorkTerms` fields + migration + schemas, saved and returned correctly.
 2. Done — **Adults-only enforcement in the API** for work listings (D15).
-3. **Work detail page** on web with safety/PPE display and an adults-only notice. The API already returns `work_terms` on `GET /opportunities/{id}`.
+3. Done — **Work detail page** shows work terms, safety/PPE and an adults-only notice; providers can enter work terms.
 4. **Support sessions**: `ApplicationSupportSession` + `SessionRegistration` models, list + register/cancel endpoints, minimal organizer view. Per `spec.md` A5/R33–R38: session requires **approval before publication**; **capacity enforced**; reminders follow channel preferences; organizer roster omits non-essential fields.
 
 **Exit for Day 5:** under-18 cannot reach work apply (done); session capacity enforced (`A5` partial).
@@ -110,7 +112,7 @@ Then: one commit per file, `git merge --no-ff day-5-local-work` into `main`.
 
 ### 4d. Decisions taken / still open
 - **Forgotten password:** decided 2026-10-14 — recovery is requesting a new one-time code (D14). Do not build a password flow.
-- **shadcn/ui + TanStack Query:** proposed deferral (D11). Owner to confirm, or schedule adding them in Day 7.
+- **shadcn/ui + TanStack Query:** adopted 2026-10-14 (D11).
 
 ### 4e. Explicitly DEFERRED (do NOT build)
 See `IMPLEMENTATION_PLAN.md` §5: released mobile app, minor/guardian flows, live SMS, real email sends, real object storage, full offline sync, live AI provider, load testing, multi-instance topology, Igbo localization, security pen-test.
@@ -177,6 +179,6 @@ bun run build
 ## 8. Suggested next action for the picking-up agent
 
 1. Read `IMPLEMENTATION_PLAN.md`, `docs/DECISIONS.md`, and the `spec.md` sections cited above.
-2. On branch `day-5-local-work`: build the work detail page (safety/PPE, adults-only notice) and support sessions (`ApplicationSupportSession`/`SessionRegistration`, approval-before-publish, capacity, minimal roster). Add tests; run `pytest` + `ruff`.
+2. On branch `day-5-local-work`: build support sessions (`ApplicationSupportSession`/`SessionRegistration`, approval-before-publish, capacity, minimal roster). Add tests; run `pytest` + `ruff`.
 3. One commit per file; hand the owner the `git add`/commit/merge commands (agent does not commit or push).
 4. Then proceed to Day 6 and Day 7 per the plan.
