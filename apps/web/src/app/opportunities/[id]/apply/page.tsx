@@ -40,7 +40,7 @@ export default async function ApplyPage({ params }: { params: Params }) {
   if (failed) {
     return (
       <section className="mx-auto w-full max-w-3xl px-4 py-12">
-        <div role="alert" className="rounded-2xl border border-danger/40 bg-danger/5 p-6">
+        <div role="alert" className="rounded-2xl border border-danger/40 bg-danger-muted p-6">
           <h1 className="font-medium">We couldn’t load this listing.</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             The directory service did not respond. Please try again.
@@ -58,16 +58,20 @@ export default async function ApplyPage({ params }: { params: Params }) {
   const canApply = opportunity.application_route === "platform" && !opportunity.is_expired;
 
   return (
-    <section className="mx-auto w-full max-w-3xl px-4 py-12">
+    <section className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
       <Link
         href={`/opportunities/${opportunity.id}`}
-        className="text-sm font-medium text-primary hover:underline"
+        className="inline-flex items-center gap-1 rounded text-sm text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         ← Back to listing
       </Link>
-      <h1 className="mt-6 text-3xl font-semibold tracking-tight">
-        Apply in-platform
-      </h1>
+      <header className="mt-5 grid gap-2">
+        <p className="eyebrow text-highlight">Apply in-platform · free</p>
+        <h1 className="font-display text-4xl leading-tight font-semibold sm:text-5xl">
+          {opportunity.title}
+        </h1>
+        <p className="text-muted-foreground">{opportunity.provider?.name ?? "Provider"}</p>
+      </header>
 
       <div className="mt-8">
         {canApply ? (
@@ -77,7 +81,7 @@ export default async function ApplyPage({ params }: { params: Params }) {
             providerName={opportunity.provider?.name ?? "the provider"}
           />
         ) : (
-          <div className="rounded-2xl border border-warning/40 bg-warning/5 p-6">
+          <div className="rounded-2xl border border-warning/40 bg-warning-muted p-6">
             <p className="font-medium">This listing cannot be applied to here.</p>
             <p className="mt-1 text-sm text-muted-foreground">
               {opportunity.is_expired
