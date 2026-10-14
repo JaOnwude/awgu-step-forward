@@ -1,4 +1,5 @@
 import { env } from "@/lib/env";
+import type { WorkTerms } from "@/lib/api/opportunities";
 
 export const SORT_OPTIONS = [
   { value: "relevance", label: "Best match (Awgu first)" },
@@ -43,6 +44,7 @@ export interface OpportunityDetail extends OpportunityCard {
   reviewed_at: string | null;
   published_at: string | null;
   decision_reason: string | null;
+  work_terms: WorkTerms | null;
 }
 
 export interface OpportunityListResponse {
