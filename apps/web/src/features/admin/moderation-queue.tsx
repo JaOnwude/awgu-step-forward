@@ -11,6 +11,7 @@ import {
   SectionSkeleton,
 } from "@/components/shared/query-states";
 import { ListingStatusBadge, VerificationBadge } from "@/components/shared/status-badge";
+import { ReminderJobCard, ReportReview } from "@/features/admin/report-review";
 import { SessionReview } from "@/features/admin/session-review";
 import { Button } from "@/components/ui/button";
 import {
@@ -119,7 +120,7 @@ export function ModerationQueue() {
   }
   if (!user) return <DevStaffSignIn />;
 
-  const queue = queueQuery.data ?? { providers: [], listings: [], sessions: [] };
+  const queue = queueQuery.data ?? { providers: [], listings: [], sessions: [], reports: [] };
 
   return (
     <div className="space-y-8">
@@ -154,6 +155,7 @@ export function ModerationQueue() {
         <ErrorState error={queueQuery.error} onRetry={() => queueQuery.refetch()} />
       ) : (
         <>
+          <ReportReview reports={queue.reports} />
           <Card>
             <CardHeader>
               <div className="flex flex-wrap items-center justify-between gap-3">
@@ -322,6 +324,8 @@ export function ModerationQueue() {
           </Card>
 
           <SessionReview sessions={queue.sessions} />
+
+          <ReminderJobCard />
         </>
       )}
     </div>
