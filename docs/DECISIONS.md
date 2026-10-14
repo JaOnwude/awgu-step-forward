@@ -88,3 +88,15 @@ Tests use `sqlite+aiosqlite` for speed. Production and local dev use PostgreSQL,
 - **Roster (R38):** shows the preferred name, registration status and attendance only — no contact details, date of birth or profile. Viewing a roster and recording attendance are audited (R44).
 - **Reminders (R34):** the applicant's opt-in is stored on the registration; sending is part of the Day 6 notifications slice.
 - **Not built yet:** printable roster, sessions for minors (needs the guardian flow), editing a session after submission, and organizer follow-up resources.
+
+### D21 — Brand and visual design system (redesign)
+**Status:** Adopted (2026-10-14, owner request to overhaul the UI)
+**Spec says:** an original, warm, editorial, locally grounded brand with documented tokens; the design brief is `ui-generation-prompt.md` (`frontend-spec.md` §5).
+**Decided:**
+- **Typography:** Fraunces (display/headlines) + Plus Jakarta Sans (UI/body), both SIL OFL, loaded via `next/font`. These replace Geist.
+- **Logo:** three rising steps toward a sun, with an "AWGU / StepForward" stacked wordmark. This replaces the placeholder "A" square.
+- **Palette:** forest green primary, laterite highlight, sun accent, ink on cream paper, plus semantic verified/success/warning/danger roles, all with dark-mode values. Token values live in `design/mockups/styles.css`.
+- **Mockups:** a high-fidelity HTML board at `design/mockups/index.html`, covering brand, foundations, components, 6 web screens and 4 mobile screens. See `design/README.md`.
+- **DaisyUI is not used.** The spec forbids layering a second component library on shadcn/ui ("adapt them consistently instead of layering a second component library"), and DaisyUI would duplicate buttons, cards and badges and add CSS weight for low-end phones. The owner confirmed shadcn only.
+- **Figma:** a Figma file was created, but the Starter plan's AI tool-call limit blocked the build. The owner chose the HTML board instead; it can be imported into Figma later.
+**Implemented** in `apps/web` (2026-10-14): tokens and fonts in `globals.css`/`layout.tsx`, the `Logo` component and `app/icon.svg`, restyled shadcn primitives and status badges, a new header (active links, icon theme switch, account avatar), a phone bottom tab bar and an ink footer, and every screen rebuilt to the mockups. The Day-1 "admin check" demo panel was removed from the home page. The mobile mockups remain the reference for the Expo app.
