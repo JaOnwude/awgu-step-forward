@@ -68,14 +68,14 @@ export function ApplicationDetailView({ id }: { id: string }) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-sm text-muted-foreground">Reference {application.reference}</p>
-          <h2 className="text-xl font-medium">{application.opportunity_title}</h2>
+          <h1 className="font-display text-3xl leading-tight font-semibold sm:text-4xl">{application.opportunity_title}</h1>
         </div>
         <ApplicationStatusBadge status={application.status} />
       </div>
 
       <Card>
         <CardHeader>
-          <h3 className="text-lg font-medium">Status history</h3>
+          <h3 className="text-lg font-bold">Status history</h3>
         </CardHeader>
         <CardContent>
           <ol className="space-y-4">
@@ -107,7 +107,7 @@ export function ApplicationDetailView({ id }: { id: string }) {
 
       <Card>
         <CardHeader>
-          <h3 className="text-lg font-medium">Your answers</h3>
+          <h3 className="text-lg font-bold">Your answers</h3>
         </CardHeader>
         <CardContent>
           {application.answers.length === 0 ? (
@@ -132,7 +132,7 @@ export function ApplicationDetailView({ id }: { id: string }) {
       {canWithdraw ? (
         <Card>
           <CardHeader>
-            <h3 className="text-lg font-medium">Withdraw application</h3>
+            <h3 className="text-lg font-bold">Withdraw application</h3>
             <CardDescription>
               Withdrawing tells the provider you are no longer applying. You can
               apply again later if the listing is still open.
