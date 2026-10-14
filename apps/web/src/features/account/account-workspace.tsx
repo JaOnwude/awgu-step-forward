@@ -5,6 +5,10 @@ import { Lock, LogOut } from "lucide-react";
 
 import { ErrorState, SectionSkeleton } from "@/components/shared/query-states";
 import { Button, buttonVariants } from "@/components/ui/button";
+import {
+  NotificationPreferencesCard,
+  NotificationsInbox,
+} from "@/features/notifications/notifications-card";
 import { useMySessionRegistrations } from "@/features/sessions/queries";
 import type { ApplicantProfile } from "@/lib/api/applicant";
 import { formatWatDate } from "@/lib/format";
@@ -154,6 +158,7 @@ export function AccountWorkspace() {
 
       <div className="grid items-start gap-6 lg:grid-cols-[1.25fr_1fr]">
         <div className="grid gap-6">
+          <NotificationsInbox />
           <ApplicationsList />
           <SavedListings />
           <MySessions />
@@ -168,6 +173,7 @@ export function AccountWorkspace() {
             // from "create" to "edit" mode with the server copy as its draft.
             <ProfileForm key={profile ? "existing" : "new"} profile={profile} />
           )}
+          <NotificationPreferencesCard />
           <div className="grid gap-2 rounded-2xl border border-dashed p-5 text-sm">
             <p className="font-bold">Looking for something new?</p>
             <p className="text-muted-foreground">
