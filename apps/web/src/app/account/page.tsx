@@ -9,16 +9,10 @@ export const metadata: Metadata = {
 };
 
 export default function AccountPage() {
+  // The workspace renders its own heading: a sign-in title or a greeting.
   return (
-    <section className="mx-auto w-full max-w-4xl px-4 py-12">
-      <h1 className="text-3xl font-semibold tracking-tight">My account</h1>
-      <p className="mt-2 max-w-2xl text-muted-foreground">
-        Sign in to save opportunities, keep a private profile, and apply to
-        opportunities in one place.
-      </p>
-      <div className="mt-8">
-        <AccountWorkspace />
-      </div>
+    <section className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-12">
+      <AccountWorkspace />
     </section>
   );
 }
