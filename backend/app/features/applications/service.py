@@ -22,6 +22,7 @@ from app.features.applications.form import (
 )
 from app.features.applications.models import (
     EDITABLE_STATUSES,
+    TRACKED_ROUTES,
     WITHDRAWABLE_STATUSES,
     Application,
     ApplicationAnswer,
@@ -36,6 +37,7 @@ from app.features.applications.schemas import (
     ApplicationSummary,
     ApplicationUpdate,
     FormQuestion,
+    TrackingUpdate,
 )
 from app.features.audit.service import record_event
 from app.features.identity.models import User
@@ -58,6 +60,13 @@ def reference_for(application: Application) -> str:
     return f"ASF-{str(application.id).split('-')[0].upper()}"
 
 
+def _require_platform(application: Application) -> None:
+    if application.route != "platform":
+        raise ConflictError(
+            "This application was made outside StepForward. Update its status instead."
+        )
+
+
 def form_view(opportunity_id: uuid.UUID) -> ApplicationFormView:
     return ApplicationFormView(
         opportunity_id=opportunity_id,
@@ -72,6 +81,7 @@ def _summary(application: Application, opportunity_title: str) -> ApplicationSum
         reference=reference_for(application),
         opportunity_id=application.opportunity_id,
         opportunity_title=opportunity_title,
+        route=application.route,
         status=application.status,
         status_source=application.status_source,
         submitted_at=application.submitted_at,
@@ -98,6 +108,7 @@ async def _detail(db: AsyncSession, application: Application) -> ApplicationDeta
     return ApplicationDetail(
         **base.model_dump(),
         form_version=application.form_version,
+        private_note=application.private_note,
         answers=[
             ApplicationAnswerView(
                 question_key=a.question_key, answer_value=a.answer_value
@@ -186,6 +197,7 @@ async def update_answers(
     payload: ApplicationUpdate,
 ) -> ApplicationDetail:
     application = await _require_own(db, user=user, application_id=application_id)
+    _require_platform(application)
     if application.status not in EDITABLE_STATUSES:
         raise ConflictError("Only draft applications can be edited.")
 
@@ -215,6 +227,7 @@ async def submit(
     idempotency_key: str | None,
 ) -> ApplicationReceipt:
     application = await _require_own(db, user=user, application_id=application_id)
+    _require_platform(application)
 
     if application.status != "draft":
         if idempotency_key and application.idempotency_key == idempotency_key:
@@ -281,6 +294,7 @@ async def withdraw(
     note: str | None,
 ) -> ApplicationDetail:
     application = await _require_own(db, user=user, application_id=application_id)
+    _require_platform(application)
     if application.status not in WITHDRAWABLE_STATUSES:
         raise ConflictError("This application cannot be withdrawn.")
 
@@ -325,4 +339,112 @@ async def get_detail(
     db: AsyncSession, *, user: User, application_id: uuid.UUID
 ) -> ApplicationDetail:
     application = await _require_own(db, user=user, application_id=application_id)
+    return await _detail(db, application)
+
+
+# --- Applications made elsewhere (spec journey 5, R28) ----------------------
+
+
+async def start_tracking(
+    db: AsyncSession, *, user: User, opportunity_id: uuid.UUID
+) -> ApplicationDetail:
+    """Record that the applicant chose to apply on the provider's site or in
+    person. Only called after the applicant's own action, and the status is
+    always applicant-reported."""
+    profile = await applicant_repo.get_profile(db, user.id)
+    if profile is None:
+        raise PermissionDeniedError(
+            "Create your applicant profile to track applications."
+        )
+    if profile.is_minor:
+        raise PermissionDeniedError(MINOR_MESSAGE)
+
+    opp = await opp_repo.get_opportunity(db, opportunity_id)
+    if opp is None or opp.status != "approved":
+        raise NotFoundError("Listing not found.")
+    if opp.application_route not in TRACKED_ROUTES:
+        raise ValidationError("This listing uses in-platform applications.")
+    min_age = effective_min_age(opp)
+    if min_age is not None and age_years(profile.date_of_birth) < min_age:
+        raise PermissionDeniedError(
+            f"This opportunity is open to applicants aged {min_age} and over."
+        )
+
+    existing = await repo.get_by_applicant_listing(
+        db, applicant_user_id=user.id, opportunity_id=opportunity_id
+    )
+    if existing is not None:
+        return await _detail(db, existing)
+
+    application = Application(
+        applicant_user_id=user.id,
+        opportunity_id=opportunity_id,
+        route=opp.application_route,
+        status="started",
+        status_source="applicant",
+        form_version="none",
+    )
+    db.add(application)
+    await db.flush()
+    db.add(
+        ApplicationStatusEvent(
+            application_id=application.id,
+            from_status=None,
+            to_status="started",
+            source="applicant",
+            actor_user_id=user.id,
+        )
+    )
+    await record_event(
+        db,
+        action="application.tracking_started",
+        actor_user_id=user.id,
+        target_type="application",
+        target_id=application.id,
+        metadata={"route": application.route},
+    )
+    await db.commit()
+    await db.refresh(application)
+    return await _detail(db, application)
+
+
+async def update_tracking(
+    db: AsyncSession,
+    *,
+    user: User,
+    application_id: uuid.UUID,
+    payload: TrackingUpdate,
+) -> ApplicationDetail:
+    application = await _require_own(db, user=user, application_id=application_id)
+    if application.route not in TRACKED_ROUTES:
+        raise ConflictError("In-platform applications are updated by the provider.")
+
+    if payload.private_note is not None:
+        application.private_note = payload.private_note.strip() or None
+
+    if payload.status != application.status:
+        previous = application.status
+        application.status = payload.status
+        application.status_source = "applicant"
+        if payload.status == "submitted" and application.submitted_at is None:
+            application.submitted_at = datetime.now(UTC)
+        db.add(
+            ApplicationStatusEvent(
+                application_id=application.id,
+                from_status=previous,
+                to_status=payload.status,
+                source="applicant",
+                actor_user_id=user.id,
+            )
+        )
+        await record_event(
+            db,
+            action="application.tracking_updated",
+            actor_user_id=user.id,
+            target_type="application",
+            target_id=application.id,
+            metadata={"status": payload.status},
+        )
+    await db.commit()
+    await db.refresh(application)
     return await _detail(db, application)
