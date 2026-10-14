@@ -15,7 +15,7 @@ const toneClasses: Record<Tone, string> = {
   success: "border-success/30 bg-success/10 text-success",
   warning: "border-warning/30 bg-warning/10 text-warning",
   danger: "border-danger/30 bg-danger/10 text-danger",
-  accent: "border-accent/30 bg-accent/10 text-accent",
+  accent: "border-highlight/30 bg-highlight/10 text-highlight",
   primary: "border-primary/30 bg-primary-muted text-primary",
 };
 
