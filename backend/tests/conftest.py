@@ -13,6 +13,7 @@ import app.features.audit.models  # noqa: F401
 import app.features.identity.models  # noqa: F401
 import app.features.opportunities.models  # noqa: F401
 import app.features.providers.models  # noqa: F401
+import app.features.sessions.models  # noqa: F401
 from app.api.deps import get_db
 from app.db.base import Base
 from app.features.identity import repository as repo
