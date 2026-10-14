@@ -30,10 +30,7 @@ async def create_opportunity(
     db: AsyncSession = Depends(get_db),
 ) -> OpportunityView:
     opp = await service.create_draft(db, user=ctx.user, payload=payload)
-    try:
-        return OpportunityView.model_validate(opp)
-    except Exception:
-        return OpportunityView.model_validate(opp.__dict__)
+    return OpportunityView.model_validate(opp)
 
 
 @router.get("", response_model=OpportunityListResponse)
@@ -83,10 +80,7 @@ async def update_opportunity(
     opp = await service.update_opportunity(
         db, user=ctx.user, opportunity_id=opportunity_id, payload=payload
     )
-    try:
-        return OpportunityView.model_validate(opp)
-    except Exception:
-        return OpportunityView.model_validate(opp.__dict__)
+    return OpportunityView.model_validate(opp)
 
 
 @router.post("/{opportunity_id}/submit", response_model=OpportunityView)
@@ -98,7 +92,4 @@ async def submit_opportunity(
     opp = await service.submit_for_review(
         db, user=ctx.user, opportunity_id=opportunity_id
     )
-    try:
-        return OpportunityView.model_validate(opp)
-    except Exception:
-        return OpportunityView.model_validate(opp.__dict__)
+    return OpportunityView.model_validate(opp)
