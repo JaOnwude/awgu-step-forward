@@ -1,9 +1,9 @@
 # Awgu StepForward project docs
 
 **Status:** Implementation handoff draft  
-**Updated:** 2026-10-13
+**Updated:** 2026-10-14
 
-This folder contains the technical and requirements documents for the Awgu StepForward build. For Claude Project knowledge, add the files in this folder **and** the companion files `../spec.md`, `../frontend-spec.md`, and `../ui-generation-prompt.md`. Then use [the Claude project starter prompt](../claude-project-initial-prompt.md) as the first project message.
+This folder contains the technical and requirements documents for the Awgu StepForward build. For Claude Project knowledge, add the files in this folder **and** the companion files `../spec.md`, `../frontend-spec.md`, and `../ui-generation-prompt.md`. Then use [the Claude project starter prompt](AGENT_STARTER_PROMPT.md) as the first project message.
 
 ## Document map
 
@@ -13,6 +13,7 @@ This folder contains the technical and requirements documents for the Awgu StepF
 | [TRD](TRD.md) | System architecture, implementation stack, deployment topology, security, scaling, operations | Technical baseline; record material changes as decisions |
 | [ERD](ERD.md) | Conceptual relational data model, key fields, relationships, constraints, and privacy notes | Starting model; migration/schema implementation must be reviewed against product rules |
 | [API contract guide](API-CONTRACT.md) | API conventions and endpoint families for frontend/backend coordination | FastAPI OpenAPI schema is the executable contract once generated |
+| [Decisions](DECISIONS.md) | Week-1 defaults, deviations from the specs, and owner decisions | Records how conflicts were resolved; does not override `../spec.md` |
 
 ## Source-of-truth order
 
