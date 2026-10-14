@@ -40,7 +40,7 @@ export function RegisterPanel({ initial }: { initial: SupportSession }) {
   if (userQuery.isSuccess && !signedIn) {
     return (
       <div className="grid gap-2">
-        <Link href="/account" className={buttonVariants({ className: "w-fit" })}>
+        <Link href="/account" className={buttonVariants({ className: "w-full" })}>
           Sign in to register
         </Link>
         <p className="text-xs text-muted-foreground">
@@ -61,7 +61,7 @@ export function RegisterPanel({ initial }: { initial: SupportSession }) {
         <Button
           type="button"
           variant="outline"
-          className="w-fit"
+          className="w-full"
           onClick={() => cancel.mutate()}
           disabled={cancel.isPending || started}
         >
@@ -87,7 +87,7 @@ export function RegisterPanel({ initial }: { initial: SupportSession }) {
       </div>
       <Button
         type="button"
-        className="w-fit"
+        className="w-full"
         onClick={() => register.mutate(reminder)}
         disabled={
           !signedIn || mine.isPending || register.isPending || session.is_full || started
