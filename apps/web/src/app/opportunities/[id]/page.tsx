@@ -9,7 +9,6 @@ import {
   ChevronLeft,
   CircleDashed,
   Clock,
-  ExternalLink,
   HardHat,
   Info,
   MapPin,
@@ -25,7 +24,9 @@ import {
 } from "@/components/shared/status-badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { buttonVariants } from "@/components/ui/button";
+import { ExternalApply } from "@/features/discovery/external-apply";
 import { SaveListingButton } from "@/features/discovery/save-listing-button";
+import { ReportDialog } from "@/features/reports/report-dialog";
 import { fetchOpportunityDetail, type OpportunityDetail } from "@/lib/api/discovery";
 import { ADULT_ONLY_TYPES } from "@/lib/api/opportunities";
 import { formatWatDate, formatWatDateTime } from "@/lib/format";
@@ -115,22 +116,13 @@ function ApplyAction({ opportunity }: { opportunity: OpportunityDetail }) {
       </Link>
     );
   }
-  if (opportunity.external_url) {
-    return (
-      <a
-        href={opportunity.external_url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={buttonVariants({ size: "lg", className: "w-full" })}
-      >
-        Apply on provider site <ExternalLink aria-hidden />
-      </a>
-    );
-  }
+  // Provider site or in person: the applicant can track it themselves.
   return (
-    <span className={buttonVariants({ size: "lg", variant: "secondary", className: "pointer-events-none w-full" })}>
-      Apply in person
-    </span>
+    <ExternalApply
+      opportunityId={opportunity.id}
+      externalUrl={opportunity.external_url}
+      inPerson={opportunity.application_route === "in_person"}
+    />
   );
 }
 
@@ -362,8 +354,11 @@ export default async function OpportunityPage({ params }: { params: Params }) {
               {provider.public_contact ? (
                 <p className="text-sm text-muted-foreground">Contact: {provider.public_contact}</p>
               ) : null}
+              <ReportDialog targetType="opportunity" targetId={opportunity.id} />
             </div>
-          ) : null}
+          ) : (
+            <ReportDialog targetType="opportunity" targetId={opportunity.id} />
+          )}
 
           <p className="px-1 text-xs text-muted-foreground">
             Verification means our team reviewed this provider. It is not a government
