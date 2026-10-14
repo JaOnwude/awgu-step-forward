@@ -1,304 +1,326 @@
 "use client";
 
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { RefreshCw } from "lucide-react";
 import { useState } from "react";
 
-import { describeApiError } from "@/lib/api/errors";
-import { devLogin, logout, type UserPublic } from "@/lib/api/auth";
+import {
+  ErrorState,
+  InlineError,
+  ListSkeleton,
+  SectionSkeleton,
+} from "@/components/shared/query-states";
+import { ListingStatusBadge, VerificationBadge } from "@/components/shared/status-badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useCurrentUser, useSignOut, useSignedIn } from "@/features/account/queries";
+import { devLogin } from "@/lib/api/auth";
+import { ApiError } from "@/lib/api/client";
 import {
   decideListing,
   decideProvider,
   fetchModerationQueue,
-  type ModerationQueue,
+  type ListingDecision,
+  type ProviderDecision,
 } from "@/lib/api/moderation";
-import { ListingStatusBadge, VerificationBadge } from "@/components/shared/status-badge";
-import {
-  dangerButton,
-  inputClass,
-  labelClass,
-  primaryButton,
-  secondaryButton,
-} from "@/lib/ui";
+import { queryKeys } from "@/lib/query/keys";
 
-interface Status {
-  kind: "idle" | "busy" | "ok" | "error";
-  message: string;
+const STAFF_ROLES = new Set(["admin", "super_admin"]);
+
+function DevStaffSignIn() {
+  const [email, setEmail] = useState("admin@awgu.local");
+  const signedIn = useSignedIn();
+  const signIn = useMutation({
+    mutationFn: () => devLogin(email.trim().toLowerCase()),
+    onSuccess: (result) => signedIn(result.user),
+  });
+
+  return (
+    <Card>
+      <CardHeader>
+        <h2 className="text-lg font-medium">Staff sign-in</h2>
+        <CardDescription>Development only: sign in as a seeded staff account.</CardDescription>
+      </CardHeader>
+      <CardContent className="grid gap-3">
+        <form
+          className="flex flex-wrap items-end gap-3"
+          onSubmit={(event) => {
+            event.preventDefault();
+            signIn.mutate();
+          }}
+        >
+          <div className="grid gap-1.5">
+            <Label htmlFor="staff-email">Development email</Label>
+            <Input
+              id="staff-email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              type="email"
+              autoComplete="off"
+            />
+          </div>
+          <Button type="submit" disabled={signIn.isPending}>
+            Sign in
+          </Button>
+        </form>
+        <InlineError error={signIn.error} />
+      </CardContent>
+    </Card>
+  );
 }
 
-const IDLE: Status = { kind: "idle", message: "" };
-
 export function ModerationQueue() {
-  const [user, setUser] = useState<UserPublic | null>(null);
-  const [email, setEmail] = useState("admin@awgu.local");
-  const [queue, setQueue] = useState<ModerationQueue | null>(null);
-  const [busyId, setBusyId] = useState<string | null>(null);
-  const [rationale, setRationale] = useState(
-    "Registration and public contact confirmed.",
-  );
+  const queryClient = useQueryClient();
+  const userQuery = useCurrentUser();
+  const user = userQuery.data ?? null;
+  const isStaff = Boolean(user?.roles.some((role) => STAFF_ROLES.has(role)));
+  const signOut = useSignOut();
+
+  const queueQuery = useQuery({
+    queryKey: queryKeys.moderationQueue,
+    queryFn: fetchModerationQueue,
+    enabled: isStaff,
+  });
+
+  const [rationale, setRationale] = useState("Registration and public contact confirmed.");
   const [reasons, setReasons] = useState<Record<string, string>>({});
-  const [status, setStatus] = useState<Status>(IDLE);
 
-  function setReason(id: string, value: string) {
-    setReasons((current) => ({ ...current, [id]: value }));
-  }
+  const refreshQueue = () =>
+    queryClient.invalidateQueries({ queryKey: queryKeys.moderationQueue });
 
-  async function loadQueue() {
-    const data = await fetchModerationQueue();
-    setQueue(data);
-    return data;
-  }
+  const providerDecision = useMutation({
+    mutationFn: ({ id, decision }: { id: string; decision: ProviderDecision }) =>
+      decideProvider(id, decision, rationale),
+    onSuccess: refreshQueue,
+  });
+  const listingDecision = useMutation({
+    mutationFn: ({ id, decision }: { id: string; decision: ListingDecision }) =>
+      decideListing(id, decision, reasons[id] ?? null),
+    onSuccess: refreshQueue,
+  });
 
-  async function handleSignIn() {
-    setStatus({ kind: "busy", message: "Signing in…" });
-    try {
-      const current = await devLogin(email.trim().toLowerCase());
-      setUser(current.user);
-      await loadQueue();
-      setStatus({ kind: "ok", message: "Signed in." });
-    } catch (error) {
-      setUser(null);
-      setStatus({ kind: "error", message: describeApiError(error) });
-    }
-  }
+  const busyId = providerDecision.isPending
+    ? providerDecision.variables?.id
+    : listingDecision.isPending
+      ? listingDecision.variables?.id
+      : undefined;
 
-  async function handleSignOut() {
-    setStatus({ kind: "busy", message: "Signing out…" });
-    try {
-      await logout();
-      setUser(null);
-      setQueue(null);
-      setStatus({ kind: "ok", message: "Signed out." });
-    } catch (error) {
-      setStatus({ kind: "error", message: describeApiError(error) });
-    }
+  if (userQuery.isPending) return <SectionSkeleton label="Checking your session…" />;
+  if (userQuery.isError) {
+    return <ErrorState error={userQuery.error} onRetry={() => userQuery.refetch()} />;
   }
+  if (!user) return <DevStaffSignIn />;
 
-  async function handleQueueRefresh() {
-    setStatus({ kind: "busy", message: "Refreshing queue…" });
-    try {
-      await loadQueue();
-      setStatus({ kind: "ok", message: "Queue refreshed." });
-    } catch (error) {
-      setStatus({ kind: "error", message: describeApiError(error) });
-    }
-  }
-
-  async function handleProvider(id: string, decision: "approve" | "reject") {
-    setBusyId(id);
-    setStatus({ kind: "busy", message: `Recording provider ${decision}…` });
-    try {
-      await decideProvider(id, decision, rationale);
-      await loadQueue();
-      setStatus({ kind: "ok", message: `Provider ${decision}d.` });
-    } catch (error) {
-      setStatus({ kind: "error", message: describeApiError(error) });
-    } finally {
-      setBusyId(null);
-    }
-  }
-
-  async function handleListing(
-    id: string,
-    decision: "approve" | "reject" | "request_changes" | "suspend",
-  ) {
-    setBusyId(id);
-    setStatus({ kind: "busy", message: `Recording listing ${decision}…` });
-    try {
-      await decideListing(id, decision, reasons[id] ?? null);
-      await loadQueue();
-      setStatus({ kind: "ok", message: `Listing ${decision}.` });
-    } catch (error) {
-      setStatus({ kind: "error", message: describeApiError(error) });
-    } finally {
-      setBusyId(null);
-    }
-  }
+  const queue = queueQuery.data ?? { providers: [], listings: [] };
 
   return (
     <div className="space-y-8">
-      <section className="rounded-2xl border border-border bg-surface p-6">
-        <h2 className="text-lg font-medium">Session</h2>
-        {user ? (
-          <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm text-muted-foreground">
-              Signed in as{" "}
-              <span className="font-medium text-foreground">{user.email}</span>
-              {user.roles.length ? ` · ${user.roles.join(", ")}` : ""}
-            </p>
-            <button type="button" className={secondaryButton} onClick={handleSignOut}>
-              Sign out
-            </button>
-          </div>
-        ) : (
-          <div className="mt-3 flex flex-wrap items-end gap-3">
-            <label className={labelClass}>
-              <span className="text-muted-foreground">Development email</span>
-              <input
-                className={inputClass}
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                type="email"
-                autoComplete="off"
-              />
-            </label>
-            <button type="button" className={primaryButton} onClick={handleSignIn}>
-              Sign in
-            </button>
-          </div>
-        )}
-      </section>
+      <Card>
+        <CardContent className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm text-muted-foreground">
+            Signed in as{" "}
+            <span className="font-medium text-foreground">{user.email ?? user.id}</span>
+            {user.roles.length ? ` · ${user.roles.join(", ")}` : ""}
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => signOut.mutate()}
+            disabled={signOut.isPending}
+          >
+            Sign out
+          </Button>
+        </CardContent>
+      </Card>
 
-      {user ? (
+      {!isStaff ? (
+        <ErrorState
+          title="Staff access only"
+          error={
+            new ApiError(403, "forbidden", "This workspace is for platform administrators.")
+          }
+        />
+      ) : queueQuery.isPending ? (
+        <ListSkeleton rows={3} label="Loading moderation queue…" />
+      ) : queueQuery.isError ? (
+        <ErrorState error={queueQuery.error} onRetry={() => queueQuery.refetch()} />
+      ) : (
         <>
-          <section className="rounded-2xl border border-border bg-surface p-6">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="text-lg font-medium">Provider verification queue</h2>
-              <button
-                type="button"
-                className={secondaryButton}
-                onClick={handleQueueRefresh}
-              >
-                Refresh
-              </button>
-            </div>
-            <label className={`mt-4 ${labelClass}`}>
-              <span className="text-muted-foreground">Verification rationale</span>
-              <input
-                className={inputClass}
-                value={rationale}
-                onChange={(event) => setRationale(event.target.value)}
-              />
-            </label>
-            {!queue || queue.providers.length === 0 ? (
-              <p className="mt-4 text-sm text-muted-foreground">
-                No providers awaiting verification.
-              </p>
-            ) : (
-              <ul className="mt-4 grid gap-3">
-                {queue.providers.map((provider) => (
-                  <li
-                    key={provider.id}
-                    className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-background px-4 py-3"
-                  >
-                    <div>
-                      <p className="font-medium">{provider.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {provider.provider_type} · {provider.operating_area}
-                      </p>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-3">
-                      <VerificationBadge status={provider.verification_status} />
-                      <button
-                        type="button"
-                        className={secondaryButton}
-                        disabled={busyId === provider.id}
-                        onClick={() => handleProvider(provider.id, "approve")}
-                      >
-                        Verify
-                      </button>
-                      <button
-                        type="button"
-                        className={dangerButton}
-                        disabled={busyId === provider.id}
-                        onClick={() => handleProvider(provider.id, "reject")}
-                      >
-                        Reject
-                      </button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-
-          <section className="rounded-2xl border border-border bg-surface p-6">
-            <h2 className="text-lg font-medium">Listing review queue</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Approve, request changes, reject, or suspend each submitted listing.
-            </p>
-            {!queue || queue.listings.length === 0 ? (
-              <p className="mt-4 text-sm text-muted-foreground">
-                No listings awaiting review.
-              </p>
-            ) : (
-              <ul className="mt-4 grid gap-4">
-                {queue.listings.map((listing) => (
-                  <li
-                    key={listing.id}
-                    className="grid gap-3 rounded-lg border border-border bg-background p-4"
-                  >
-                    <div className="flex flex-wrap items-center justify-between gap-3">
+          <Card>
+            <CardHeader>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h2 className="text-lg font-medium">Provider verification queue</h2>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => queueQuery.refetch()}
+                  disabled={queueQuery.isFetching}
+                >
+                  <RefreshCw aria-hidden className={queueQuery.isFetching ? "animate-spin" : ""} />
+                  Refresh
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="grid gap-4">
+              <div className="grid gap-1.5">
+                <Label htmlFor="verification-rationale">Verification rationale</Label>
+                <Input
+                  id="verification-rationale"
+                  value={rationale}
+                  onChange={(event) => setRationale(event.target.value)}
+                />
+              </div>
+              {queue.providers.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  No providers awaiting verification.
+                </p>
+              ) : (
+                <ul className="grid gap-3">
+                  {queue.providers.map((provider) => (
+                    <li
+                      key={provider.id}
+                      className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-background px-4 py-3"
+                    >
                       <div>
-                        <p className="font-medium">{listing.title}</p>
+                        <p className="font-medium">{provider.name}</p>
                         <p className="text-sm text-muted-foreground">
-                          {listing.opportunity_type} · {listing.location}
+                          {provider.provider_type} · {provider.operating_area}
                         </p>
                       </div>
-                      <ListingStatusBadge status={listing.status} />
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      {listing.description}
-                    </p>
-                    <label className={labelClass}>
-                      <span className="text-muted-foreground">
-                        Reason (required for changes, reject, suspend)
-                      </span>
-                      <input
-                        className={inputClass}
-                        value={reasons[listing.id] ?? ""}
-                        onChange={(event) => setReason(listing.id, event.target.value)}
-                      />
-                    </label>
-                    <div className="flex flex-wrap gap-3">
-                      <button
-                        type="button"
-                        className={secondaryButton}
-                        disabled={busyId === listing.id}
-                        onClick={() => handleListing(listing.id, "approve")}
-                      >
-                        Approve
-                      </button>
-                      <button
-                        type="button"
-                        className={secondaryButton}
-                        disabled={busyId === listing.id}
-                        onClick={() => handleListing(listing.id, "request_changes")}
-                      >
-                        Request changes
-                      </button>
-                      <button
-                        type="button"
-                        className={dangerButton}
-                        disabled={busyId === listing.id}
-                        onClick={() => handleListing(listing.id, "reject")}
-                      >
-                        Reject
-                      </button>
-                      <button
-                        type="button"
-                        className={dangerButton}
-                        disabled={busyId === listing.id}
-                        onClick={() => handleListing(listing.id, "suspend")}
-                      >
-                        Suspend
-                      </button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-        </>
-      ) : null}
+                      <div className="flex flex-wrap items-center gap-3">
+                        <VerificationBadge status={provider.verification_status} />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={busyId === provider.id}
+                          onClick={() =>
+                            providerDecision.mutate({ id: provider.id, decision: "approve" })
+                          }
+                        >
+                          Verify
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          disabled={busyId === provider.id}
+                          onClick={() =>
+                            providerDecision.mutate({ id: provider.id, decision: "reject" })
+                          }
+                        >
+                          Reject
+                        </Button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <InlineError error={providerDecision.error} />
+            </CardContent>
+          </Card>
 
-      <p
-        role="status"
-        aria-live="polite"
-        className={`text-sm ${
-          status.kind === "error" ? "text-danger" : "text-muted-foreground"
-        }`}
-      >
-        {status.message}
-      </p>
+          <Card>
+            <CardHeader>
+              <h2 className="text-lg font-medium">Listing review queue</h2>
+              <CardDescription>
+                Approve, request changes, reject, or suspend each submitted listing.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4">
+              {queue.listings.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No listings awaiting review.</p>
+              ) : (
+                <ul className="grid gap-4">
+                  {queue.listings.map((listing) => {
+                    const reasonId = `reason-${listing.id}`;
+                    const decide = (decision: ListingDecision) =>
+                      listingDecision.mutate({ id: listing.id, decision });
+                    return (
+                      <li
+                        key={listing.id}
+                        className="grid gap-3 rounded-lg border border-border bg-background p-4"
+                      >
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                          <div>
+                            <p className="font-medium">{listing.title}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {listing.opportunity_type} · {listing.location}
+                            </p>
+                          </div>
+                          <ListingStatusBadge status={listing.status} />
+                        </div>
+                        <p className="text-sm text-muted-foreground">{listing.description}</p>
+                        <div className="grid gap-1.5">
+                          <Label htmlFor={reasonId}>
+                            Reason (required for changes, reject, suspend)
+                          </Label>
+                          <Input
+                            id={reasonId}
+                            value={reasons[listing.id] ?? ""}
+                            onChange={(event) =>
+                              setReasons((current) => ({
+                                ...current,
+                                [listing.id]: event.target.value,
+                              }))
+                            }
+                          />
+                        </div>
+                        <div className="flex flex-wrap gap-3">
+                          <Button
+                            type="button"
+                            size="sm"
+                            disabled={busyId === listing.id}
+                            onClick={() => decide("approve")}
+                          >
+                            Approve
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            disabled={busyId === listing.id}
+                            onClick={() => decide("request_changes")}
+                          >
+                            Request changes
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            disabled={busyId === listing.id}
+                            onClick={() => decide("reject")}
+                          >
+                            Reject
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            disabled={busyId === listing.id}
+                            onClick={() => decide("suspend")}
+                          >
+                            Suspend
+                          </Button>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+              <InlineError error={listingDecision.error} />
+            </CardContent>
+          </Card>
+        </>
+      )}
     </div>
   );
 }
