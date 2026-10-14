@@ -129,7 +129,7 @@ export function OrganizerPanel({
   return (
     <Card>
       <CardHeader>
-        <h2 className="text-lg font-medium">Application support sessions</h2>
+        <h2 className="text-lg font-bold">Application support sessions</h2>
         <CardDescription>
           Propose a free workshop or help desk. Our team reviews each session before
           it is listed publicly.
@@ -272,7 +272,7 @@ export function OrganizerPanel({
         )}
 
         <div className="grid gap-3">
-          <h3 className="text-base font-medium">Your sessions</h3>
+          <h3 className="text-base font-bold">Your sessions</h3>
           {sessions.isPending ? (
             <ListSkeleton rows={1} label="Loading your sessions…" />
           ) : sessions.isError ? (
@@ -284,7 +284,7 @@ export function OrganizerPanel({
               {ownSessions.map((session) => (
                 <li
                   key={session.id}
-                  className="grid gap-3 rounded-lg border border-border bg-background p-4"
+                  className="grid gap-3 rounded-xl border bg-background p-4"
                 >
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
