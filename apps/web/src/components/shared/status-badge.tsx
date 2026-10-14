@@ -113,6 +113,7 @@ export function ListingStatusBadge({ status }: { status: string }) {
 
 export const applicationStatusMeta: Record<string, Meta> = {
   draft: { tone: "neutral", label: "Draft", icon: CircleDashed },
+  started: { tone: "neutral", label: "Started", icon: CircleDashed },
   submitted: { tone: "primary", label: "Submitted", icon: Check },
   under_review: { tone: "warning", label: "Under review", icon: Eye },
   interview: { tone: "accent", label: "Interview", icon: MessageSquareWarning },
@@ -121,6 +122,7 @@ export const applicationStatusMeta: Record<string, Meta> = {
   rejected: { tone: "danger", label: "Not successful", icon: AlertTriangle },
   withdrawn: { tone: "neutral", label: "Withdrawn", icon: CircleDashed },
   closed: { tone: "neutral", label: "Closed", icon: Clock },
+  completed: { tone: "success", label: "Completed", icon: Check },
 };
 
 export function applicationStatusLabel(status: string): string {
