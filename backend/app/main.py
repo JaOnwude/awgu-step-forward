@@ -11,7 +11,6 @@ from app.api.v1 import api_router
 from app.bootstrap import bootstrap
 from app.core.config import get_settings
 from app.core.errors import AppError
-from app.core.logging import configure_logging
 
 _settings = get_settings()
 
