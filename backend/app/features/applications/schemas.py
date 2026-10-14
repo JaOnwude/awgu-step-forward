@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -51,6 +52,8 @@ class ApplicationSummary(BaseModel):
     reference: str
     opportunity_id: uuid.UUID
     opportunity_title: str
+    #: "platform" (submitted here) or "external"/"in_person" (applicant-tracked).
+    route: str
     status: str
     status_source: str
     submitted_at: datetime | None = None
@@ -60,6 +63,7 @@ class ApplicationSummary(BaseModel):
 
 class ApplicationDetail(ApplicationSummary):
     form_version: str
+    private_note: str | None = None
     answers: list[ApplicationAnswerView] = Field(default_factory=list)
     history: list[ApplicationStatusEventView] = Field(default_factory=list)
 
@@ -74,3 +78,23 @@ class ApplicationReceipt(BaseModel):
 
 class ApplicationWithdrawRequest(BaseModel):
     note: str | None = Field(default=None, max_length=2000)
+
+
+class TrackedApplicationCreate(BaseModel):
+    opportunity_id: uuid.UUID
+
+
+class TrackingUpdate(BaseModel):
+    """Applicant-reported progress on an application made elsewhere."""
+
+    status: Literal[
+        "started",
+        "submitted",
+        "interview",
+        "offered",
+        "accepted",
+        "rejected",
+        "withdrawn",
+        "completed",
+    ]
+    private_note: str | None = Field(default=None, max_length=2000)
