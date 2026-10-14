@@ -5,6 +5,7 @@ import { ChevronLeft, Lock, MapPin, Monitor, ShieldCheck } from "lucide-react";
 
 import { StatusBadge } from "@/components/shared/status-badge";
 import { buttonVariants } from "@/components/ui/button";
+import { ReportDialog } from "@/features/reports/report-dialog";
 import { RegisterPanel } from "@/features/sessions/register-panel";
 import { DateBlock } from "@/features/sessions/session-card";
 import {
@@ -142,6 +143,9 @@ export default async function SessionPage({ params }: { params: Params }) {
             The organiser only sees your preferred name and whether you attended — never
             your contact details or profile. Report anyone who asks for payment.
           </p>
+          <div className="px-1">
+            <ReportDialog targetType="support_session" targetId={session.id} targetLabel="session" />
+          </div>
         </aside>
       </div>
     </article>
