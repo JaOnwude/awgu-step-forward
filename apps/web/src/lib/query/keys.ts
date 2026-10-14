@@ -13,6 +13,10 @@ export const queryKeys = {
   myProviders: ["providers", "mine"] as const,
   provider: (id: string) => ["providers", id] as const,
   opportunity: (id: string) => ["opportunities", id] as const,
+  session: (id: string) => ["sessions", id] as const,
+  mySessionRegistrations: ["sessions", "registrations", "mine"] as const,
+  managedSessions: ["sessions", "managed"] as const,
+  roster: (id: string) => ["sessions", "roster", id] as const,
   moderationQueue: ["moderation", "queue"] as const,
   adminPing: ["admin", "ping"] as const,
 };
