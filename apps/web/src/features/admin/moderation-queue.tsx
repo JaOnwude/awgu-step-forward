@@ -11,6 +11,7 @@ import {
   SectionSkeleton,
 } from "@/components/shared/query-states";
 import { ListingStatusBadge, VerificationBadge } from "@/components/shared/status-badge";
+import { SessionReview } from "@/features/admin/session-review";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -118,7 +119,7 @@ export function ModerationQueue() {
   }
   if (!user) return <DevStaffSignIn />;
 
-  const queue = queueQuery.data ?? { providers: [], listings: [] };
+  const queue = queueQuery.data ?? { providers: [], listings: [], sessions: [] };
 
   return (
     <div className="space-y-8">
@@ -319,6 +320,8 @@ export function ModerationQueue() {
               <InlineError error={listingDecision.error} />
             </CardContent>
           </Card>
+
+          <SessionReview sessions={queue.sessions} />
         </>
       )}
     </div>
