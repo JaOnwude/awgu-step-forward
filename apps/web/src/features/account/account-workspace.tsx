@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 import { ApplicationsList } from "./applications-list";
+import { MySessions } from "./my-sessions";
 import { ProfileForm } from "./profile-form";
 import { useCurrentUser, useProfile, useSignOut } from "./queries";
 import { SavedListings } from "./saved-listings";
@@ -67,6 +68,7 @@ export function AccountWorkspace() {
 
       <SavedListings />
       <ApplicationsList />
+      <MySessions />
     </div>
   );
 }
