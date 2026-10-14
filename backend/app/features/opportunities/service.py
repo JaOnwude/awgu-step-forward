@@ -17,11 +17,14 @@ from app.features.audit.service import record_event
 from app.features.identity.models import User, utcnow
 from app.features.opportunities import repository as repo
 from app.features.opportunities.models import (
+    ADULT_MIN_AGE,
+    ADULT_ONLY_TYPES,
     DELIVERY_MODES,
     MATERIAL_FIELDS,
     OPPORTUNITY_TYPES,
     ListingRevision,
     Opportunity,
+    WorkTerms,
 )
 from app.features.opportunities.schemas import (
     OpportunityCard,
@@ -30,6 +33,7 @@ from app.features.opportunities.schemas import (
     OpportunityListResponse,
     OpportunityUpdate,
     ProviderRef,
+    WorkTermsOut,
 )
 from app.features.providers import repository as provider_repo
 from app.features.providers import service as provider_service
@@ -41,6 +45,35 @@ PUBLIC_STATUSES = ("approved", "expired")
 
 #: Listings closing within this window are labelled "closing soon".
 CLOSING_SOON_DAYS = 14
+
+#: Non-nullable work-term flags; an explicit null in an update leaves them as-is.
+_REQUIRED_TERM_FLAGS = ("hazards_reviewed", "adult_only_construction")
+
+
+def requires_adult(opp: Opportunity) -> bool:
+    """Work listings and construction work are adults-only (spec R22a/R22b)."""
+    if opp.opportunity_type in ADULT_ONLY_TYPES:
+        return True
+    return opp.work_terms is not None and opp.work_terms.adult_only_construction
+
+
+def effective_min_age(opp: Opportunity) -> int | None:
+    """The minimum age the API enforces, whatever the listing states."""
+    if requires_adult(opp):
+        return max(opp.min_age or 0, ADULT_MIN_AGE)
+    return opp.min_age
+
+
+def _enforce_adult_policy(opp: Opportunity) -> None:
+    if not requires_adult(opp):
+        return
+    if opp.min_age is None:
+        opp.min_age = ADULT_MIN_AGE
+    elif opp.min_age < ADULT_MIN_AGE:
+        raise ValidationError(
+            f"Work and construction listings are open to adults only; "
+            f"min_age must be {ADULT_MIN_AGE} or over."
+        )
 
 
 async def _resolve_org(
@@ -151,6 +184,9 @@ def _detail(
         reviewed_at=opp.reviewed_at,
         published_at=opp.published_at,
         decision_reason=opp.decision_reason,
+        work_terms=(
+            WorkTermsOut.model_validate(opp.work_terms) if opp.work_terms else None
+        ),
     )
 
 
@@ -268,13 +304,17 @@ async def create_draft(
             "Provider must be verified before creating listings."
         )
 
-    data = payload.model_dump(exclude={"organization_id"})
+    data = payload.model_dump(exclude={"organization_id", "work_terms"})
     opp = Opportunity(
         organization_id=org.id,
         created_by_user_id=user.id,
         status="draft",
         **data,
     )
+    opp.work_terms = (
+        WorkTerms(**payload.work_terms.model_dump()) if payload.work_terms else None
+    )
+    _enforce_adult_policy(opp)
     db.add(opp)
     await db.flush()
     await record_event(
@@ -300,12 +340,32 @@ async def update_opportunity(
     if opp.status == "suspended":
         raise ConflictError("Suspended listings cannot be edited.")
 
-    changes = payload.model_dump(exclude_unset=True)
+    changes = payload.model_dump(exclude_unset=True, exclude={"work_terms"})
     material_changed = False
     for field, value in changes.items():
         if field in MATERIAL_FIELDS and getattr(opp, field) != value:
             material_changed = True
         setattr(opp, field, value)
+
+    if payload.work_terms is not None:
+        terms_changes = payload.work_terms.model_dump(exclude_unset=True)
+        if opp.work_terms is None:
+            opp.work_terms = WorkTerms()
+        for field, value in terms_changes.items():
+            if value is None and field in _REQUIRED_TERM_FLAGS:
+                continue
+            # Construction status changes age suitability, so it is material.
+            if (
+                field == "adult_only_construction"
+                and getattr(opp.work_terms, field) != value
+            ):
+                material_changed = True
+            setattr(opp.work_terms, field, value)
+
+    min_age_before = opp.min_age
+    _enforce_adult_policy(opp)
+    if opp.min_age != min_age_before:
+        material_changed = True
 
     returned_to_review = False
     if opp.status == "approved" and material_changed:
