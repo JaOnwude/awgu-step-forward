@@ -1,6 +1,7 @@
 import { apiRequest } from "@/lib/api/client";
 import type { Opportunity } from "@/lib/api/opportunities";
 import type { ProviderSummary } from "@/lib/api/providers";
+import type { ManagedSession } from "@/lib/api/sessions";
 
 export type ProviderDecision = "approve" | "reject";
 export type ListingDecision =
@@ -12,6 +13,7 @@ export type ListingDecision =
 export interface ModerationQueue {
   providers: ProviderSummary[];
   listings: Opportunity[];
+  sessions: ManagedSession[];
 }
 
 export function fetchModerationQueue(): Promise<ModerationQueue> {
