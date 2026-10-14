@@ -7,11 +7,15 @@ from app.api.deps import AuthContext, require_roles
 from app.db.session import get_db
 from app.features.applicant.router import router as applicant_router
 from app.features.applications.router import router as applications_router
+from app.features.assistant.router import router as assistant_router
 from app.features.audit.service import record_event
 from app.features.identity.router import router as identity_router
 from app.features.moderation.router import router as moderation_router
+from app.features.notifications.router import router as notifications_router
+from app.features.notifications.router import staff_router as jobs_router
 from app.features.opportunities.router import router as opportunities_router
 from app.features.providers.router import router as providers_router
+from app.features.reports.router import router as reports_router
 from app.features.sessions.router import me_router as session_me_router
 from app.features.sessions.router import router as sessions_router
 
@@ -24,6 +28,10 @@ api_router.include_router(applicant_router)
 api_router.include_router(applications_router)
 api_router.include_router(sessions_router)
 api_router.include_router(session_me_router)
+api_router.include_router(reports_router)
+api_router.include_router(notifications_router)
+api_router.include_router(jobs_router)
+api_router.include_router(assistant_router)
 
 
 @api_router.get("/admin/ping", tags=["admin"])
