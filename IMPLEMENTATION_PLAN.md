@@ -109,7 +109,7 @@ Progress: Days 1–4 ✅ done. Day 5 🟡 in progress. Days 6–7 ⬜ not starte
 - Exit: adult submits once despite retries, gets a receipt, sees history (`A4` partial).
 
 **Day 5 — Local work + support sessions** 🟡
-- ✅ WorkTerms fields + adults-only enforcement in API (`docs/DECISIONS.md` D15). ⬜ Work detail page with safety/PPE.
+- ✅ WorkTerms fields + adults-only enforcement in API (`docs/DECISIONS.md` D15). ✅ Work detail page with safety/PPE.
 - Support-session list + register/cancel; minimal organizer view.
 - Exit: under-18 cannot reach work apply; session capacity enforced (`A5` partial).
 
