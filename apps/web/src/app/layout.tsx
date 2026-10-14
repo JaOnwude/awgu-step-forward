@@ -1,26 +1,41 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Fraunces, Plus_Jakarta_Sans } from "next/font/google";
 
 import "./globals.css";
+import { MobileTabBar } from "@/components/shared/primary-nav";
 import { SiteFooter } from "@/components/shared/site-footer";
 import { SiteHeader } from "@/components/shared/site-header";
 import { QueryProvider } from "@/lib/query/provider";
 import { ThemeProvider } from "@/theme/theme-provider";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Brand typefaces (DECISIONS D21): Fraunces for headlines, Plus Jakarta Sans
+// for the interface. Self-hosted by next/font, Latin subset only.
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
   subsets: ["latin"],
+  weight: ["400", "600"],
+  style: ["normal", "italic"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const jakarta = Plus_Jakarta_Sans({
+  variable: "--font-jakarta",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
   title: "Awgu StepForward — Verified opportunities for your next step",
   description:
     "A verified opportunity directory and application tracker for Enugu State, prioritising Awgu. Find learning, work, apprenticeships, and safe local paid work.",
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#fbf7ef" },
+    { media: "(prefers-color-scheme: dark)", color: "#10140f" },
+  ],
 };
 
 const themeScript = `(function(){try{var m=localStorage.getItem('awgu-theme')||'system';var d=m==='dark'||(m==='system'&&window.matchMedia('(prefers-color-scheme: dark)').matches);var r=document.documentElement;r.classList.toggle('dark',d);r.dataset.theme=m;r.style.colorScheme=d?'dark':'light';}catch(e){}})();`;
@@ -33,7 +48,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${fraunces.variable} ${jakarta.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>
@@ -42,11 +57,20 @@ export default function RootLayout({
       <body className="min-h-full font-sans">
         <ThemeProvider>
           <QueryProvider>
+            <a
+              href="#main"
+              className="sr-only z-50 rounded-full bg-primary px-4 py-2 font-semibold text-primary-foreground focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
+            >
+              Skip to content
+            </a>
             <div className="flex min-h-dvh flex-col">
               <SiteHeader />
-              <main className="flex-1">{children}</main>
+              <main id="main" className="flex-1">
+                {children}
+              </main>
               <SiteFooter />
             </div>
+            <MobileTabBar />
           </QueryProvider>
         </ThemeProvider>
       </body>
