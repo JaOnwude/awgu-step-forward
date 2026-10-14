@@ -1,12 +1,34 @@
 "use client";
 
 import Link from "next/link";
+import { Bell } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
 import { useCurrentUser } from "@/features/account/queries";
+import { useNotifications } from "@/features/notifications/queries";
 import { cn } from "@/lib/utils";
 
 const STAFF_ROLES = new Set(["admin", "super_admin"]);
+
+/** Bell with an unread count; opens the inbox on the account page. */
+function NotificationBell() {
+  const { data } = useNotifications();
+  const unread = data?.unread ?? 0;
+  return (
+    <Link
+      href="/account#notifications"
+      aria-label={unread ? `Notifications, ${unread} unread` : "Notifications"}
+      className={buttonVariants({ variant: "outline", size: "icon-sm", className: "relative" })}
+    >
+      <Bell aria-hidden />
+      {unread ? (
+        <span className="absolute -top-1 -right-1 grid min-w-5 place-items-center rounded-full bg-highlight px-1 text-[0.65rem] font-bold text-highlight-foreground">
+          {unread > 9 ? "9+" : unread}
+        </span>
+      ) : null}
+    </Link>
+  );
+}
 
 /** Sign-in actions for visitors; avatar (and staff link) once signed in. */
 export function HeaderAccount() {
@@ -45,6 +67,7 @@ export function HeaderAccount() {
           Staff
         </Link>
       ) : null}
+      <NotificationBell />
       <Link
         href="/account"
         aria-label={`My account (${name})`}
