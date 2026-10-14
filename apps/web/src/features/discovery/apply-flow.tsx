@@ -1,18 +1,36 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRef, useState } from "react";
 
+import {
+  ErrorState,
+  FieldError,
+  InlineError,
+  SectionSkeleton,
+} from "@/components/shared/query-states";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+} from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { NativeSelect } from "@/components/ui/native-select";
+import { Textarea } from "@/components/ui/textarea";
 import {
   createApplication,
   fetchApplicationForm,
   submitApplication,
   updateApplicationAnswers,
-  type ApplicationReceipt,
-  type FormQuestion,
 } from "@/lib/api/applications";
-import { toApiErrorInfo, isUnauthorized } from "@/lib/api/errors";
-import { inputClass, labelClass, primaryButton, secondaryButton } from "@/lib/ui";
+import { ApiError } from "@/lib/api/client";
+import { isUnauthorized, toApiErrorInfo } from "@/lib/api/errors";
+import { queryKeys } from "@/lib/query/keys";
 
 const SHARED_PROFILE_FIELDS = [
   "Preferred name",
@@ -32,6 +50,13 @@ function newIdempotencyKey(): string {
   return `key-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
+function signInAware(error: unknown, action: string): unknown {
+  if (isUnauthorized(error)) {
+    return new ApiError(401, "auth_required", `Please sign in to ${action}.`);
+  }
+  return error;
+}
+
 export function ApplyFlow({
   opportunityId,
   opportunityTitle,
@@ -41,263 +66,252 @@ export function ApplyFlow({
   opportunityTitle: string;
   providerName: string;
 }) {
-  const [questions, setQuestions] = useState<FormQuestion[]>([]);
-  const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const [confirmed, setConfirmed] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [draftSaved, setDraftSaved] = useState(false);
-  const [receipt, setReceipt] = useState<ApplicationReceipt | null>(null);
+  const queryClient = useQueryClient();
+  const formQuery = useQuery({
+    queryKey: queryKeys.applicationForm(opportunityId),
+    queryFn: () => fetchApplicationForm(opportunityId),
+  });
+  const questions = formQuery.data?.questions ?? [];
 
+  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [confirmed, setConfirmed] = useState(false);
+  const [missing, setMissing] = useState<string[]>([]);
+
+  // One draft and one idempotency key per visit: retries of the same submit
+  // reuse the key, so the server creates exactly one application.
   const draftIdRef = useRef<string | null>(null);
   const idempotencyRef = useRef<string | null>(null);
 
-  useEffect(() => {
-    let active = true;
-    (async () => {
-      try {
-        const form = await fetchApplicationForm(opportunityId);
-        if (active) setQuestions(form.questions);
-      } catch (caught) {
-        if (active) setError(toApiErrorInfo(caught).message);
-      } finally {
-        if (active) setLoading(false);
-      }
-    })();
-    return () => {
-      active = false;
-    };
-  }, [opportunityId]);
-
-  function validate(): string | null {
-    const missing = questions
-      .filter((q) => q.required && !(answers[q.key] ?? "").trim())
-      .map((q) => q.label);
-    if (missing.length > 0) {
-      setError(`Please answer: ${missing.join(", ")}`);
-      return null;
-    }
-    return "ok";
-  }
-
-  async function persistDraft(): Promise<string | null> {
+  async function persistDraft(): Promise<string> {
     if (!draftIdRef.current) {
       const draft = await createApplication(opportunityId);
       draftIdRef.current = draft.id;
     }
-    const payload = questions.map((q) => ({
-      question_key: q.key,
-      answer_value: (answers[q.key] ?? "").trim() || null,
-    }));
-    await updateApplicationAnswers(draftIdRef.current, payload);
+    await updateApplicationAnswers(
+      draftIdRef.current,
+      questions.map((q) => ({
+        question_key: q.key,
+        answer_value: (answers[q.key] ?? "").trim() || null,
+      })),
+    );
     return draftIdRef.current;
   }
 
-  async function handleSaveDraft() {
-    setBusy(true);
-    setError("");
-    setFieldErrors({});
-    setDraftSaved(false);
-    try {
-      await persistDraft();
-      setDraftSaved(true);
-    } catch (caught) {
-      const info = toApiErrorInfo(caught);
-      setError(
-        isUnauthorized(caught)
-          ? "Please sign in to start your application."
-          : info.message,
-      );
-      setFieldErrors(info.fieldErrors);
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function handleSubmit() {
-    if (!validate()) return;
-    setBusy(true);
-    setError("");
-    setFieldErrors({});
-    try {
-      const draftId = await persistDraft();
-      if (!draftId) throw new Error("missing draft");
-      if (!idempotencyRef.current) {
-        idempotencyRef.current = newIdempotencyKey();
+  const saveDraft = useMutation({
+    mutationFn: async () => {
+      try {
+        await persistDraft();
+      } catch (error) {
+        throw signInAware(error, "start your application");
       }
-      const result = await submitApplication(draftId, idempotencyRef.current);
-      setReceipt(result);
-    } catch (caught) {
-      const info = toApiErrorInfo(caught);
-      setError(
-        isUnauthorized(caught)
-          ? "Please sign in to submit your application."
-          : info.message,
-      );
-      setFieldErrors(info.fieldErrors);
-    } finally {
-      setBusy(false);
-    }
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.applications }),
+  });
+
+  const submit = useMutation({
+    mutationFn: async () => {
+      try {
+        const draftId = await persistDraft();
+        idempotencyRef.current ??= newIdempotencyKey();
+        return await submitApplication(draftId, idempotencyRef.current);
+      } catch (error) {
+        throw signInAware(error, "submit your application");
+      }
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.applications }),
+  });
+
+  const error = submit.error ?? saveDraft.error;
+  const fieldErrors = error ? toApiErrorInfo(error).fieldErrors : {};
+  const busy = submit.isPending || saveDraft.isPending;
+
+  function handleSubmit() {
+    const unanswered = questions
+      .filter((q) => q.required && !(answers[q.key] ?? "").trim())
+      .map((q) => q.label);
+    setMissing(unanswered);
+    if (unanswered.length === 0) submit.mutate();
   }
 
-  if (loading) {
-    return <p className="text-sm text-muted-foreground">Loading application form…</p>;
+  function setAnswer(key: string, value: string) {
+    setAnswers((current) => ({ ...current, [key]: value }));
   }
 
-  if (receipt) {
+  if (formQuery.isPending) {
+    return <SectionSkeleton label="Loading application form…" />;
+  }
+
+  if (formQuery.isError) {
+    return <ErrorState error={formQuery.error} onRetry={() => formQuery.refetch()} />;
+  }
+
+  if (submit.data) {
+    const receipt = submit.data;
     return (
-      <section className="rounded-2xl border border-verified/40 bg-verified/5 p-6">
-        <h2 className="text-lg font-medium">Application submitted</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {receipt.message} Keep this reference safe:
-        </p>
-        <p className="mt-2 text-2xl font-semibold tracking-tight">
-          {receipt.reference}
-        </p>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {opportunityTitle} · {providerName}
-        </p>
-        <div className="mt-5 flex flex-wrap gap-3">
-          <Link href={`/account/applications/${receipt.id}`} className={primaryButton}>
-            View application status
-          </Link>
-          <Link href="/opportunities" className={secondaryButton}>
-            Browse more opportunities
-          </Link>
-        </div>
-      </section>
+      <Card className="border-verified/40 bg-verified/5">
+        <CardHeader>
+          <h2 className="text-lg font-medium">Application submitted</h2>
+          <CardDescription>{receipt.message} Keep this reference safe:</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          <p className="text-2xl font-semibold tracking-tight">{receipt.reference}</p>
+          <p className="text-sm text-muted-foreground">
+            {opportunityTitle} · {providerName}
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <Button asChild>
+              <Link href={`/account/applications/${receipt.id}`}>
+                View application status
+              </Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/opportunities">Browse more opportunities</Link>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
     <div className="space-y-8">
-      <section className="rounded-2xl border border-border bg-surface p-6">
-        <h2 className="text-lg font-medium">Application form</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Applying to <span className="font-medium text-foreground">{opportunityTitle}</span>{" "}
-          at {providerName}.
-        </p>
+      <Card>
+        <CardHeader>
+          <h2 className="text-lg font-medium">Application form</h2>
+          <CardDescription>
+            Applying to{" "}
+            <span className="font-medium text-foreground">{opportunityTitle}</span>{" "}
+            at {providerName}.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-5">
+          {questions.map((question) => {
+            const id = `answer-${question.key}`;
+            const value = answers[question.key] ?? "";
+            const invalid = Boolean(fieldErrors[question.key]);
+            return (
+              <div key={question.key} className="grid gap-1.5">
+                <Label htmlFor={id}>
+                  {question.label}
+                  {question.required ? (
+                    <span aria-hidden className="text-destructive">
+                      *
+                    </span>
+                  ) : null}
+                </Label>
+                {question.type === "long_text" ? (
+                  <Textarea
+                    id={id}
+                    rows={4}
+                    value={value}
+                    required={question.required}
+                    aria-invalid={invalid}
+                    onChange={(event) => setAnswer(question.key, event.target.value)}
+                  />
+                ) : question.type === "yes_no" ? (
+                  <NativeSelect
+                    id={id}
+                    value={value}
+                    required={question.required}
+                    aria-invalid={invalid}
+                    onChange={(event) => setAnswer(question.key, event.target.value)}
+                  >
+                    <option value="">Select…</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                  </NativeSelect>
+                ) : (
+                  <Input
+                    id={id}
+                    value={value}
+                    required={question.required}
+                    aria-invalid={invalid}
+                    onChange={(event) => setAnswer(question.key, event.target.value)}
+                  />
+                )}
+                <FieldError message={fieldErrors[question.key]} />
+              </div>
+            );
+          })}
+        </CardContent>
+      </Card>
 
-        <div className="mt-5 grid gap-5">
-          {questions.map((question) => (
-            <label key={question.key} className={labelClass}>
-              <span className="text-muted-foreground">
-                {question.label}
-                {question.required ? " *" : ""}
-              </span>
-              {question.type === "long_text" ? (
-                <textarea
-                  className={inputClass}
-                  rows={4}
-                  value={answers[question.key] ?? ""}
-                  onChange={(event) =>
-                    setAnswers((current) => ({
-                      ...current,
-                      [question.key]: event.target.value,
-                    }))
-                  }
-                />
-              ) : question.type === "yes_no" ? (
-                <select
-                  className={inputClass}
-                  value={answers[question.key] ?? ""}
-                  onChange={(event) =>
-                    setAnswers((current) => ({
-                      ...current,
-                      [question.key]: event.target.value,
-                    }))
-                  }
+      <Card>
+        <CardHeader>
+          <h3 className="text-lg font-medium">Review before you submit</h3>
+          <CardDescription>
+            {providerName} will receive exactly what is listed here.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-5">
+          <div>
+            <p className="text-sm font-medium">Your answers</p>
+            <dl className="mt-2 grid gap-3">
+              {questions.map((question) => (
+                <div key={question.key}>
+                  <dt className="text-xs text-muted-foreground">{question.label}</dt>
+                  <dd className="text-sm whitespace-pre-line">
+                    {(answers[question.key] ?? "").trim() || "Not answered"}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+          <div>
+            <p className="text-sm font-medium">From your private profile</p>
+            <ul className="mt-2 flex flex-wrap gap-2">
+              {SHARED_PROFILE_FIELDS.map((field) => (
+                <li
+                  key={field}
+                  className="rounded-full border border-border bg-muted px-3 py-1 text-xs text-muted-foreground"
                 >
-                  <option value="">Select…</option>
-                  <option value="yes">Yes</option>
-                  <option value="no">No</option>
-                </select>
-              ) : (
-                <input
-                  className={inputClass}
-                  value={answers[question.key] ?? ""}
-                  onChange={(event) =>
-                    setAnswers((current) => ({
-                      ...current,
-                      [question.key]: event.target.value,
-                    }))
-                  }
-                />
-              )}
-              {fieldErrors[question.key] ? (
-                <span className="text-xs text-danger">{fieldErrors[question.key]}</span>
-              ) : null}
-            </label>
-          ))}
-        </div>
-      </section>
+                  {field}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="flex items-start gap-2">
+            <Checkbox
+              id="apply-confirm"
+              className="mt-0.5"
+              checked={confirmed}
+              onCheckedChange={(state) => setConfirmed(state === true)}
+            />
+            <Label htmlFor="apply-confirm" className="leading-snug font-normal">
+              I confirm the information I provide is accurate and I agree to share
+              my answers and profile summary with {providerName}.
+            </Label>
+          </div>
+        </CardContent>
+      </Card>
 
-      <section className="rounded-2xl border border-border bg-surface p-6">
-        <h3 className="text-lg font-medium">Before you submit</h3>
-        <p className="mt-2 text-sm text-muted-foreground">
-          The provider will see your application answers and these profile
-          details:
-        </p>
-        <ul className="mt-3 flex flex-wrap gap-2">
-          {SHARED_PROFILE_FIELDS.map((field) => (
-            <li
-              key={field}
-              className="rounded-full border border-border bg-surface-muted px-3 py-1 text-xs text-muted-foreground"
-            >
-              {field}
-            </li>
-          ))}
-        </ul>
-        <label className="mt-4 flex items-start gap-2 text-sm">
-          <input
-            type="checkbox"
-            className="mt-1"
-            checked={confirmed}
-            onChange={(event) => setConfirmed(event.target.checked)}
-          />
-          <span>
-            I confirm the information I provide is accurate and I agree to share
-            my profile summary with {providerName}.
-          </span>
-        </label>
-      </section>
-
-      {error ? (
-        <p role="alert" className="text-sm text-danger">
-          {error}
+      {missing.length > 0 ? (
+        <p role="alert" className="text-sm text-destructive">
+          Please answer: {missing.join(", ")}
         </p>
       ) : null}
-      {draftSaved ? (
+      <InlineError error={error} />
+      {saveDraft.isSuccess ? (
         <p role="status" className="text-sm text-muted-foreground">
           Draft saved. You can come back and finish later.
         </p>
       ) : null}
 
       <div className="flex flex-wrap gap-3">
-        <button
-          type="button"
-          className={primaryButton}
-          onClick={handleSubmit}
-          disabled={busy || !confirmed}
-        >
+        <Button type="button" onClick={handleSubmit} disabled={busy || !confirmed}>
           Submit application
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
-          className={secondaryButton}
-          onClick={handleSaveDraft}
+          variant="outline"
+          onClick={() => saveDraft.mutate()}
           disabled={busy}
         >
           Save draft
-        </button>
-        <Link
-          href={`/opportunities/${opportunityId}`}
-          className={secondaryButton}
-        >
-          Back to listing
-        </Link>
+        </Button>
+        <Button asChild variant="ghost">
+          <Link href={`/opportunities/${opportunityId}`}>Back to listing</Link>
+        </Button>
       </div>
     </div>
   );
