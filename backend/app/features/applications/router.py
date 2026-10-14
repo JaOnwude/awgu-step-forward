@@ -16,6 +16,8 @@ from app.features.applications.schemas import (
     ApplicationSummary,
     ApplicationUpdate,
     ApplicationWithdrawRequest,
+    TrackedApplicationCreate,
+    TrackingUpdate,
 )
 
 router = APIRouter(prefix="/applications", tags=["applications"])
@@ -96,4 +98,32 @@ async def withdraw_application(
         user=ctx.user,
         application_id=application_id,
         note=payload.note,
+    )
+
+
+@router.post("/tracked", response_model=ApplicationDetail, status_code=201)
+async def start_tracking(
+    payload: TrackedApplicationCreate,
+    ctx: AuthContext = Depends(verify_csrf),
+    db: AsyncSession = Depends(get_db),
+) -> ApplicationDetail:
+    """Start tracking an application made on the provider's site or in person."""
+    return await service.start_tracking(
+        db, user=ctx.user, opportunity_id=payload.opportunity_id
+    )
+
+
+@router.patch("/{application_id}/tracking", response_model=ApplicationDetail)
+async def update_tracking(
+    application_id: uuid.UUID,
+    payload: TrackingUpdate,
+    ctx: AuthContext = Depends(verify_csrf),
+    db: AsyncSession = Depends(get_db),
+) -> ApplicationDetail:
+    """Applicant-reported status for a tracked application.
+
+    These statuses are never shown as provider-confirmed (spec R28).
+    """
+    return await service.update_tracking(
+        db, user=ctx.user, application_id=application_id, payload=payload
     )
