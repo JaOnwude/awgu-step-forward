@@ -11,6 +11,9 @@ from app.features.identity.schemas import (
     DevLoginRequest,
     LoginResponse,
     MessageResponse,
+    OtpRequest,
+    OtpRequestResponse,
+    OtpVerifyRequest,
     UserPublic,
 )
 
@@ -49,6 +52,38 @@ async def dev_login(
     db: AsyncSession = Depends(get_db),
 ) -> LoginResponse:
     user, raw_token, raw_csrf = await service.dev_login(db, payload.email)
+    _set_auth_cookies(response, raw_token, raw_csrf)
+    return LoginResponse(user=user, csrf_token=raw_csrf)
+
+
+@router.post("/otp/request", response_model=OtpRequestResponse)
+async def request_otp(
+    payload: OtpRequest,
+    db: AsyncSession = Depends(get_db),
+) -> OtpRequestResponse:
+    challenge, dev_code = await service.request_otp(
+        db, channel=payload.channel, destination=payload.destination
+    )
+    return OtpRequestResponse(
+        channel=challenge.channel,
+        destination=challenge.destination,
+        expires_at=challenge.expires_at,
+        dev_code=dev_code,
+    )
+
+
+@router.post("/otp/verify", response_model=LoginResponse)
+async def verify_otp(
+    payload: OtpVerifyRequest,
+    response: Response,
+    db: AsyncSession = Depends(get_db),
+) -> LoginResponse:
+    user, raw_token, raw_csrf = await service.verify_otp(
+        db,
+        channel=payload.channel,
+        destination=payload.destination,
+        code=payload.code,
+    )
     _set_auth_cookies(response, raw_token, raw_csrf)
     return LoginResponse(user=user, csrf_token=raw_csrf)
 

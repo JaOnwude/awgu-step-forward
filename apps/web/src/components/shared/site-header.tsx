@@ -35,7 +35,7 @@ export function SiteHeader() {
         <div className="flex items-center gap-3">
           <ThemeToggle />
           <Link
-            href="/providers"
+            href="/account"
             className="hidden rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:inline-block"
           >
             Sign in

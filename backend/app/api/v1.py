@@ -5,6 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import AuthContext, require_roles
 from app.db.session import get_db
+from app.features.applicant.router import router as applicant_router
+from app.features.applications.router import router as applications_router
 from app.features.audit.service import record_event
 from app.features.identity.router import router as identity_router
 from app.features.moderation.router import router as moderation_router
@@ -16,6 +18,8 @@ api_router.include_router(identity_router)
 api_router.include_router(providers_router)
 api_router.include_router(opportunities_router)
 api_router.include_router(moderation_router)
+api_router.include_router(applicant_router)
+api_router.include_router(applications_router)
 
 
 @api_router.get("/admin/ping", tags=["admin"])

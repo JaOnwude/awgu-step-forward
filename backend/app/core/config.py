@@ -30,6 +30,9 @@ class Settings(BaseSettings):
     # Dev-only OTP/session bootstrap. Must be False in production.
     dev_auth_enabled: bool = True
 
+    # Dev convenience: apply migrations and seed sample data on startup.
+    dev_bootstrap: bool = True
+
 
 @lru_cache
 def get_settings() -> Settings:
