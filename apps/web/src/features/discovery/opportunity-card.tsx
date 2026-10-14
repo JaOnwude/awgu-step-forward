@@ -1,62 +1,90 @@
 import Link from "next/link";
+import { Clock, MapPin } from "lucide-react";
 
-import type { OpportunityCard } from "@/lib/api/discovery";
-import { formatWatDateTime } from "@/lib/format";
+import { CategoryIcon } from "@/components/shared/category-icon";
 import {
-  deliveryModeLabel,
-  opportunityTypeLabel,
-} from "@/lib/opportunity-labels";
-import { ListingStatusBadge, StatusBadge, VerificationBadge } from "@/components/shared/status-badge";
+  AdultsOnlyBadge,
+  ListingStatusBadge,
+  StatusBadge,
+  VerificationBadge,
+} from "@/components/shared/status-badge";
+import type { OpportunityCard } from "@/lib/api/discovery";
+import { ADULT_ONLY_TYPES } from "@/lib/api/opportunities";
+import { formatWatDate } from "@/lib/format";
+import { deliveryModeLabel, opportunityTypeLabel } from "@/lib/opportunity-labels";
+
+function Fact({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="grid gap-0.5">
+      <dt className="text-[0.7rem] font-bold tracking-[0.06em] text-muted-foreground uppercase">
+        {label}
+      </dt>
+      <dd className="text-[0.9rem] font-semibold">{value}</dd>
+    </div>
+  );
+}
 
 export function OpportunityCardView({
   opportunity,
 }: {
   opportunity: OpportunityCard;
 }) {
-  const deadline = formatWatDateTime(opportunity.deadline_at);
+  const deadline = formatWatDate(opportunity.deadline_at);
+  const isWork = ADULT_ONLY_TYPES.includes(opportunity.opportunity_type);
+  const showsPay = isWork || Boolean(opportunity.pay_details);
+  const moneyValue =
+    (showsPay ? opportunity.pay_details : opportunity.cost_details) ?? "Not stated";
 
   return (
-    <article className="flex flex-col gap-3 rounded-2xl border border-border bg-surface p-5">
-      <div className="flex flex-wrap items-center gap-2">
+    <article className="group relative grid gap-4 rounded-2xl border bg-card p-5 shadow-xs transition-all focus-within:ring-2 focus-within:ring-ring hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-[var(--shadow-soft)]">
+      <div className="flex items-center gap-2.5 text-[0.8rem] font-semibold text-muted-foreground">
+        <CategoryIcon type={opportunity.opportunity_type} size="sm" />
+        {opportunityTypeLabel(opportunity.opportunity_type)}
+      </div>
+
+      <div className="grid gap-1.5">
+        <h3 className="font-display text-[1.3rem] leading-tight font-semibold">
+          {/* The whole card is clickable through this stretched link. */}
+          <Link
+            href={`/opportunities/${opportunity.id}`}
+            className="outline-none after:absolute after:inset-0 after:rounded-2xl"
+          >
+            {opportunity.title}
+          </Link>
+        </h3>
+        <p className="text-sm text-muted-foreground">
+          {opportunity.provider?.name ?? "Unknown provider"}
+        </p>
+      </div>
+
+      <div className="flex flex-wrap gap-1.5">
         {opportunity.provider ? (
-          <VerificationBadge status={opportunity.provider.verification_status} />
+          <VerificationBadge
+            status={opportunity.provider.verification_status}
+            label={
+              opportunity.provider.verification_status === "verified" ? "Verified" : undefined
+            }
+          />
         ) : null}
+        {isWork ? <AdultsOnlyBadge short /> : null}
         {opportunity.is_expired ? (
           <ListingStatusBadge status="expired" />
         ) : opportunity.is_closing_soon ? (
-          <StatusBadge tone="warning">Closing soon</StatusBadge>
+          <StatusBadge tone="warning" icon={Clock}>
+            Closing soon
+          </StatusBadge>
         ) : null}
+        <StatusBadge tone="primary" icon={MapPin}>
+          {opportunity.location}
+        </StatusBadge>
       </div>
 
-      <h3 className="text-lg font-medium">
-        <Link
-          href={`/opportunities/${opportunity.id}`}
-          className="hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          {opportunity.title}
-        </Link>
-      </h3>
-
-      <p className="text-sm text-muted-foreground">
-        {opportunity.provider?.name ?? "Unknown provider"} · {opportunity.location}
-      </p>
-
-      <dl className="mt-auto grid gap-1 text-sm text-muted-foreground">
-        <div className="flex gap-1">
-          <dt className="sr-only">Category</dt>
-          <dd>{opportunityTypeLabel(opportunity.opportunity_type)}</dd>
-        </div>
-        <div className="flex gap-1">
-          <dt className="sr-only">Delivery mode</dt>
+      <dl className="mt-auto grid grid-cols-2 gap-3 border-t border-dashed pt-4">
+        <Fact label={showsPay ? "Pay" : "Cost"} value={moneyValue} />
+        <Fact label={opportunity.is_expired ? "Closed" : "Apply by"} value={deadline ?? "Open"} />
+        <div className="sr-only">
+          <dt>Delivery</dt>
           <dd>{deliveryModeLabel(opportunity.delivery_mode)}</dd>
-        </div>
-        <div className="flex gap-1">
-          <dt className="sr-only">Deadline</dt>
-          <dd>
-            {deadline
-              ? `Closes ${deadline} (WAT)`
-              : "No fixed deadline"}
-          </dd>
         </div>
       </dl>
     </article>

@@ -9,10 +9,13 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 import app.features.applicant.models  # noqa: F401
 import app.features.applications.models  # noqa: F401
+import app.features.assistant.models  # noqa: F401
 import app.features.audit.models  # noqa: F401
 import app.features.identity.models  # noqa: F401
+import app.features.notifications.models  # noqa: F401
 import app.features.opportunities.models  # noqa: F401
 import app.features.providers.models  # noqa: F401
+import app.features.reports.models  # noqa: F401
 import app.features.sessions.models  # noqa: F401
 from alembic import context
 from app.core.config import get_settings

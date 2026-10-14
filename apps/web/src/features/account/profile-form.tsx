@@ -79,7 +79,7 @@ export function ProfileForm({
     <Card>
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-lg font-medium">
+          <h2 className="text-lg font-bold">
             {profile ? "Your private profile" : "Create your applicant profile"}
           </h2>
           {profile ? (

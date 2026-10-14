@@ -7,6 +7,7 @@ import {
   InlineError,
   ListSkeleton,
 } from "@/components/shared/query-states";
+import { CategoryIcon } from "@/components/shared/category-icon";
 import { ListingStatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -23,7 +24,7 @@ export function SavedListings() {
   return (
     <Card>
       <CardHeader>
-        <h2 className="text-lg font-medium">Saved opportunities</h2>
+        <h2 className="text-lg font-bold">Saved opportunities</h2>
       </CardHeader>
       <CardContent className="grid gap-3">
         {savedQuery.isPending ? (
@@ -43,19 +44,22 @@ export function SavedListings() {
             {rows.map((row) => (
               <li
                 key={row.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-background px-4 py-3"
+                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-background px-4 py-3"
               >
-                <div>
-                  <Link
-                    href={`/opportunities/${row.opportunity_id}`}
-                    className="font-medium hover:underline"
-                  >
-                    {row.title}
-                  </Link>
-                  <p className="text-sm text-muted-foreground">
-                    {opportunityTypeLabel(row.opportunity_type)} · {row.location} ·
-                    saved {formatWatDate(row.saved_at) ?? "recently"}
-                  </p>
+                <div className="flex min-w-0 items-center gap-3.5">
+                  <CategoryIcon type={row.opportunity_type} />
+                  <div className="min-w-0">
+                    <Link
+                      href={`/opportunities/${row.opportunity_id}`}
+                      className="font-semibold hover:underline"
+                    >
+                      {row.title}
+                    </Link>
+                    <p className="text-xs text-muted-foreground">
+                      {opportunityTypeLabel(row.opportunity_type)} · {row.location} · saved{" "}
+                      {formatWatDate(row.saved_at) ?? "recently"}
+                    </p>
+                  </div>
                 </div>
                 <div className="flex items-center gap-3">
                   {row.is_expired ? <ListingStatusBadge status="expired" /> : null}

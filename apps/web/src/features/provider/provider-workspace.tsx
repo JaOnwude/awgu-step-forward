@@ -80,7 +80,7 @@ function DevProviderSignIn() {
   return (
     <Card>
       <CardHeader>
-        <h2 className="text-lg font-medium">Provider sign-in</h2>
+        <h2 className="text-lg font-bold">Provider sign-in</h2>
         <CardDescription>
           Development only: sign in as a provider member. Applicants sign in on
           the account page.
@@ -220,7 +220,7 @@ export function ProviderWorkspace() {
       <Card>
         <CardHeader>
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-lg font-medium">My providers</h2>
+            <h2 className="text-lg font-bold">My providers</h2>
             <Button
               type="button"
               variant="outline"
@@ -253,7 +253,7 @@ export function ProviderWorkspace() {
               {providers.map((provider) => (
                 <li
                   key={provider.id}
-                  className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-background px-4 py-3"
+                  className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-background px-4 py-3"
                 >
                   <div>
                     <p className="font-medium">{provider.name}</p>
@@ -282,7 +282,7 @@ export function ProviderWorkspace() {
 
       <Card>
         <CardHeader>
-          <h2 className="text-lg font-medium">Request provider access</h2>
+          <h2 className="text-lg font-bold">Request provider access</h2>
           <CardDescription>
             An administrator verifies the organization before it can list.
           </CardDescription>
@@ -350,7 +350,7 @@ export function ProviderWorkspace() {
 
       <Card>
         <CardHeader>
-          <h2 className="text-lg font-medium">Listing draft</h2>
+          <h2 className="text-lg font-bold">Listing draft</h2>
           {!canCreate ? (
             <CardDescription>
               Select a verified provider to create a listing. Unverified providers
@@ -509,7 +509,7 @@ export function ProviderWorkspace() {
           <InlineError error={createDraft.error ?? submitDraft.error} />
 
           {listing ? (
-            <div className="rounded-lg border border-border bg-background p-4">
+            <div className="rounded-xl border bg-background p-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <p className="font-medium">{listing.title}</p>
                 <ListingStatusBadge status={listing.status} />

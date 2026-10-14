@@ -24,16 +24,17 @@ Read `IMPLEMENTATION_PLAN.md` before doing anything — it holds the locked scop
 | Day 2 — Provider + moderation | Done, merged to `main` |
 | Day 3 — Public discovery | Done, merged to `main` |
 | Day 4 — Applicant workflows | Done, merged to `main`, **pushed** (external-application tracking moved to Day 6) |
-| Day 5 — Local work + support sessions | Done on `day-5-local-work`; **not merged yet** |
-| Day 6 — Notifications + AI slice | Not started |
+| Day 5 — Local work + support sessions | Done, merged to `main` (PR #2) |
+| Redesign (D21) | Done on `day-6-notify-ai` (brand, shadcn/ui, all screens) |
+| Day 6 — Notifications + AI slice | Done on `day-6-notify-ai` (D22); **not merged yet** |
 | Day 7 — Stabilize & demo | Not started |
-| Backend tests | `38 passed` (`uv run pytest -q`) |
+| Backend tests | `57 passed` (`uv run pytest -q`) |
 | Backend lint | `uv run ruff check .` — All checks passed |
 | Web lint / typecheck / build | `bun run lint`, `bun run typecheck` and `bun run build` pass (2026-10-14) |
 
 **Branches:**
-- `main` — HEAD `bb3ebee` (includes Day 1–4 and the Day 4 PR merge). Pushed to `origin`.
-- `day-5-local-work` — WorkTerms commit `d8f2fba` plus uncommitted 2026-10-14 fixes (see §3a). **Not merged, not pushed.**
+- `main` — includes Days 1–5 (Day 5 via PR #2). Pushed to `origin`.
+- `day-6-notify-ai` — redesign + Day 6. **Not merged.**
 
 **Workflow the owner has locked in (IMPORTANT — respect it):**
 - One commit per file.
@@ -98,12 +99,12 @@ Feature modules present under `backend/app/features/`:
 
 Then: one commit per file, `git merge --no-ff day-5-local-work` into `main`.
 
-### 4b. Day 6 — Notifications, AI, external tracking, reports
-- Notification preferences (in-app + email); `ConsoleEmailAdapter`; mocked `ConsoleSmsAdapter`; deadline-reminder job stub. **No live sends.**
-- Feature-flagged opportunity assistant (`AI_ENABLED=false` by default) grounded in approved listings; deterministic search is the real path; **no PII sent to any model** (`R48`).
-- External application tracking, labelled applicant-reported (`R28`).
-- `POST /reports` + basic staff report queue (`R21`).
-- **Exit:** see `IMPLEMENTATION_PLAN.md` Day 6.
+### 4b. Day 6 — Done (2026-10-14, `docs/DECISIONS.md` D22)
+- **Reports** (`features/reports/`): `POST /reports` (anonymous or signed in with CSRF, 5/hour per hashed fingerprint), staff queue in `/admin/moderation/queue` (urgent first, age, overdue), resolve / dismiss / suspend target, all audited. UI: "Report this listing/session" dialog; Reports card in the staff workspace.
+- **External tracking** (`features/applications/`): `POST /applications/tracked`, `PATCH /applications/{id}/tracking`; statuses always applicant-reported; private note. UI: provider-site / in-person apply buttons start tracking; tracking card on the application page; "Reported by you" labels.
+- **Notifications** (`features/notifications/`, `integrations/messaging.py`, `jobs/reminders.py`): preferences (channel needs a verified address), in-app inbox, console email/SMS adapters (log only, masked), deduplicated deadline + session reminders, failures recorded not raised. Run the job with `uv run python -m app.jobs.reminders` or the staff "Run reminder job" button. UI: header bell, inbox and reminder settings on the account page.
+- **Assistant** (`features/assistant/`): `GET /opportunity-assistant/status`, `POST /opportunity-assistant/search`; off unless `AI_ENABLED=true`; rule-based interpreter, no external model; redacts contacts/IDs; logs `AIUsageEvent` without the query. UI: panel above the directory, hidden when off.
+- **Exit met:** disabling AI leaves ordinary search fully usable (tested); external statuses are applicant-reported; a visitor can report a listing and staff see it.
 
 ### 4c. Day 7 — Stabilize & demo
 - Moderation restore + expire actions (`R20`).
@@ -180,6 +181,6 @@ bun run build
 ## 8. Suggested next action for the picking-up agent
 
 1. Read `IMPLEMENTATION_PLAN.md`, `docs/DECISIONS.md`, and the `spec.md` sections cited above.
-2. Owner merges `day-5-local-work` into `main` (`git merge --no-ff`), then start `day-6-notify-ai`.
+2. Owner merges `day-6-notify-ai` into `main`, then starts `day-7-demo`.
 3. One commit per file; hand the owner the `git add`/commit/merge commands (agent does not commit or push).
-4. Then proceed to Day 6 and Day 7 per the plan.
+4. Day 7: restore/expire moderation actions, the metadata-caching dev warning on detail pages, a11y (axe) pass, `docs/RUNBOOK.md`, demo deploy.

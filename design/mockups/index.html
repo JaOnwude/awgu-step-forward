@@ -1,0 +1,766 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Awgu StepForward — Design System &amp; Mockups</title>
+<meta name="description" content="Brand, design tokens, components and high-fidelity web and mobile mockups for Awgu StepForward.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400;1,9..144,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script>
+  // Board-only: remember the preview theme.
+  // ?theme=dark in the URL wins (useful for sharing a dark-mode link).
+  try {
+    const t = new URLSearchParams(location.search).get("theme") || localStorage.getItem("awgu-board-theme");
+    if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
+  } catch (e) {}
+</script>
+</head>
+<body>
+
+<!-- ======================= ICON SPRITE (Lucide-style, 24px, 1.75 stroke) ======================= -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="mark" viewBox="0 0 40 40">
+      <rect width="40" height="40" rx="11" fill="var(--primary)"/>
+      <rect x="7.5" y="24" width="7" height="8.5" rx="1.6" fill="var(--primary-foreground)"/>
+      <rect x="16.5" y="18" width="7" height="14.5" rx="1.6" fill="var(--primary-foreground)"/>
+      <rect x="25.5" y="12" width="7" height="20.5" rx="1.6" fill="var(--primary-foreground)"/>
+      <circle cx="14" cy="11.5" r="4" fill="var(--sun)"/>
+    </symbol>
+    <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 5-8 12-8 12s-8-7-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="17" rx="2.5"/><path d="M16 2.5v4M8 2.5v4M3 10h18"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-bookmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21 12 16.5 5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z"/></symbol>
+    <symbol id="i-bookmark-fill" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"><path d="M19 21 12 16.5 5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-3.5 8-10V5l-8-3-8 3v7c0 6.5 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-hardhat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 18h20v-1a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M4 15v-3a8 8 0 0 1 16 0v3M10 10V5.5a2 2 0 0 1 4 0V10"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18.5 14.5A6.5 6.5 0 0 1 21.5 20"/></symbol>
+    <symbol id="i-cash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><circle cx="12" cy="12" r="2.5"/><path d="M6 9.5v.01M18 14.5v.01"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-up-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 2 18a2 2 0 0 0 1.7 3h16.6a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4.5M12 8h.01"/></symbol>
+    <symbol id="i-wifioff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m2 2 20 20M8.5 16.5a5 5 0 0 1 7 0M5 13a10 10 0 0 1 5.2-2.8M19 13a10 10 0 0 0-2-1.5M2 8.8A15 15 0 0 1 6.2 6.3M22 8.8a15 15 0 0 0-9.4-3.7M12 20h.01"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22V4s1.5-1.5 5-1.5S14 5 17.5 5 20 4 20 4v11s-1 1-4.5 1S11 13.5 7.5 13.5 4 15 4 15"/></symbol>
+    <symbol id="i-grad" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m22 9-10-5L2 9l10 5 10-5Z"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5M22 9v6"/></symbol>
+    <symbol id="i-wrench" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0 5 5L21 13l-8 8-3-3 6.3-6.3a4 4 0 0 1-5-5L3 14.3"/><path d="M7.5 7.5 3 3"/></symbol>
+    <symbol id="i-brief" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="7" width="19" height="13.5" rx="2.5"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M2.5 13h19"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2ZM22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7Z"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></symbol>
+    <symbol id="i-monitor" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="3.5" width="19" height="13" rx="2"/><path d="M8 21h8M12 16.5V21"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1.5 1.5 0 0 1-1.5 1.5H15v-6H9v6H4.5A1.5 1.5 0 0 1 3 20Z"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0"/></symbol>
+    <symbol id="i-filter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18M6 12h12M10 19h4"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10.5" rx="2.5"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 13.3 7.6 4.4M15.8 6.3l-7.6 4.4"/></symbol>
+    <symbol id="i-print" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7.5" rx="1"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></symbol>
+    <symbol id="i-sparkle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></symbol>
+    <symbol id="i-doc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2.5H6.5a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V8Z"/><path d="M14 2.5V8h5.5M9 13h6M9 17h6"/></symbol>
+  </defs>
+</svg>
+
+<!-- ======================= BOARD BAR ======================= -->
+<div class="board-bar">
+  <div class="inner">
+    <a class="logo" href="#cover" aria-label="Awgu StepForward board home">
+      <svg class="logo-mark"><use href="#mark"/></svg>
+      <span class="logo-word"><small>AWGU</small><span>StepForward</span></span>
+    </a>
+    <nav aria-label="Board sections">
+      <a href="#brand">Brand</a>
+      <a href="#foundations">Foundations</a>
+      <a href="#components">Components</a>
+      <a href="#web">Web screens</a>
+      <a href="#mobile">Mobile screens</a>
+    </nav>
+    <div class="theme-switch" role="group" aria-label="Preview theme">
+      <button type="button" data-set-theme="light" aria-pressed="true" aria-label="Light"><svg class="icon-sm"><use href="#i-sun"/></svg></button>
+      <button type="button" data-set-theme="dark" aria-pressed="false" aria-label="Dark"><svg class="icon-sm"><use href="#i-moon"/></svg></button>
+    </div>
+  </div>
+</div>
+
+<main class="board">
+
+<!-- ======================= 00 COVER ======================= -->
+<section id="cover" class="hero-art" style="padding:72px 64px;min-height:520px;display:grid;grid-template-columns:1.1fr 0.9fr;gap:48px;align-items:center">
+  <div class="stack" style="--gap:22px">
+    <p class="overline" style="color:var(--sun)">Design system · v1.0 · October 2026</p>
+    <h1 class="display-xl" style="color:#fff">Verified opportunities for learning, work, <span class="serif-italic" style="color:var(--sun)">and your next step.</span></h1>
+    <p class="body-l" style="color:rgb(255 255 255 / .82);max-width:560px">Brand, foundations, components and high-fidelity mockups for Awgu StepForward — a calm, trustworthy, low-bandwidth opportunity service for Enugu State, with Awgu first.</p>
+    <div class="row-wrap" style="--gap:10px">
+      <span class="badge" style="background:rgb(255 255 255 / .12);color:#fff">Web / PWA</span>
+      <span class="badge" style="background:rgb(255 255 255 / .12);color:#fff">Android</span>
+      <span class="badge" style="background:rgb(255 255 255 / .12);color:#fff">Light + Dark</span>
+      <span class="badge" style="background:rgb(255 255 255 / .12);color:#fff">shadcn/ui + Tailwind tokens</span>
+    </div>
+  </div>
+  <svg viewBox="0 0 520 420" role="img" aria-label="Illustration: steps rising over the Awgu hills toward the morning sun" style="width:100%;height:auto">
+    <circle cx="380" cy="120" r="64" fill="#F2B33D"/>
+    <circle cx="380" cy="120" r="96" fill="#F2B33D" opacity=".14"/>
+    <path d="M0 300 C 90 230 170 250 250 210 S 420 160 520 200 V420 H0Z" fill="#0b4836"/>
+    <path d="M0 340 C 120 280 220 320 320 270 S 470 250 520 270 V420 H0Z" fill="#B8501F"/>
+    <path d="M0 380 C 140 340 260 370 380 340 S 500 330 520 340 V420 H0Z" fill="#8f3c16"/>
+    <g fill="#FBF7EF">
+      <rect x="150" y="300" width="56" height="70" rx="8"/>
+      <rect x="214" y="250" width="56" height="120" rx="8"/>
+      <rect x="278" y="200" width="56" height="170" rx="8"/>
+    </g>
+    <circle cx="306" cy="176" r="10" fill="#15201A"/>
+    <path d="M306 186 v18" stroke="#15201A" stroke-width="6" stroke-linecap="round"/>
+  </svg>
+</section>
+
+<!-- ======================= 01 BRAND ======================= -->
+<section id="brand" class="board-section">
+  <header>
+    <div class="stack" style="--gap:8px"><p class="board-num">01 — BRAND</p><h2 class="h1">A mark about the next step</h2></div>
+    <p class="muted" style="max-width:520px">Three rising steps toward a morning sun: progress you can see, taken one verified step at a time. The steps also read as the hills of Awgu. It is built from simple rectangles, so it stays crisp at 16&nbsp;px and costs almost nothing to load.</p>
+  </header>
+
+  <div class="grid g3">
+    <div class="card card-pad" style="display:grid;place-items:center;min-height:240px">
+      <span class="logo" style="transform:scale(1.6)"><svg class="logo-mark"><use href="#mark"/></svg><span class="logo-word"><small>AWGU</small><span>StepForward</span></span></span>
+    </div>
+    <div class="card card-pad" style="display:grid;place-items:center;min-height:240px;background:#15201A;border-color:#15201A" data-theme="dark">
+      <span class="logo" style="transform:scale(1.6);color:#EEF0E8"><svg class="logo-mark"><use href="#mark"/></svg><span class="logo-word"><small>AWGU</small><span>StepForward</span></span></span>
+    </div>
+    <div class="card card-pad" style="display:grid;place-items:center;min-height:240px;background:var(--surface-muted)">
+      <div class="row" style="--gap:28px;align-items:end">
+        <svg style="width:96px;height:96px"><use href="#mark"/></svg>
+        <svg style="width:48px;height:48px"><use href="#mark"/></svg>
+        <svg style="width:24px;height:24px"><use href="#mark"/></svg>
+        <svg style="width:16px;height:16px"><use href="#mark"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid g3" style="margin-top:20px">
+    <div class="card card-pad stack" style="--gap:10px">
+      <p class="overline accent-text">Lockup</p>
+      <p class="body-s muted">“AWGU” is set in Plus Jakarta Sans Bold, tracked +22%, in laterite. “StepForward” is set in Fraunces SemiBold. Keep the mark’s height equal to the two lines of the wordmark, with clear space of half a step on every side.</p>
+    </div>
+    <div class="card card-pad stack" style="--gap:10px">
+      <p class="overline accent-text">Voice</p>
+      <p class="body-s muted">Plain, warm and direct. Say what is verified and what is not. Never promise placement, funding or jobs. Write for a first-time phone user on 2G: short sentences, one action per screen.</p>
+    </div>
+    <div class="card card-pad stack" style="--gap:10px">
+      <p class="overline accent-text">Do not</p>
+      <p class="body-s muted">Do not recolour the steps, add gradients or shadows to the mark, use the mark as a government seal, or place it on busy photos. The wordmark is never set in another typeface.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 02 FOUNDATIONS ======================= -->
+<section id="foundations" class="board-section">
+  <header>
+    <div class="stack" style="--gap:8px"><p class="board-num">02 — FOUNDATIONS</p><h2 class="h1">Colour, type, space</h2></div>
+    <p class="muted" style="max-width:520px">A palette taken from the place: cream paper, forest green, the red laterite earth of Enugu, and the morning sun. Every text pairing meets WCAG 2.2 AA in both themes, and status is always shown with an icon and words, never colour alone.</p>
+  </header>
+
+  <h3 class="h3" style="margin-bottom:16px">Colour roles <span class="muted body-s" style="font-weight:500">— switch Light/Dark in the top bar</span></h3>
+  <div class="grid g5">
+    <div class="swatch"><div class="chip-color" style="background:var(--primary)"></div><div class="meta"><b>Forest · primary</b><code>--primary · #0F5A43</code></div></div>
+    <div class="swatch"><div class="chip-color" style="background:var(--highlight)"></div><div class="meta"><b>Laterite · highlight</b><code>--highlight · #B8501F</code></div></div>
+    <div class="swatch"><div class="chip-color" style="background:var(--sun)"></div><div class="meta"><b>Sun · accent</b><code>--sun · #F2B33D</code></div></div>
+    <div class="swatch"><div class="chip-color" style="background:var(--foreground)"></div><div class="meta"><b>Ink · foreground</b><code>--foreground · #15201A</code></div></div>
+    <div class="swatch"><div class="chip-color" style="background:var(--background);border-bottom:1px solid var(--border)"></div><div class="meta"><b>Paper · background</b><code>--background · #FBF7EF</code></div></div>
+    <div class="swatch"><div class="chip-color" style="background:var(--surface-muted)"></div><div class="meta"><b>Sand · muted</b><code>--surface-muted · #F2EBDD</code></div></div>
+    <div class="swatch"><div class="chip-color" style="background:var(--verified)"></div><div class="meta"><b>Verified</b><code>--verified · #1D5FA6</code></div></div>
+    <div class="swatch"><div class="chip-color" style="background:var(--success)"></div><div class="meta"><b>Success</b><code>--success · #157A4A</code></div></div>
+    <div class="swatch"><div class="chip-color" style="background:var(--warning)"></div><div class="meta"><b>Warning</b><code>--warning · #8F5B00</code></div></div>
+    <div class="swatch"><div class="chip-color" style="background:var(--danger)"></div><div class="meta"><b>Danger</b><code>--danger · #B42318</code></div></div>
+  </div>
+
+  <div class="grid" style="grid-template-columns:1.4fr 1fr;margin-top:40px;gap:24px">
+    <div class="card card-pad stack" style="--gap:18px">
+      <div class="row between"><h3 class="h3">Type scale</h3><span class="caption muted">Fraunces · Plus Jakarta Sans</span></div>
+      <div class="row between" style="align-items:baseline"><span class="display-l">Your next step</span><span class="caption muted">Display L · 56/62</span></div>
+      <div class="row between" style="align-items:baseline"><span class="h1">Scholarships in Awgu</span><span class="caption muted">H1 · 40/46</span></div>
+      <div class="row between" style="align-items:baseline"><span class="h2">Solar installation apprenticeship</span><span class="caption muted">H2 · 30/36</span></div>
+      <div class="row between" style="align-items:baseline"><span class="h3">Before you apply</span><span class="caption muted">H3 · 20/28 Bold</span></div>
+      <div class="row between" style="align-items:baseline"><span class="body-l">Free to join. A monthly stipend is paid during training.</span><span class="caption muted">Body L · 18/28</span></div>
+      <div class="row between" style="align-items:baseline"><span>The provider will see your answers and profile summary.</span><span class="caption muted">Body · 16/24</span></div>
+      <div class="row between" style="align-items:baseline"><span class="overline">Deadline · WAT</span><span class="caption muted">Overline · 12/16 +8%</span></div>
+    </div>
+    <div class="stack" style="--gap:24px">
+      <div class="card card-pad stack" style="--gap:14px">
+        <h3 class="h3">Why these typefaces</h3>
+        <p class="body-s muted"><b style="color:var(--foreground)">Fraunces</b> is a soft, warm serif with real character. It makes headlines feel editorial and human rather than like a government portal.</p>
+        <p class="body-s muted"><b style="color:var(--foreground)">Plus Jakarta Sans</b> has open shapes and a tall x-height, so forms, prices and dates stay readable at small sizes on low-end phones.</p>
+        <p class="body-s muted">Both are free (SIL Open Font License), self-hosted through <code>next/font</code>, subset to Latin, and limited to four weights in total, about 90&nbsp;KB.</p>
+      </div>
+      <div class="card card-pad stack" style="--gap:14px">
+        <h3 class="h3">Space &amp; shape</h3>
+        <div class="row" style="--gap:10px;align-items:end">
+          <span style="width:4px;height:4px;background:var(--primary);border-radius:2px"></span>
+          <span style="width:8px;height:8px;background:var(--primary);border-radius:2px"></span>
+          <span style="width:12px;height:12px;background:var(--primary);border-radius:3px"></span>
+          <span style="width:16px;height:16px;background:var(--primary);border-radius:4px"></span>
+          <span style="width:24px;height:24px;background:var(--primary);border-radius:5px"></span>
+          <span style="width:32px;height:32px;background:var(--primary);border-radius:6px"></span>
+          <span style="width:48px;height:48px;background:var(--primary);border-radius:8px"></span>
+          <span style="width:64px;height:64px;background:var(--primary);border-radius:10px"></span>
+        </div>
+        <p class="body-s muted">4-point scale: 4 · 8 · 12 · 16 · 24 · 32 · 48 · 64 · 96. Radii: 8 inputs-sm · 12 inputs · 16 cards · 24 panels · full for buttons and chips. Touch targets are at least 44&nbsp;px (48&nbsp;dp on Android).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 03 COMPONENTS ======================= -->
+<section id="components" class="board-section">
+  <header>
+    <div class="stack" style="--gap:8px"><p class="board-num">03 — COMPONENTS</p><h2 class="h1">Built on shadcn/ui, styled by our tokens</h2></div>
+    <p class="muted" style="max-width:520px">Every component maps to a shadcn/ui primitive (Button, Badge, Card, Input, Tabs, Alert, Skeleton) restyled through the tokens above. No second component library is needed.</p>
+  </header>
+
+  <div class="grid g2" style="gap:24px">
+    <div class="card card-pad stack" style="--gap:18px">
+      <h3 class="h3">Buttons</h3>
+      <div class="row-wrap" style="--gap:12px">
+        <button class="btn btn-primary">Apply in-platform <svg class="icon-sm"><use href="#i-arrow"/></svg></button>
+        <button class="btn btn-outline">Save listing</button>
+        <button class="btn btn-ghost">Cancel</button>
+        <button class="btn btn-sun">List an opportunity</button>
+      </div>
+      <div class="row-wrap" style="--gap:12px">
+        <button class="btn btn-danger btn-sm">Withdraw</button>
+        <button class="btn btn-primary btn-sm" disabled>Submitting…</button>
+        <button class="btn btn-outline btn-icon btn-sm" aria-label="Share"><svg class="icon-sm"><use href="#i-share"/></svg></button>
+      </div>
+      <p class="caption muted">Pill shape, 44 px default height, 3 px focus ring. Primary actions are one per view.</p>
+    </div>
+
+    <div class="card card-pad stack" style="--gap:18px">
+      <h3 class="h3">Status &amp; trust badges</h3>
+      <div class="row-wrap">
+        <span class="badge b-verified"><svg><use href="#i-shield"/></svg>Verified provider</span>
+        <span class="badge b-adult"><svg><use href="#i-hardhat"/></svg>Adults only · 18+</span>
+        <span class="badge b-warning"><svg><use href="#i-clock"/></svg>Closes in 3 days</span>
+        <span class="badge b-success"><svg><use href="#i-check"/></svg>Submitted</span>
+        <span class="badge b-neutral">Expired</span>
+        <span class="badge b-primary"><svg><use href="#i-pin"/></svg>Awgu</span>
+        <span class="badge b-outline">Reported by you · not confirmed</span>
+        <span class="badge b-danger"><svg><use href="#i-alert"/></svg>Suspended</span>
+      </div>
+      <p class="caption muted">Each badge carries an icon and words, so meaning survives without colour.</p>
+    </div>
+
+    <div class="card card-pad stack" style="--gap:18px">
+      <h3 class="h3">Filter chips &amp; tabs</h3>
+      <div class="row-wrap">
+        <button class="chip" aria-pressed="true">All <span class="count">48</span></button>
+        <button class="chip" aria-pressed="false"><svg class="icon-sm"><use href="#i-grad"/></svg>Scholarships <span class="count">9</span></button>
+        <button class="chip" aria-pressed="false"><svg class="icon-sm"><use href="#i-book"/></svg>Training <span class="count">14</span></button>
+        <button class="chip" aria-pressed="false"><svg class="icon-sm"><use href="#i-hardhat"/></svg>Local paid work <span class="count">11</span></button>
+      </div>
+      <div class="tabs" role="tablist"><button role="tab" aria-selected="true">Providers 3</button><button role="tab" aria-selected="false">Listings 7</button><button role="tab" aria-selected="false">Sessions 2</button><button role="tab" aria-selected="false">Reports 1</button></div>
+    </div>
+
+    <div class="card card-pad stack" style="--gap:16px">
+      <h3 class="h3">Form fields</h3>
+      <div class="grid g2" style="--gap:14px">
+        <div class="field"><label for="c1">Preferred name</label><input id="c1" class="input" value="Ngozi"></div>
+        <div class="field"><label for="c2">Community / town</label><select id="c2" class="select input"><option>Mgbowo</option></select></div>
+        <div class="field" style="grid-column:span 2"><label for="c3">Phone number</label><input id="c3" class="input input-error" value="0803 12"><span class="error"><svg class="icon-sm"><use href="#i-alert"/></svg>Enter an 11-digit Nigerian number, e.g. 0803 123 4567.</span></div>
+      </div>
+      <label class="check"><span class="box on"><svg class="icon-sm"><use href="#i-check"/></svg></span><span>Remind me before the session <span class="muted">(by SMS or email — your choice)</span></span></label>
+    </div>
+  </div>
+
+  <h3 class="h3" style="margin:36px 0 16px">Opportunity cards</h3>
+  <div class="grid g3" style="gap:20px">
+    <article class="card card-hover opp">
+      <div class="opp-top"><span class="cat"><i class="t-scholar"><svg class="icon-sm"><use href="#i-grad"/></svg></i>Scholarship</span><button class="save-btn on" aria-label="Saved"><svg class="icon-sm"><use href="#i-bookmark-fill"/></svg></button></div>
+      <div class="stack" style="--gap:6px"><h3>State secondary scholarship 2026</h3><p class="provider"><svg class="icon-sm" style="color:var(--verified)"><use href="#i-shield"/></svg>Enugu State Education Trust</p></div>
+      <div class="row-wrap"><span class="badge b-warning"><svg><use href="#i-clock"/></svg>Closes 13 Nov</span><span class="badge b-outline">Hybrid</span></div>
+      <div class="facts"><div class="fact"><span>Funding</span><span>Full tuition + books</span></div><div class="fact"><span>Cost to apply</span><span>Free</span></div></div>
+    </article>
+    <article class="card card-hover opp">
+      <div class="opp-top"><span class="cat"><i class="t-work"><svg class="icon-sm"><use href="#i-hardhat"/></svg></i>Local paid work</span><button class="save-btn" aria-label="Save"><svg class="icon-sm"><use href="#i-bookmark"/></svg></button></div>
+      <div class="stack" style="--gap:6px"><h3>Market stall construction — day work</h3><p class="provider"><svg class="icon-sm" style="color:var(--verified)"><use href="#i-shield"/></svg>Awgu Market Traders Union</p></div>
+      <div class="row-wrap"><span class="badge b-adult"><svg><use href="#i-hardhat"/></svg>Adults only · 18+</span><span class="badge b-primary"><svg><use href="#i-pin"/></svg>Awgu</span></div>
+      <div class="facts"><div class="fact"><span>Pay</span><span>₦8,000 / day</span></div><div class="fact"><span>When</span><span>Mon–Fri · 2 weeks</span></div></div>
+    </article>
+    <article class="card opp" style="opacity:.78">
+      <div class="opp-top"><span class="cat"><i class="t-scholar"><svg class="icon-sm"><use href="#i-grad"/></svg></i>Scholarship</span><span class="badge b-neutral">Expired</span></div>
+      <div class="stack" style="--gap:6px"><h3>Undergraduate bursary award</h3><p class="provider"><svg class="icon-sm" style="color:var(--verified)"><use href="#i-shield"/></svg>Enugu State Education Trust</p></div>
+      <p class="body-s muted">This round closed on 11 Oct. It is kept here so you can track an application you already made.</p>
+      <div class="facts"><div class="fact"><span>Funding</span><span>₦50,000 once</span></div><div class="fact"><span>Status</span><span>Closed</span></div></div>
+    </article>
+  </div>
+
+  <h3 class="h3" style="margin:36px 0 16px">Notices &amp; states</h3>
+  <div class="grid g2" style="gap:16px">
+    <div class="alert a-adult"><svg><use href="#i-hardhat"/></svg><div><strong>Adults only (18+)</strong>Construction-site work is open to verified adults only. Never pay anyone to get this job.</div></div>
+    <div class="alert a-info"><svg><use href="#i-lock"/></svg><div><strong>Your profile stays private</strong>The provider only sees what is listed under “What you will share”, and only after you submit.</div></div>
+    <div class="alert a-warn"><svg><use href="#i-alert"/></svg><div><strong>Scam check</strong>Real opportunities never ask for an application fee. Report any listing that does.</div></div>
+    <div class="alert a-success"><svg><use href="#i-check"/></svg><div><strong>Application submitted</strong>Reference ASF-7F3A21. We sent a copy to your email.</div></div>
+  </div>
+  <div class="grid g2" style="gap:16px;margin-top:16px">
+    <div class="card" style="overflow:hidden"><div class="offline-bar"><svg class="icon-sm"><use href="#i-wifioff"/></svg>You’re offline. Showing listings saved at 09:14 WAT. <a href="#" style="text-decoration:underline">Retry</a></div><div class="card-pad body-s muted">Offline banner: sits under the header, never blocks reading saved data.</div></div>
+    <div class="card card-pad" role="status" aria-label="Loading opportunities"><div class="row" style="--gap:14px"><div class="sk" style="width:44px;height:44px;border-radius:12px"></div><div style="flex:1" class="stack"><div class="sk" style="height:14px;width:60%"></div><div class="sk" style="height:12px;width:35%;margin-top:8px"></div></div></div><div class="sk" style="height:56px;margin-top:16px"></div></div>
+  </div>
+</section>
+
+<!-- ======================= 04 WEB SCREENS ======================= -->
+<section id="web" class="board-section">
+  <header>
+    <div class="stack" style="--gap:8px"><p class="board-num">04 — WEB / PWA</p><h2 class="h1">Desktop screens</h2></div>
+    <p class="muted" style="max-width:520px">1280 px frames. All names, providers and figures are sample data. Layouts collapse to the mobile screens in section 05.</p>
+  </header>
+
+  <!-- ---------- 4.1 LANDING ---------- -->
+  <div class="frame-label"><h3>4.1 Landing page</h3><span>/</span></div>
+  <div class="browser">
+    <div class="browser-top"><i></i><i></i><i></i><div class="url">awgustepforward.ng</div></div>
+    <div class="container">
+      <div class="nav">
+        <a class="logo" href="#"><svg class="logo-mark"><use href="#mark"/></svg><span class="logo-word"><small>AWGU</small><span>StepForward</span></span></a>
+        <nav class="nav-links"><a href="#">Opportunities</a><a href="#">Support sessions</a><a href="#">How it works</a><a href="#">For providers</a></nav>
+        <div class="row" style="--gap:10px"><a class="btn btn-ghost btn-sm" href="#">Sign in</a><a class="btn btn-primary btn-sm" href="#">Create account</a></div>
+      </div>
+    </div>
+
+    <div class="container" style="padding-top:40px;padding-bottom:72px">
+      <div class="grid" style="grid-template-columns:1.15fr .85fr;gap:56px;align-items:center">
+        <div class="stack" style="--gap:26px">
+          <span class="badge b-primary" style="width:fit-content"><svg><use href="#i-pin"/></svg>Enugu State · Awgu first</span>
+          <h1 class="display-xl">Find your next step, <span class="serif-italic primary-text">closer to home.</span></h1>
+          <p class="body-l muted" style="max-width:540px">Scholarships, training, apprenticeships, jobs and safe local paid work. Every provider is checked by our team before a listing goes live.</p>
+          <form class="card" style="display:grid;grid-template-columns:1.3fr 1fr auto;gap:0;padding:6px;border-radius:var(--radius-full);box-shadow:var(--shadow-md)">
+            <label class="row" style="--gap:10px;padding:0 18px"><svg class="icon muted"><use href="#i-search"/></svg><input class="input" style="border:0;height:48px;padding:0;background:transparent" placeholder="What are you looking for?" aria-label="Keyword"></label>
+            <label class="row" style="--gap:10px;padding:0 18px;border-left:1px solid var(--border)"><svg class="icon muted"><use href="#i-pin"/></svg><input class="input" style="border:0;height:48px;padding:0;background:transparent" value="Awgu LGA" aria-label="Location"></label>
+            <button class="btn btn-primary btn-lg" type="button">Search</button>
+          </form>
+          <div class="row-wrap body-s muted" style="--gap:18px"><span class="row" style="--gap:6px"><svg class="icon-sm primary-text"><use href="#i-shield"/></svg>Providers verified by staff</span><span class="row" style="--gap:6px"><svg class="icon-sm primary-text"><use href="#i-cash"/></svg>Never a fee to apply</span><span class="row" style="--gap:6px"><svg class="icon-sm primary-text"><use href="#i-lock"/></svg>Your profile stays private</span></div>
+        </div>
+        <div class="hero-art" style="aspect-ratio:4/4.4;padding:28px;display:flex;flex-direction:column;justify-content:space-between">
+          <svg viewBox="0 0 400 300" aria-hidden="true" style="position:absolute;inset:auto 0 0 0;width:100%">
+            <path d="M0 160 C 80 110 150 130 220 100 S 340 70 400 95 V300 H0Z" fill="#0b4836"/>
+            <path d="M0 210 C 100 170 190 200 270 165 S 370 150 400 160 V300 H0Z" fill="#B8501F"/>
+            <path d="M0 250 C 110 225 220 245 310 225 S 390 220 400 225 V300 H0Z" fill="#8f3c16"/>
+          </svg>
+          <div class="card" style="position:relative;padding:18px;width:72%;align-self:flex-end;box-shadow:var(--shadow-lg)">
+            <div class="row between"><span class="badge b-verified"><svg><use href="#i-shield"/></svg>Verified</span><span class="caption muted">Sample</span></div>
+            <p style="font:600 19px/1.25 var(--font-display);margin-top:10px;color:var(--foreground)">Solar installation apprenticeship</p>
+            <p class="caption muted" style="margin-top:4px">Awgu Skills Centre · Awgu</p>
+            <div class="row between" style="margin-top:12px"><span class="label primary-text">₦30,000 / month stipend</span><span class="badge b-warning"><svg><use href="#i-clock"/></svg>6 days left</span></div>
+          </div>
+          <div class="card" style="position:relative;padding:14px 16px;width:64%;box-shadow:var(--shadow-lg)">
+            <div class="row" style="--gap:12px"><span style="width:36px;height:36px;border-radius:10px;display:grid;place-items:center" class="t-work"><svg class="icon-sm"><use href="#i-users"/></svg></span><div><p class="label" style="color:var(--foreground)">Application help desk</p><p class="caption muted">Sat · Mgbowo Town Hall · Free</p></div></div>
+          </div>
+          <svg viewBox="0 0 80 80" aria-hidden="true" style="position:absolute;top:26px;left:30px;width:84px"><circle cx="40" cy="40" r="26" fill="#F2B33D"/><circle cx="40" cy="40" r="38" fill="#F2B33D" opacity=".18"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+      <div class="container" style="padding-top:64px;padding-bottom:64px">
+        <div class="row between" style="align-items:end;margin-bottom:28px"><div class="stack" style="--gap:10px"><p class="overline accent-text">Browse by category</p><h2 class="h1">Start where you are</h2></div><a class="btn btn-outline" href="#">See all 48 opportunities <svg class="icon-sm"><use href="#i-arrow"/></svg></a></div>
+        <div class="grid g5" style="gap:16px">
+          <a class="card card-hover card-pad stack" style="--gap:28px;text-decoration:none"><span style="width:48px;height:48px;border-radius:14px;display:grid;place-items:center" class="t-scholar"><svg class="icon"><use href="#i-grad"/></svg></span><div><p class="h4">Scholarships</p><p class="body-s muted">9 open</p></div></a>
+          <a class="card card-hover card-pad stack" style="--gap:28px;text-decoration:none"><span style="width:48px;height:48px;border-radius:14px;display:grid;place-items:center" class="t-train"><svg class="icon"><use href="#i-book"/></svg></span><div><p class="h4">Skills &amp; training</p><p class="body-s muted">14 open</p></div></a>
+          <a class="card card-hover card-pad stack" style="--gap:28px;text-decoration:none"><span style="width:48px;height:48px;border-radius:14px;display:grid;place-items:center" class="t-appr"><svg class="icon"><use href="#i-wrench"/></svg></span><div><p class="h4">Apprenticeships</p><p class="body-s muted">6 open</p></div></a>
+          <a class="card card-hover card-pad stack" style="--gap:28px;text-decoration:none"><span style="width:48px;height:48px;border-radius:14px;display:grid;place-items:center" class="t-job"><svg class="icon"><use href="#i-brief"/></svg></span><div><p class="h4">Jobs</p><p class="body-s muted">8 open</p></div></a>
+          <a class="card card-hover card-pad stack" style="--gap:28px;text-decoration:none"><span style="width:48px;height:48px;border-radius:14px;display:grid;place-items:center" class="t-work"><svg class="icon"><use href="#i-hardhat"/></svg></span><div><p class="h4">Local paid work</p><p class="body-s muted">11 open · 18+</p></div></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="container" style="padding-top:72px;padding-bottom:72px">
+      <div class="grid" style="grid-template-columns:.8fr 1.2fr;gap:64px">
+        <div class="stack" style="--gap:16px"><p class="overline accent-text">How it works</p><h2 class="h1">Find. Apply. <span class="serif-italic">Track.</span></h2><p class="muted">One place for the whole journey, with an honest record of where every application stands.</p></div>
+        <div class="grid g3" style="gap:20px">
+          <div class="stack" style="--gap:14px"><span style="font:600 44px/1 var(--font-display);color:var(--highlight)">01</span><p class="h4">Find</p><p class="body-s muted">Filter by category, town, deadline and pay. Awgu listings come first.</p></div>
+          <div class="stack" style="--gap:14px"><span style="font:600 44px/1 var(--font-display);color:var(--highlight)">02</span><p class="h4">Apply</p><p class="body-s muted">Apply here or on the provider’s site. You always see exactly what is shared.</p></div>
+          <div class="stack" style="--gap:14px"><span style="font:600 44px/1 var(--font-display);color:var(--highlight)">03</span><p class="h4">Track</p><p class="body-s muted">Every status change is dated and labelled with who made it.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container" style="padding-bottom:72px">
+      <div class="grid g2" style="gap:20px">
+        <div class="card" style="padding:40px;background:var(--surface-muted);border:0" >
+          <div class="stack" style="--gap:16px"><span class="badge b-verified" style="width:fit-content"><svg><use href="#i-shield"/></svg>Trust &amp; safety</span><h2 class="h2">How verification works</h2>
+            <ol class="stack body-s" style="--gap:10px;padding-left:18px;margin:0"><li>Providers send proof of who they are and a reachable contact.</li><li>A staff member checks every new listing before it is public.</li><li>Changes to pay, deadline or eligibility go back for review.</li><li>Anyone can report a listing; urgent safety reports are reviewed the same day.</li></ol>
+            <p class="caption muted">Verification means our team reviewed the provider. It is not a government endorsement or a guaranteed place.</p></div>
+        </div>
+        <div class="card brand-panel" style="padding:40px;border:0">
+          <div class="stack" style="--gap:16px"><span class="badge" style="width:fit-content;background:rgb(255 255 255 / .14);color:inherit"><svg><use href="#i-users"/></svg>Free support sessions</span><h2 class="h2" style="color:inherit">Get help with forms, CVs and interviews</h2><p class="body-s" style="opacity:.85">Workshops and help desks run by local partners in Awgu and across Enugu State. Book a place in two taps.</p><a class="btn btn-sun" style="width:fit-content" href="#">Find a session <svg class="icon-sm"><use href="#i-arrow"/></svg></a></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="container" style="padding-top:56px;padding-bottom:40px">
+        <div class="grid" style="grid-template-columns:1.4fr 1fr 1fr 1fr;gap:40px">
+          <div class="stack" style="--gap:14px"><span class="logo" style="color:inherit"><svg class="logo-mark"><use href="#mark"/></svg><span class="logo-word"><small>AWGU</small><span>StepForward</span></span></span><p class="body-s" style="opacity:.7;max-width:300px">Verified opportunities for learning, work, and your next step. Enugu State, Awgu first.</p></div>
+          <div class="stack body-s" style="--gap:10px"><p class="overline" style="opacity:.55">Explore</p><a href="#">Opportunities</a><a href="#">Support sessions</a><a href="#">For providers</a></div>
+          <div class="stack body-s" style="--gap:10px"><p class="overline" style="opacity:.55">Trust</p><a href="#">How verification works</a><a href="#">Report a listing</a><a href="#">Privacy</a></div>
+          <div class="stack body-s" style="--gap:10px"><p class="overline" style="opacity:.55">Help</p><a href="#">Accessibility</a><a href="#">Contact us</a><a href="#">Low-data mode</a></div>
+        </div>
+        <hr class="divider" style="background:rgb(255 255 255 / .14);margin:36px 0 20px">
+        <p class="caption" style="opacity:.6">Demo build · all listings and names are sample data.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------- 4.2 DIRECTORY ---------- -->
+  <div class="frame-label"><h3>4.2 Opportunity directory</h3><span>/opportunities?location=Awgu</span></div>
+  <div class="browser">
+    <div class="browser-top"><i></i><i></i><i></i><div class="url">awgustepforward.ng/opportunities</div></div>
+    <div class="container" style="border-bottom:1px solid var(--border)">
+      <div class="nav">
+        <a class="logo" href="#"><svg class="logo-mark"><use href="#mark"/></svg><span class="logo-word"><small>AWGU</small><span>StepForward</span></span></a>
+        <nav class="nav-links"><a href="#" class="on">Opportunities</a><a href="#">Support sessions</a><a href="#">How it works</a><a href="#">For providers</a></nav>
+        <div class="row" style="--gap:10px"><button class="btn btn-outline btn-icon btn-sm" aria-label="Saved"><svg class="icon-sm"><use href="#i-bookmark"/></svg></button><span style="width:36px;height:36px;border-radius:50%;background:var(--sun);display:grid;place-items:center;font-weight:700;color:#2a1d02">N</span></div>
+      </div>
+    </div>
+    <div class="container" style="padding-top:36px;padding-bottom:56px">
+      <div class="row between" style="align-items:end"><div class="stack" style="--gap:8px"><h1 class="h1">Opportunities near Awgu</h1><p class="muted">48 open opportunities · Awgu LGA listings first, then the rest of Enugu State</p></div><div class="row" style="--gap:10px"><span class="body-s muted">Sort</span><select class="select input" style="width:auto;height:40px;border-radius:99px"><option>Deadline soonest</option></select></div></div>
+      <div class="card" style="display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr auto;gap:0;margin-top:24px;padding:6px;border-radius:var(--radius-full)">
+        <label class="row" style="--gap:10px;padding:0 18px"><svg class="icon muted"><use href="#i-search"/></svg><input class="input" style="border:0;padding:0;background:transparent" value="solar" aria-label="Keyword"></label>
+        <label class="row" style="--gap:10px;padding:0 16px;border-left:1px solid var(--border)"><svg class="icon-sm muted"><use href="#i-pin"/></svg><span class="body-s">Awgu LGA</span></label>
+        <label class="row" style="--gap:10px;padding:0 16px;border-left:1px solid var(--border)"><svg class="icon-sm muted"><use href="#i-cal"/></svg><span class="body-s">Any deadline</span></label>
+        <label class="row" style="--gap:10px;padding:0 16px;border-left:1px solid var(--border)"><svg class="icon-sm muted"><use href="#i-cash"/></svg><span class="body-s">Free or paid</span></label>
+        <button class="btn btn-primary">Search</button>
+      </div>
+      <div class="row-wrap" style="margin-top:18px">
+        <button class="chip" aria-pressed="true">All <span class="count">48</span></button>
+        <button class="chip" aria-pressed="false">Scholarships <span class="count">9</span></button>
+        <button class="chip" aria-pressed="false">Training <span class="count">14</span></button>
+        <button class="chip" aria-pressed="false">Apprenticeships <span class="count">6</span></button>
+        <button class="chip" aria-pressed="false">Jobs <span class="count">8</span></button>
+        <button class="chip" aria-pressed="false">Local paid work <span class="count">11</span></button>
+        <span style="flex:1"></span>
+        <span class="badge b-outline">“solar” <svg><use href="#i-x"/></svg></span><span class="badge b-outline">Awgu LGA <svg><use href="#i-x"/></svg></span><a class="label primary-text" href="#">Clear all</a>
+      </div>
+      <div class="grid g3" style="gap:20px;margin-top:28px">
+        <article class="card card-hover opp">
+          <div class="opp-top"><span class="cat"><i class="t-appr"><svg class="icon-sm"><use href="#i-wrench"/></svg></i>Apprenticeship</span><button class="save-btn on" aria-label="Saved"><svg class="icon-sm"><use href="#i-bookmark-fill"/></svg></button></div>
+          <div class="stack" style="--gap:6px"><h3>Solar installation apprenticeship</h3><p class="provider"><svg class="icon-sm" style="color:var(--verified)"><use href="#i-shield"/></svg>Awgu Skills Centre</p></div>
+          <div class="row-wrap"><span class="badge b-warning"><svg><use href="#i-clock"/></svg>6 days left</span><span class="badge b-primary"><svg><use href="#i-pin"/></svg>Awgu</span><span class="badge b-outline">18–30</span></div>
+          <div class="facts"><div class="fact"><span>Stipend</span><span>₦30,000 / month</span></div><div class="fact"><span>Cost</span><span>Free to join</span></div></div>
+        </article>
+        <article class="card card-hover opp">
+          <div class="opp-top"><span class="cat"><i class="t-work"><svg class="icon-sm"><use href="#i-hardhat"/></svg></i>Local paid work</span><button class="save-btn" aria-label="Save"><svg class="icon-sm"><use href="#i-bookmark"/></svg></button></div>
+          <div class="stack" style="--gap:6px"><h3>Solar panel cleaning crew — 3 days</h3><p class="provider"><svg class="icon-sm" style="color:var(--verified)"><use href="#i-shield"/></svg>Mgbowo Community Clinic</p></div>
+          <div class="row-wrap"><span class="badge b-adult"><svg><use href="#i-hardhat"/></svg>18+</span><span class="badge b-primary"><svg><use href="#i-pin"/></svg>Mgbowo</span></div>
+          <div class="facts"><div class="fact"><span>Pay</span><span>₦6,500 / day</span></div><div class="fact"><span>When</span><span>18–20 Nov</span></div></div>
+        </article>
+        <article class="card card-hover opp">
+          <div class="opp-top"><span class="cat"><i class="t-train"><svg class="icon-sm"><use href="#i-book"/></svg></i>Training</span><button class="save-btn" aria-label="Save"><svg class="icon-sm"><use href="#i-bookmark"/></svg></button></div>
+          <div class="stack" style="--gap:6px"><h3>Solar basics for women in trade</h3><p class="provider"><svg class="icon-sm" style="color:var(--verified)"><use href="#i-shield"/></svg>Nenwe Women’s Cooperative</p></div>
+          <div class="row-wrap"><span class="badge b-outline">Closes 2 Dec</span><span class="badge b-primary"><svg><use href="#i-pin"/></svg>Nenwe</span></div>
+          <div class="facts"><div class="fact"><span>Cost</span><span>₦2,000 materials</span></div><div class="fact"><span>Format</span><span>4 Saturdays</span></div></div>
+        </article>
+      </div>
+      <div class="row between" style="margin-top:32px"><p class="body-s muted">Showing 1–3 of 3 for “solar” · Updated 09:14 WAT</p><div class="row" style="--gap:8px"><button class="btn btn-outline btn-sm" disabled>Previous</button><button class="btn btn-outline btn-sm" disabled>Next</button></div></div>
+    </div>
+  </div>
+
+  <!-- ---------- 4.3 WORK DETAIL ---------- -->
+  <div class="frame-label"><h3>4.3 Opportunity detail — local paid work</h3><span>/opportunities/[id]</span></div>
+  <div class="browser">
+    <div class="browser-top"><i></i><i></i><i></i><div class="url">awgustepforward.ng/opportunities/market-stall-construction</div></div>
+    <div class="container" style="border-bottom:1px solid var(--border)"><div class="nav"><a class="logo" href="#"><svg class="logo-mark"><use href="#mark"/></svg><span class="logo-word"><small>AWGU</small><span>StepForward</span></span></a><nav class="nav-links"><a href="#" class="on">Opportunities</a><a href="#">Support sessions</a><a href="#">How it works</a><a href="#">For providers</a></nav><div class="row" style="--gap:10px"><a class="btn btn-primary btn-sm" href="#">Sign in</a></div></div></div>
+    <div class="container" style="padding-top:28px;padding-bottom:64px">
+      <a class="row body-s muted" style="--gap:4px;text-decoration:none;width:fit-content" href="#"><svg class="icon-sm"><use href="#i-back"/></svg>All opportunities</a>
+      <div class="grid" style="grid-template-columns:1fr 380px;gap:48px;margin-top:20px;align-items:start">
+        <div class="stack" style="--gap:28px">
+          <div class="stack" style="--gap:14px">
+            <div class="row-wrap"><span class="badge b-verified"><svg><use href="#i-shield"/></svg>Verified employer</span><span class="badge b-adult"><svg><use href="#i-hardhat"/></svg>Adults only · 18+</span><span class="badge b-primary"><svg><use href="#i-pin"/></svg>Awgu</span></div>
+            <h1 class="display-l">Market stall construction — paid day work</h1>
+            <p class="body-l muted">Awgu Market Traders Union · Local paid work · Listing reviewed 12 Oct</p>
+          </div>
+          <div class="alert a-adult"><svg><use href="#i-hardhat"/></svg><div><strong>Adults only (18+)</strong>This is construction-site work, open to verified adults only. Tools and safety gear are provided. Never pay anyone to get this job — report it if they ask.</div></div>
+          <div class="grid g3" style="gap:14px">
+            <div class="card card-pad stack" style="--gap:6px"><svg class="icon primary-text"><use href="#i-cash"/></svg><p class="overline muted">Pay</p><p class="h3">₦8,000 / day</p><p class="caption muted">Paid daily, end of shift</p></div>
+            <div class="card card-pad stack" style="--gap:6px"><svg class="icon primary-text"><use href="#i-cal"/></svg><p class="overline muted">Dates &amp; hours</p><p class="h3">Mon–Fri · 2 weeks</p><p class="caption muted">8:00–16:00 WAT, from 3 Nov</p></div>
+            <div class="card card-pad stack" style="--gap:6px"><svg class="icon primary-text"><use href="#i-pin"/></svg><p class="overline muted">Worksite</p><p class="h3">Awgu main market</p><p class="caption muted">Exact spot shared after you’re accepted</p></div>
+          </div>
+          <div class="stack" style="--gap:12px"><h2 class="h2">The work</h2><p class="muted">Carry blocks, mix mortar and help a mason team build twelve new market stalls. Light lifting in a team of six. No experience needed — the supervisor explains each task on day one.</p></div>
+          <div class="card card-pad stack" style="--gap:16px">
+            <h3 class="h3">Safety &amp; supervision</h3>
+            <div class="grid g2" style="gap:14px">
+              <div class="row" style="--gap:12px;align-items:flex-start"><span class="badge b-success" style="height:28px;width:28px;padding:0;justify-content:center"><svg><use href="#i-check"/></svg></span><div><p class="label">Hard hat, gloves and boots provided</p><p class="caption muted">You don’t need to bring your own</p></div></div>
+              <div class="row" style="--gap:12px;align-items:flex-start"><span class="badge b-success" style="height:28px;width:28px;padding:0;justify-content:center"><svg><use href="#i-check"/></svg></span><div><p class="label">Site hazards reviewed</p><p class="caption muted">Confirmed by the employer on 10 Oct</p></div></div>
+              <div class="row" style="--gap:12px;align-items:flex-start"><span class="badge b-success" style="height:28px;width:28px;padding:0;justify-content:center"><svg><use href="#i-check"/></svg></span><div><p class="label">Named supervisor on site</p><p class="caption muted">Site foreman, via the provider contact</p></div></div>
+              <div class="row" style="--gap:12px;align-items:flex-start"><span class="badge b-success" style="height:28px;width:28px;padding:0;justify-content:center"><svg><use href="#i-check"/></svg></span><div><p class="label">Water and shade breaks</p><p class="caption muted">Every two hours</p></div></div>
+            </div>
+          </div>
+        </div>
+        <aside class="stack" style="--gap:16px;position:sticky;top:20px">
+          <div class="card card-pad stack" style="--gap:18px;box-shadow:var(--shadow-md)">
+            <div class="row between"><p class="overline muted">Apply by</p><span class="badge b-warning"><svg><use href="#i-clock"/></svg>20 days left</span></div>
+            <p class="h2">3 Nov 2026</p>
+            <p class="caption muted">23:59 West Africa Time</p>
+            <hr class="divider">
+            <div class="stack" style="--gap:10px"><p class="label">How to apply</p><p class="body-s muted">In person at the Union office, Awgu main market, any weekday 9:00–15:00. Bring nothing but yourself — there is no fee.</p></div>
+            <button class="btn btn-primary btn-lg" style="width:100%">I’m interested</button>
+            <div class="row" style="--gap:8px"><button class="btn btn-outline" style="flex:1"><svg class="icon-sm"><use href="#i-bookmark"/></svg>Save</button><button class="btn btn-outline btn-icon" aria-label="Share"><svg class="icon-sm"><use href="#i-share"/></svg></button><button class="btn btn-outline btn-icon" aria-label="Print"><svg class="icon-sm"><use href="#i-print"/></svg></button></div>
+          </div>
+          <div class="card card-pad stack" style="--gap:12px">
+            <p class="label">About the employer</p>
+            <div class="row" style="--gap:12px"><span style="width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font:600 18px var(--font-display)" class="t-work">AM</span><div><p class="label">Awgu Market Traders Union</p><p class="caption muted">Verified 13 Oct 2026 · SME</p></div></div>
+            <a class="row caption" style="--gap:6px;color:var(--danger);text-decoration:none" href="#"><svg class="icon-sm"><use href="#i-flag"/></svg>Report this listing</a>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------- 4.4 SESSIONS ---------- -->
+  <div class="frame-label"><h3>4.4 Application support sessions</h3><span>/sessions</span></div>
+  <div class="browser">
+    <div class="browser-top"><i></i><i></i><i></i><div class="url">awgustepforward.ng/sessions</div></div>
+    <div class="container" style="border-bottom:1px solid var(--border)"><div class="nav"><a class="logo" href="#"><svg class="logo-mark"><use href="#mark"/></svg><span class="logo-word"><small>AWGU</small><span>StepForward</span></span></a><nav class="nav-links"><a href="#">Opportunities</a><a href="#" class="on">Support sessions</a><a href="#">How it works</a><a href="#">For providers</a></nav><div class="row" style="--gap:10px"><span style="width:36px;height:36px;border-radius:50%;background:var(--sun);display:grid;place-items:center;font-weight:700;color:#2a1d02">N</span></div></div></div>
+    <div style="background:var(--surface-muted)">
+      <div class="container" style="padding-top:56px;padding-bottom:56px;display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:end">
+        <div class="stack" style="--gap:16px"><p class="overline accent-text">Free · run by local partners</p><h1 class="display-l">Help with your application, <span class="serif-italic">in person.</span></h1></div>
+        <p class="body-l muted">Workshops and help desks for scholarship forms, CVs, interview practice and digital skills. Every session is reviewed by our team before it’s listed.</p>
+      </div>
+    </div>
+    <div class="container" style="padding-top:36px;padding-bottom:64px">
+      <div class="row between"><div class="tabs" role="tablist"><button role="tab" aria-selected="true">Upcoming</button><button role="tab" aria-selected="false">In person</button><button role="tab" aria-selected="false">Online</button><button role="tab" aria-selected="false">My sessions</button></div><p class="body-s muted">3 upcoming · soonest first</p></div>
+      <div class="stack" style="--gap:14px;margin-top:22px">
+        <article class="card card-hover" style="display:grid;grid-template-columns:96px 1fr auto;gap:28px;padding:22px 26px;align-items:center">
+          <div style="text-align:center;padding:12px 0;border-radius:16px;background:var(--primary);color:var(--primary-foreground)"><p class="overline" style="opacity:.8">Sat</p><p style="font:600 34px/1 var(--font-display)">19</p><p class="caption" style="opacity:.8">Oct</p></div>
+          <div class="stack" style="--gap:8px"><div class="row-wrap"><span class="badge b-verified"><svg><use href="#i-shield"/></svg>Awgu Skills Centre</span><span class="badge b-outline"><svg><use href="#i-pin"/></svg>In person</span><span class="badge b-success"><svg><use href="#i-users"/></svg>24 of 25 places left</span></div><h3 class="h2" style="font-size:24px">Application help desk: forms and documents</h3><p class="body-s muted">10:00–13:00 WAT · Awgu Skills Centre, main hall · Step-free entrance, seating provided</p></div>
+          <div class="stack" style="--gap:8px;justify-items:end"><span class="badge b-success"><svg><use href="#i-check"/></svg>You’re registered</span><button class="btn btn-outline btn-sm">Cancel place</button></div>
+        </article>
+        <article class="card card-hover" style="display:grid;grid-template-columns:96px 1fr auto;gap:28px;padding:22px 26px;align-items:center">
+          <div style="text-align:center;padding:12px 0;border-radius:16px;background:var(--surface-muted)"><p class="overline muted">Sat</p><p style="font:600 34px/1 var(--font-display)">26</p><p class="caption muted">Oct</p></div>
+          <div class="stack" style="--gap:8px"><div class="row-wrap"><span class="badge b-verified"><svg><use href="#i-shield"/></svg>Awgu Skills Centre</span><span class="badge b-outline"><svg><use href="#i-monitor"/></svg>Online · low data</span><span class="badge b-warning"><svg><use href="#i-users"/></svg>1 place left</span></div><h3 class="h2" style="font-size:24px">Writing a strong scholarship essay</h3><p class="body-s muted">17:00–18:00 WAT · Video call, link sent after you register · Captions on</p></div>
+          <button class="btn btn-primary">Register free</button>
+        </article>
+        <article class="card" style="display:grid;grid-template-columns:96px 1fr auto;gap:28px;padding:22px 26px;align-items:center">
+          <div style="text-align:center;padding:12px 0;border-radius:16px;background:var(--surface-muted)"><p class="overline muted">Tue</p><p style="font:600 34px/1 var(--font-display)">4</p><p class="caption muted">Nov</p></div>
+          <div class="stack" style="--gap:8px"><div class="row-wrap"><span class="badge b-verified"><svg><use href="#i-shield"/></svg>Nenwe Youth Desk</span><span class="badge b-outline"><svg><use href="#i-pin"/></svg>In person</span><span class="badge b-neutral">Full</span></div><h3 class="h2" style="font-size:24px">Mock interviews for apprenticeships</h3><p class="body-s muted">14:00–16:00 WAT · Nenwe Community Hall</p></div>
+          <button class="btn btn-outline" disabled>Session full</button>
+        </article>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------- 4.5 APPLICANT DASHBOARD ---------- -->
+  <div class="frame-label"><h3>4.5 Applicant dashboard</h3><span>/account</span></div>
+  <div class="browser">
+    <div class="browser-top"><i></i><i></i><i></i><div class="url">awgustepforward.ng/account</div></div>
+    <div class="container" style="border-bottom:1px solid var(--border)"><div class="nav"><a class="logo" href="#"><svg class="logo-mark"><use href="#mark"/></svg><span class="logo-word"><small>AWGU</small><span>StepForward</span></span></a><nav class="nav-links"><a href="#">Opportunities</a><a href="#">Support sessions</a><a href="#" class="on">My account</a></nav><div class="row" style="--gap:10px"><button class="btn btn-outline btn-icon btn-sm" aria-label="Notifications"><svg class="icon-sm"><use href="#i-bell"/></svg></button><span style="width:36px;height:36px;border-radius:50%;background:var(--sun);display:grid;place-items:center;font-weight:700;color:#2a1d02">N</span></div></div></div>
+    <div class="container" style="padding-top:40px;padding-bottom:64px">
+      <div class="row between" style="align-items:end"><div class="stack" style="--gap:8px"><p class="overline muted">Welcome back</p><h1 class="h1">Good morning, Ngozi</h1></div><div class="row" style="--gap:10px"><span class="badge b-outline"><svg><use href="#i-lock"/></svg>Your profile is private</span><a class="btn btn-outline btn-sm" href="#">Privacy &amp; data</a></div></div>
+      <div class="grid g4" style="gap:16px;margin-top:28px">
+        <div class="card card-pad stack" style="--gap:6px"><p class="overline muted">Applications</p><p style="font:600 40px/1 var(--font-display)">3</p><p class="caption muted">1 draft · 2 submitted</p></div>
+        <div class="card card-pad stack" style="--gap:6px"><p class="overline muted">Saved</p><p style="font:600 40px/1 var(--font-display)">5</p><p class="caption muted">2 close this week</p></div>
+        <div class="card card-pad stack" style="--gap:6px"><p class="overline muted">Sessions</p><p style="font:600 40px/1 var(--font-display)">1</p><p class="caption muted">Sat 19 Oct, 10:00</p></div>
+        <div class="card card-pad stack brand-panel" style="--gap:6px;border:0"><p class="overline" style="opacity:.8">Profile</p><p class="h3" style="color:inherit">80% complete</p><div class="steps"><span class="on" style="background:var(--sun)"></span><span class="on" style="background:var(--sun)"></span><span class="on" style="background:var(--sun)"></span><span class="on" style="background:var(--sun)"></span><span style="background:rgb(255 255 255 / .2)"></span></div></div>
+      </div>
+      <div class="grid" style="grid-template-columns:1.35fr 1fr;gap:24px;margin-top:24px;align-items:start">
+        <div class="card card-pad stack" style="--gap:18px">
+          <div class="row between"><h2 class="h3">Your applications</h2><div class="tabs"><button aria-selected="true">Active</button><button aria-selected="false">Closed</button></div></div>
+          <div class="stack" style="--gap:12px">
+            <div class="row between card" style="padding:16px 18px;box-shadow:none"><div class="row" style="--gap:14px"><span style="width:42px;height:42px;border-radius:12px;display:grid;place-items:center" class="t-appr"><svg class="icon-sm"><use href="#i-wrench"/></svg></span><div><p class="label">Solar installation apprenticeship</p><p class="caption muted">ASF-7F3A21 · Submitted 14 Oct</p></div></div><span class="badge b-warning"><svg><use href="#i-eye"/></svg>Under review</span></div>
+            <div class="row between card" style="padding:16px 18px;box-shadow:none"><div class="row" style="--gap:14px"><span style="width:42px;height:42px;border-radius:12px;display:grid;place-items:center" class="t-scholar"><svg class="icon-sm"><use href="#i-grad"/></svg></span><div><p class="label">State secondary scholarship 2026</p><p class="caption muted">External · provider’s website</p></div></div><span class="badge b-outline">Reported by you · Submitted</span></div>
+            <div class="row between card" style="padding:16px 18px;box-shadow:none"><div class="row" style="--gap:14px"><span style="width:42px;height:42px;border-radius:12px;display:grid;place-items:center" class="t-train"><svg class="icon-sm"><use href="#i-book"/></svg></span><div><p class="label">Basic computer skills training</p><p class="caption muted">Draft · saved 2 days ago</p></div></div><a class="btn btn-primary btn-sm" href="#">Continue</a></div>
+          </div>
+        </div>
+        <div class="card card-pad stack" style="--gap:16px">
+          <h2 class="h3">Solar apprenticeship · timeline</h2>
+          <div class="timeline">
+            <div class="tl"><span class="dot"><svg class="icon-sm"><use href="#i-check"/></svg></span><div><p class="label">Draft started</p><p class="caption muted">You · 12 Oct, 18:40 WAT</p></div></div>
+            <div class="tl"><span class="dot"><svg class="icon-sm"><use href="#i-check"/></svg></span><div><p class="label">Submitted</p><p class="caption muted">You · 14 Oct, 09:02 WAT · Ref ASF-7F3A21</p></div></div>
+            <div class="tl"><span class="dot now"><svg class="icon-sm"><use href="#i-eye"/></svg></span><div><p class="label">Under review</p><p class="caption muted">Provider · 15 Oct, 11:30 WAT</p><p class="body-s" style="margin-top:6px;padding:10px 12px;background:var(--surface-muted);border-radius:10px">“Thanks Ngozi — we’ll invite shortlisted applicants by 25 Oct.”</p></div></div>
+            <div class="tl"><span class="dot todo"><svg class="icon-sm"><use href="#i-users"/></svg></span><div><p class="label muted">Interview</p><p class="caption muted">Not yet</p></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------- 4.6 STAFF ---------- -->
+  <div class="frame-label"><h3>4.6 Staff moderation workspace</h3><span>/admin</span></div>
+  <div class="browser">
+    <div class="browser-top"><i></i><i></i><i></i><div class="url">awgustepforward.ng/admin</div></div>
+    <div style="display:grid;grid-template-columns:240px 1fr;min-height:760px">
+      <aside class="staff-rail">
+        <span class="logo" style="color:#EEF0E8"><svg class="logo-mark"><use href="#mark"/></svg><span class="logo-word"><small>STAFF</small><span>StepForward</span></span></span>
+        <nav aria-label="Staff">
+          <a class="on" href="#">Review queue <span class="badge" style="height:22px;background:#F2B33D;color:#2a1d02">13</span></a>
+          <a href="#">Urgent reports <span class="badge" style="height:22px;background:#F59A90;color:#3d1814">1</span></a>
+          <a href="#">Providers</a>
+          <a href="#">Audit log</a>
+          <a href="#">Outcomes</a>
+        </nav>
+        <p class="caption" style="color:#A6AEA2;margin-top:auto">Signed in as Chidi O. · Admin</p>
+      </aside>
+      <div style="padding:28px 32px" class="stack">
+        <div class="row between"><div class="stack" style="--gap:6px"><h1 class="h2">Review queue</h1><p class="body-s muted">Routine target: first decision within 48 hours. Urgent safety reports: same day.</p></div><div class="tabs"><button aria-selected="false">Providers 3</button><button aria-selected="true">Listings 7</button><button aria-selected="false">Sessions 2</button><button aria-selected="false">Reports 1</button></div></div>
+        <div class="alert a-danger" style="margin-top:20px"><svg><use href="#i-alert"/></svg><div><strong>1 urgent report waiting · 2 h old</strong>“Asked me to pay ₦5,000 to start” — Shop assistant listing, Ihe. Same-day triage required.</div><button class="btn btn-danger btn-sm" style="margin-left:auto">Review now</button></div>
+        <div class="grid" style="grid-template-columns:1.25fr 1fr;gap:20px;margin-top:20px;align-items:start">
+          <div class="card" style="overflow:hidden">
+            <table class="table">
+              <thead><tr><th>Listing</th><th>Provider</th><th>Age</th><th>Owner</th></tr></thead>
+              <tbody>
+                <tr class="sel"><td><p class="label">Market stall construction</p><span class="badge b-adult" style="margin-top:4px"><svg><use href="#i-hardhat"/></svg>Work · 18+</span></td><td class="body-s">Awgu Market Traders</td><td><span class="badge b-danger"><svg><use href="#i-clock"/></svg>52 h · overdue</span></td><td class="body-s">You</td></tr>
+                <tr><td><p class="label">Solar basics for women</p><span class="badge b-primary" style="margin-top:4px">Training</span></td><td class="body-s">Nenwe Women’s Coop.</td><td><span class="badge b-warning"><svg><use href="#i-clock"/></svg>31 h</span></td><td class="body-s muted">Unassigned</td></tr>
+                <tr><td><p class="label">Shop assistant (entry)</p><span class="badge b-outline" style="margin-top:4px">Job · edit</span></td><td class="body-s">Ihe Provisions</td><td><span class="badge b-neutral">4 h</span></td><td class="body-s">Chidi O.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card card-pad stack" style="--gap:16px">
+            <div class="row between"><p class="overline muted">Listing review</p><span class="badge b-warning">Pending review</span></div>
+            <h2 class="h3">Market stall construction — paid day work</h2>
+            <div class="stack" style="--gap:10px">
+              <label class="check"><span class="box on"><svg class="icon-sm"><use href="#i-check"/></svg></span><span>Task, pay, hours and worksite are specific</span></label>
+              <label class="check"><span class="box on"><svg class="icon-sm"><use href="#i-check"/></svg></span><span>Minimum age 18 (construction policy)</span></label>
+              <label class="check"><span class="box on"><svg class="icon-sm"><use href="#i-check"/></svg></span><span>Named supervisor and PPE stated</span></label>
+              <label class="check"><span class="box"></span><span>No fee or guarantee language</span></label>
+            </div>
+            <div class="field"><label for="r1">Reason (required to reject or suspend)</label><textarea id="r1" class="input textarea" placeholder="Explain what needs to change"></textarea></div>
+            <div class="row-wrap" style="--gap:10px"><button class="btn btn-primary btn-sm">Approve</button><button class="btn btn-outline btn-sm">Request changes</button><button class="btn btn-danger btn-sm">Reject</button></div>
+            <p class="caption muted">Every decision is written to the audit log with your name and the reason.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 05 MOBILE ======================= -->
+<section id="mobile" class="board-section">
+  <header>
+    <div class="stack" style="--gap:8px"><p class="board-num">05 — MOBILE / ANDROID</p><h2 class="h1">Phone screens</h2></div>
+    <p class="muted" style="max-width:520px">390 × 844 frames, built for one-handed use on low-end Android: bottom navigation, 48 dp targets, one primary action per screen, and visible offline state.</p>
+  </header>
+  <div class="phones">
+
+    <!-- 5.1 Home -->
+    <div class="phone-wrap"><p>5.1 Home</p><div class="phone"><div class="screen">
+      <div class="status"><span>9:41</span><span class="caption">4G ▮▮▮</span></div>
+      <div class="scroll">
+        <div class="m-pad row between" style="height:56px"><span class="logo"><svg class="logo-mark" style="width:32px;height:32px"><use href="#mark"/></svg><span class="logo-word"><small>AWGU</small><span style="font-size:18px">StepForward</span></span></span><button class="btn btn-outline btn-icon btn-sm" aria-label="Notifications"><svg class="icon-sm"><use href="#i-bell"/></svg></button></div>
+        <div class="m-pad stack" style="--gap:14px;padding-top:10px">
+          <h1 style="font:600 34px/1.08 var(--font-display);margin:0;letter-spacing:-.01em">Find your next step, <span class="serif-italic primary-text">closer to home.</span></h1>
+          <label class="card row" style="--gap:10px;padding:0 16px;height:52px;border-radius:99px"><svg class="icon muted"><use href="#i-search"/></svg><span class="muted body-s">Search scholarships, jobs…</span></label>
+          <div class="row" style="--gap:8px;overflow:hidden"><button class="chip" aria-pressed="true">All</button><button class="chip" aria-pressed="false">Scholarships</button><button class="chip" aria-pressed="false">Paid work</button></div>
+        </div>
+        <div class="m-pad stack" style="--gap:12px;margin-top:22px">
+          <div class="row between"><p class="h4">Closing soon near Awgu</p><a class="caption primary-text" href="#" style="font-weight:700">See all</a></div>
+          <article class="card opp" style="padding:16px;gap:10px">
+            <div class="opp-top"><span class="cat"><i class="t-appr"><svg class="icon-sm"><use href="#i-wrench"/></svg></i>Apprenticeship</span><button class="save-btn on" aria-label="Saved"><svg class="icon-sm"><use href="#i-bookmark-fill"/></svg></button></div>
+            <h3 style="font-size:19px">Solar installation apprenticeship</h3>
+            <p class="provider"><svg class="icon-sm" style="color:var(--verified)"><use href="#i-shield"/></svg>Awgu Skills Centre</p>
+            <div class="row between"><span class="label primary-text">₦30,000 / month</span><span class="badge b-warning"><svg><use href="#i-clock"/></svg>6 days</span></div>
+          </article>
+          <article class="card opp" style="padding:16px;gap:10px">
+            <div class="opp-top"><span class="cat"><i class="t-work"><svg class="icon-sm"><use href="#i-hardhat"/></svg></i>Paid work · 18+</span><button class="save-btn" aria-label="Save"><svg class="icon-sm"><use href="#i-bookmark"/></svg></button></div>
+            <h3 style="font-size:19px">Market stall construction</h3>
+            <div class="row between"><span class="label primary-text">₦8,000 / day</span><span class="badge b-outline">20 days</span></div>
+          </article>
+        </div>
+      </div>
+      <nav class="tabbar"><a class="on" href="#"><svg class="icon"><use href="#i-home"/></svg>Home</a><a href="#"><svg class="icon"><use href="#i-search"/></svg>Browse</a><a href="#"><svg class="icon"><use href="#i-list"/></svg>Applications</a><a href="#"><svg class="icon"><use href="#i-user"/></svg>Me</a></nav>
+    </div></div></div>
+
+    <!-- 5.2 Filters -->
+    <div class="phone-wrap"><p>5.2 Browse + filter sheet (offline)</p><div class="phone"><div class="screen">
+      <div class="status"><span>9:41</span><span class="caption">No signal</span></div>
+      <div class="offline-bar" style="font-size:12.5px"><svg class="icon-sm"><use href="#i-wifioff"/></svg>Offline · saved 09:14 WAT</div>
+      <div class="scroll" style="position:relative">
+        <div class="m-pad stack" style="--gap:10px;padding-top:14px;opacity:.35">
+          <p class="h3">48 opportunities</p>
+          <div class="card" style="height:150px"></div><div class="card" style="height:150px"></div>
+        </div>
+        <div style="position:absolute;inset:auto 0 0 0;background:var(--surface);border-radius:28px 28px 0 0;box-shadow:var(--shadow-lg);padding:10px 20px 22px" class="stack">
+          <span style="width:40px;height:5px;border-radius:9px;background:var(--border);margin:0 auto 10px;display:block"></span>
+          <div class="row between"><p class="h3">Filters</p><button class="btn btn-ghost btn-icon btn-sm" aria-label="Close"><svg class="icon-sm"><use href="#i-x"/></svg></button></div>
+          <div class="stack" style="--gap:10px;margin-top:14px"><p class="overline muted">Category</p><div class="row-wrap"><button class="chip" aria-pressed="true">Scholarships</button><button class="chip" aria-pressed="false">Training</button><button class="chip" aria-pressed="false">Paid work</button><button class="chip" aria-pressed="false">Jobs</button></div></div>
+          <div class="stack" style="--gap:10px;margin-top:18px"><p class="overline muted">Where</p><div class="row-wrap"><button class="chip" aria-pressed="true">Awgu LGA</button><button class="chip" aria-pressed="false">All Enugu</button><button class="chip" aria-pressed="false">Online</button></div></div>
+          <div class="stack" style="--gap:10px;margin-top:18px"><p class="overline muted">Cost</p><div class="row-wrap"><button class="chip" aria-pressed="true">Free only</button><button class="chip" aria-pressed="false">Paid / stipend</button></div></div>
+          <div class="row" style="--gap:10px;margin-top:22px"><button class="btn btn-ghost" style="flex:1">Clear</button><button class="btn btn-primary" style="flex:2">Show 9 results</button></div>
+        </div>
+      </div>
+    </div></div></div>
+
+    <!-- 5.3 Work detail -->
+    <div class="phone-wrap"><p>5.3 Work detail</p><div class="phone"><div class="screen">
+      <div class="status"><span>9:41</span><span class="caption">4G ▮▮▮</span></div>
+      <div class="m-pad row between" style="height:52px"><button class="btn btn-ghost btn-icon btn-sm" aria-label="Back"><svg class="icon"><use href="#i-back"/></svg></button><div class="row" style="--gap:6px"><button class="btn btn-ghost btn-icon btn-sm" aria-label="Share"><svg class="icon-sm"><use href="#i-share"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" aria-label="Save"><svg class="icon-sm"><use href="#i-bookmark"/></svg></button></div></div>
+      <div class="scroll m-pad stack" style="--gap:14px">
+        <div class="row-wrap"><span class="badge b-verified"><svg><use href="#i-shield"/></svg>Verified</span><span class="badge b-adult"><svg><use href="#i-hardhat"/></svg>18+</span></div>
+        <h1 style="font:600 28px/1.12 var(--font-display);margin:0">Market stall construction — day work</h1>
+        <p class="body-s muted">Awgu Market Traders Union · Awgu</p>
+        <div class="grid g2" style="gap:10px">
+          <div class="card" style="padding:14px"><p class="overline muted">Pay</p><p class="h4">₦8,000/day</p><p class="caption muted">Paid daily</p></div>
+          <div class="card" style="padding:14px"><p class="overline muted">When</p><p class="h4">Mon–Fri</p><p class="caption muted">8:00–16:00 · 2 wks</p></div>
+        </div>
+        <div class="alert a-adult" style="font-size:13.5px"><svg><use href="#i-hardhat"/></svg><div><strong>Adults only · PPE provided</strong>Hard hat, gloves and boots on site. Never pay to get this job.</div></div>
+        <div class="stack" style="--gap:6px"><p class="h4">The work</p><p class="body-s muted">Carry blocks and mix mortar with a mason team building twelve market stalls. Supervisor on site.</p></div>
+      </div>
+      <div style="padding:12px 20px 26px;border-top:1px solid var(--border);background:var(--surface)" class="row"><div style="flex:1"><p class="caption muted">Apply by</p><p class="label">3 Nov · 23:59 WAT</p></div><button class="btn btn-primary">I’m interested</button></div>
+    </div></div></div>
+
+    <!-- 5.4 Review & share -->
+    <div class="phone-wrap"><p>5.4 Apply · review what you share</p><div class="phone"><div class="screen">
+      <div class="status"><span>9:41</span><span class="caption">4G ▮▮▮</span></div>
+      <div class="m-pad stack" style="--gap:10px;padding-top:6px"><div class="row between"><button class="btn btn-ghost btn-icon btn-sm" aria-label="Back"><svg class="icon"><use href="#i-back"/></svg></button><span class="caption muted">Step 3 of 3</span><span style="width:36px"></span></div><div class="steps"><span class="on"></span><span class="on"></span><span class="on"></span></div></div>
+      <div class="scroll m-pad stack" style="--gap:14px;padding-top:16px">
+        <h1 style="font:600 26px/1.15 var(--font-display);margin:0">Review what you’ll share</h1>
+        <p class="body-s muted">Awgu Skills Centre will see only this. Nothing else from your profile is sent.</p>
+        <div class="card" style="padding:16px" >
+          <div class="stack" style="--gap:12px">
+            <div><p class="caption muted">Why do you want this apprenticeship?</p><p class="body-s">I fix phone chargers at my uncle’s shop and want to learn solar so I can…</p></div>
+            <hr class="divider">
+            <div><p class="caption muted">Can you attend Monday to Friday?</p><p class="body-s">Yes</p></div>
+          </div>
+        </div>
+        <div class="card" style="padding:16px">
+          <p class="label" style="margin-bottom:10px">From your private profile</p>
+          <div class="row-wrap" style="--gap:6px"><span class="badge b-neutral">Ngozi</span><span class="badge b-neutral">Age 18–24</span><span class="badge b-neutral">Mgbowo</span><span class="badge b-neutral">Secondary</span></div>
+          <p class="caption muted" style="margin-top:10px">Not shared: date of birth, phone, email.</p>
+        </div>
+        <label class="check"><span class="box on"><svg class="icon-sm"><use href="#i-check"/></svg></span><span class="body-s">This is accurate and I agree to share it with Awgu Skills Centre.</span></label>
+      </div>
+      <div style="padding:12px 20px 26px;border-top:1px solid var(--border);background:var(--surface)" class="stack" ><button class="btn btn-primary btn-lg" style="width:100%">Submit application</button></div>
+    </div></div></div>
+
+  </div>
+</section>
+
+<footer style="margin-top:96px;padding-top:24px;border-top:1px solid var(--border)" class="row between body-s muted">
+  <span>Awgu StepForward · Design system v1.0 · Sample data only</span>
+  <span>Fonts: Fraunces &amp; Plus Jakarta Sans (SIL OFL) · Icons: Lucide-style</span>
+</footer>
+</main>
+
+<script>
+  // Board-only theme preview toggle.
+  document.querySelectorAll("[data-set-theme]").forEach((button) => {
+    const sync = () => document.querySelectorAll("[data-set-theme]").forEach((b) =>
+      b.setAttribute("aria-pressed", String(b.dataset.setTheme === document.documentElement.dataset.theme)));
+    sync();
+    button.addEventListener("click", () => {
+      document.documentElement.dataset.theme = button.dataset.setTheme;
+      try { localStorage.setItem("awgu-board-theme", button.dataset.setTheme); } catch (e) {}
+      sync();
+    });
+  });
+</script>
+</body>
+</html>

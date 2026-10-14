@@ -88,3 +88,23 @@ Tests use `sqlite+aiosqlite` for speed. Production and local dev use PostgreSQL,
 - **Roster (R38):** shows the preferred name, registration status and attendance only — no contact details, date of birth or profile. Viewing a roster and recording attendance are audited (R44).
 - **Reminders (R34):** the applicant's opt-in is stored on the registration; sending is part of the Day 6 notifications slice.
 - **Not built yet:** printable roster, sessions for minors (needs the guardian flow), editing a session after submission, and organizer follow-up resources.
+
+### D21 — Brand and visual design system (redesign)
+**Status:** Adopted (2026-10-14, owner request to overhaul the UI)
+**Spec says:** an original, warm, editorial, locally grounded brand with documented tokens; the design brief is `ui-generation-prompt.md` (`frontend-spec.md` §5).
+**Decided:**
+- **Typography:** Fraunces (display/headlines) + Plus Jakarta Sans (UI/body), both SIL OFL, loaded via `next/font`. These replace Geist.
+- **Logo:** three rising steps toward a sun, with an "AWGU / StepForward" stacked wordmark. This replaces the placeholder "A" square.
+- **Palette:** forest green primary, laterite highlight, sun accent, ink on cream paper, plus semantic verified/success/warning/danger roles, all with dark-mode values. Token values live in `design/mockups/styles.css`.
+- **Mockups:** a high-fidelity HTML board at `design/mockups/index.html`, covering brand, foundations, components, 6 web screens and 4 mobile screens. See `design/README.md`.
+- **DaisyUI is not used.** The spec forbids layering a second component library on shadcn/ui ("adapt them consistently instead of layering a second component library"), and DaisyUI would duplicate buttons, cards and badges and add CSS weight for low-end phones. The owner confirmed shadcn only.
+- **Figma:** a Figma file was created, but the Starter plan's AI tool-call limit blocked the build. The owner chose the HTML board instead; it can be imported into Figma later.
+**Implemented** in `apps/web` (2026-10-14): tokens and fonts in `globals.css`/`layout.tsx`, the `Logo` component and `app/icon.svg`, restyled shadcn primitives and status badges, a new header (active links, icon theme switch, account avatar), a phone bottom tab bar and an ink footer, and every screen rebuilt to the mockups. The Day-1 "admin check" demo panel was removed from the home page. The mobile mockups remain the reference for the Expo app.
+
+### D22 — How Day 6 works (reports, tracking, notifications, assistant)
+**Status:** Adopted (2026-10-14)
+- **Reports (R21, R45):** anyone can report a public listing or session, signed in or not. Signed-in reports must carry the CSRF token. To limit abuse without storing IP addresses, each report keeps a salted SHA-256 fingerprint (`REPORT_HASH_SECRET` + client address + user id), capped at 5 per hour. Fee requests, fraud, unsafe work and harassment are urgent (24 h target); others have a 48 h target. Staff see neither the reporter nor the fingerprint. Suspending from a report uses the normal moderation services, so it is audited the same way.
+- **External tracking (R28, journey 5):** a record is created only when the applicant clicks "Apply on provider site" (while signed in) or "I'll apply in person — track it". Statuses (started → completed) are always source `applicant` and shown as "Reported by you · not confirmed". The private note is never shared.
+- **Notifications (R34–R37):** in-app is always on. Email and SMS can be chosen only with a verified address for that channel. Marketing is a separate opt-in, off by default. Week-1 adapters are console-only (D3/D4): messages are logged with masked recipients and never delivered. Reminders are deduplicated per channel; delivery failures are recorded on the notification row and never block other flows. The reminder job runs by hand (CLI or staff button) until a scheduler exists.
+- **Assistant (R46–R48, D6):** off unless `AI_ENABLED=true`. When on, a rule-based interpreter (no external model, `rule-based-interpreter-v1`) maps plain words to the ordinary search filters, explains each mapping, and returns ordinary listing cards. It removes emails, phone numbers and long ID numbers before processing, and `AIUsageEvent` stores filters, listing ids, timing and outcome — never the query text. A model-backed interpreter can replace it behind `interpret()` after a data-processing review.
+- **Hydration-safe session state:** `useCurrentUser()` reports "pending" until hydration finishes, because streamed page segments could otherwise see a user already loaded by the header and cause React hydration mismatches.

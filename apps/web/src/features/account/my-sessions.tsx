@@ -22,7 +22,7 @@ function RegistrationRow({ row }: { row: MySessionRegistration }) {
   const active = row.status === "registered";
 
   return (
-    <li className="grid gap-2 rounded-lg border border-border bg-background px-4 py-3">
+    <li className="grid gap-2 rounded-xl border bg-background px-4 py-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <Link href={`/sessions/${row.session_id}`} className="font-medium hover:underline">
@@ -64,7 +64,7 @@ export function MySessions() {
   return (
     <Card>
       <CardHeader>
-        <h2 className="text-lg font-medium">Your support sessions</h2>
+        <h2 className="text-lg font-bold">Your support sessions</h2>
       </CardHeader>
       <CardContent>
         {query.isPending ? (

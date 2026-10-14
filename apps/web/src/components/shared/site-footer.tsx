@@ -1,36 +1,42 @@
 import Link from "next/link";
 
-import { footerNav } from "@/lib/navigation";
+import { Logo } from "@/components/shared/logo";
+import { footerGroups } from "@/lib/navigation";
+import { ThemeToggle } from "@/theme/theme-toggle";
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-border bg-surface">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-10 sm:flex-row sm:items-center sm:justify-between">
-        <div className="space-y-1">
-          <p className="font-semibold">Awgu StepForward</p>
-          <p className="max-w-md text-sm text-muted-foreground">
-            Verified opportunities for learning, work, and your next step, with
-            Awgu LGA prioritised.
-          </p>
-        </div>
-
-        <nav aria-label="Footer" className="flex flex-wrap gap-x-6 gap-y-2">
-          {footerNav.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-            >
-              {item.label}
-            </Link>
+    // Always ink, in both themes, matching the mockups.
+    <footer className="bg-[#15201a] text-[#eef0e8] dark:border-t dark:bg-[#0a0d09]">
+      <div className="mx-auto w-full max-w-6xl px-4 pt-14 pb-28 sm:px-6 lg:pb-10">
+        <div className="grid gap-10 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
+          <div className="grid content-start gap-4">
+            <Logo className="[&_.font-display]:text-[#eef0e8]" />
+            <p className="max-w-xs text-sm text-[#eef0e8]/70">
+              Verified opportunities for learning, work, and your next step. Enugu
+              State, Awgu first.
+            </p>
+            <ThemeToggle className="w-fit border-white/15 bg-white/5 sm:hidden" />
+          </div>
+          {footerGroups.map((group) => (
+            <nav key={group.title} aria-label={group.title} className="grid content-start gap-2.5">
+              <p className="eyebrow text-[#eef0e8]/55">{group.title}</p>
+              {group.items.map((item) => (
+                <Link
+                  key={`${group.title}-${item.label}`}
+                  href={item.href}
+                  className="w-fit rounded text-sm text-[#eef0e8]/75 hover:text-[#eef0e8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4fc79c]"
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
           ))}
-        </nav>
-      </div>
-
-      <div className="border-t border-border px-4 py-4">
-        <p className="mx-auto w-full max-w-6xl text-xs text-muted-foreground">
-          Week-1 demo build. All listings and accounts are synthetic sample data.
-        </p>
+        </div>
+        <div className="mt-10 border-t border-white/15 pt-5 text-xs text-[#eef0e8]/60">
+          Demo build · all listings, names and accounts are sample data. Verification
+          means our team reviewed a provider — it is not a government endorsement.
+        </div>
       </div>
     </footer>
   );

@@ -33,6 +33,24 @@ class Settings(BaseSettings):
     # Dev convenience: apply migrations and seed sample data on startup.
     dev_bootstrap: bool = True
 
+    # Messaging adapters (DECISIONS D3/D4). Week 1 only has "console": messages
+    # are logged, never delivered to a real person.
+    email_provider: str = "console"
+    sms_provider: str = "console"
+    # Remind about saved listings this many days before their deadline.
+    reminder_deadline_days: int = 3
+    # Remind about registered sessions this many hours before they start.
+    reminder_session_hours: int = 24
+
+    # Opportunity assistant (spec R46/R48, DECISIONS D6). Off by default; when
+    # off, ordinary search is the only path and stays fully usable.
+    ai_enabled: bool = False
+
+    # Secret mixed into hashed reporter fingerprints for report rate limits.
+    # Override in every non-development environment.
+    report_hash_secret: str = "dev-only-report-secret"
+    report_rate_limit_per_hour: int = 5
+
 
 @lru_cache
 def get_settings() -> Settings:

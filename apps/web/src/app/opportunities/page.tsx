@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { SearchX, X } from "lucide-react";
 
-import { FilterForm } from "@/features/discovery/filter-form";
+import { buttonVariants } from "@/components/ui/button";
+import { AssistantPanel } from "@/features/discovery/assistant-panel";
+import { CategoryChips, FilterForm } from "@/features/discovery/filter-form";
 import { OpportunityCardView } from "@/features/discovery/opportunity-card";
 import {
   fetchOpportunityDirectory,
@@ -9,7 +12,6 @@ import {
   type OpportunityListResponse,
 } from "@/lib/api/discovery";
 import { deliveryModeLabel, opportunityTypeLabel } from "@/lib/opportunity-labels";
-import { buttonVariants } from "@/components/ui/button";
 
 export const metadata: Metadata = {
   title: "Opportunities — Awgu StepForward",
@@ -65,43 +67,42 @@ export default async function OpportunitiesPage({
 
   const activeFilters: { key: keyof DirectoryQuery; label: string }[] = [];
   if (query.q) activeFilters.push({ key: "q", label: `“${query.q}”` });
-  if (query.category) {
-    activeFilters.push({ key: "category", label: opportunityTypeLabel(query.category) });
-  }
   if (query.location) activeFilters.push({ key: "location", label: query.location });
   if (query.delivery_mode) {
-    activeFilters.push({
-      key: "delivery_mode",
-      label: deliveryModeLabel(query.delivery_mode),
-    });
+    activeFilters.push({ key: "delivery_mode", label: deliveryModeLabel(query.delivery_mode) });
   }
 
+  const heading = query.category
+    ? opportunityTypeLabel(query.category)
+    : query.location
+      ? `Opportunities near ${query.location}`
+      : "Find your next step";
+
   return (
-    <section className="mx-auto w-full max-w-6xl px-4 py-12">
-      <header className="max-w-2xl">
-        <h1 className="text-3xl font-semibold tracking-tight">
-          Find your next step
-        </h1>
-        <p className="mt-2 text-muted-foreground">
-          Verified opportunities across Enugu State, with Awgu prioritised.
-          Browsing needs no account — sign in only when you want to save or
-          apply.
+    <section className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-12">
+      <header className="grid max-w-3xl gap-2">
+        <p className="eyebrow text-highlight">Verified opportunities</p>
+        <h1 className="font-display text-4xl font-semibold sm:text-5xl">{heading}</h1>
+        <p className="text-muted-foreground">
+          Across Enugu State, with Awgu listings first. Browsing needs no account — sign in
+          only to save or apply.
         </p>
       </header>
 
-      <div className="mt-8">
+      <div className="mt-8 grid gap-4">
+        <AssistantPanel />
         <FilterForm query={query} />
+        <CategoryChips
+          query={query}
+          hrefFor={(category) => buildHref({ ...query, category, page: undefined })}
+        />
       </div>
 
       {failed ? (
-        <div
-          role="alert"
-          className="mt-8 rounded-2xl border border-danger/40 bg-danger/5 p-6"
-        >
-          <h2 className="font-medium">We couldn’t load opportunities.</h2>
+        <div role="alert" className="mt-8 rounded-2xl border border-danger/40 bg-danger-muted p-6">
+          <h2 className="font-semibold">We couldn’t load opportunities.</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            The directory service did not respond. Check your connection and try
-            again.
+            The directory service did not respond. Check your connection and try again.
           </p>
           <Link href={buildHref(query)} className={buttonVariants({ variant: "outline", className: "mt-4" })}>
             Try again
@@ -110,11 +111,7 @@ export default async function OpportunitiesPage({
       ) : null}
 
       {!failed && data ? (
-        <DirectoryResults
-          query={query}
-          data={data}
-          activeFilters={activeFilters}
-        />
+        <DirectoryResults query={query} data={data} activeFilters={activeFilters} />
       ) : null}
     </section>
   );
@@ -133,11 +130,12 @@ function DirectoryResults({
   const page = data.page;
 
   return (
-    <div className="mt-8 space-y-6">
+    <div className="mt-8 grid gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-muted-foreground">
-          {data.total} {data.total === 1 ? "opportunity" : "opportunities"}
-          {activeFilters.length > 0 ? " matching your filters" : ""}
+        <p className="text-sm text-muted-foreground" aria-live="polite">
+          <span className="font-semibold text-foreground">{data.total}</span>{" "}
+          {data.total === 1 ? "opportunity" : "opportunities"}
+          {activeFilters.length > 0 || query.category ? " match your search" : " open now"}
         </p>
         {activeFilters.length > 0 ? (
           <ul className="flex flex-wrap items-center gap-2">
@@ -145,16 +143,16 @@ function DirectoryResults({
               <li key={filter.key}>
                 <Link
                   href={hrefWithout(query, filter.key)}
-                  className="inline-flex items-center gap-1 rounded-full border border-border bg-surface-muted px-3 py-1 text-xs font-medium hover:text-foreground"
+                  className="inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-xs font-semibold text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   {filter.label}
-                  <span aria-hidden>×</span>
+                  <X aria-hidden className="size-3.5" />
                   <span className="sr-only">Remove filter</span>
                 </Link>
               </li>
             ))}
             <li>
-              <Link href="/opportunities" className="text-xs font-medium text-primary">
+              <Link href="/opportunities" className="text-sm font-semibold text-primary hover:underline">
                 Clear all
               </Link>
             </li>
@@ -163,12 +161,16 @@ function DirectoryResults({
       </div>
 
       {data.items.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border bg-surface p-10 text-center">
-          <h2 className="font-medium">No opportunities match your search.</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Try a wider location, a different category, or clear your filters.
+        <div className="grid justify-items-center gap-3 rounded-3xl border border-dashed bg-card px-6 py-14 text-center">
+          <span className="grid size-14 place-items-center rounded-2xl bg-muted text-muted-foreground">
+            <SearchX aria-hidden className="size-6" />
+          </span>
+          <h2 className="font-display text-2xl font-semibold">Nothing matches yet</h2>
+          <p className="max-w-md text-sm text-muted-foreground">
+            Try a wider location, a different category, or clear your filters. New
+            opportunities are added as providers are verified.
           </p>
-          <Link href="/opportunities" className={buttonVariants({ variant: "outline", className: "mt-4" })}>
+          <Link href="/opportunities" className={buttonVariants({ variant: "outline", className: "mt-2" })}>
             Clear all filters
           </Link>
         </div>
@@ -181,15 +183,9 @@ function DirectoryResults({
           </div>
 
           {totalPages > 1 ? (
-            <nav
-              aria-label="Pagination"
-              className="flex items-center justify-between gap-4"
-            >
+            <nav aria-label="Pagination" className="flex items-center justify-between gap-4">
               {page > 1 ? (
-                <Link
-                  href={buildHref({ ...query, page: page - 1 })}
-                  className={buttonVariants({ variant: "outline" })}
-                >
+                <Link href={buildHref({ ...query, page: page - 1 })} className={buttonVariants({ variant: "outline" })}>
                   Previous
                 </Link>
               ) : (
@@ -199,10 +195,7 @@ function DirectoryResults({
                 Page {page} of {totalPages}
               </span>
               {page < totalPages ? (
-                <Link
-                  href={buildHref({ ...query, page: page + 1 })}
-                  className={buttonVariants({ variant: "outline" })}
-                >
+                <Link href={buildHref({ ...query, page: page + 1 })} className={buttonVariants({ variant: "outline" })}>
                   Next
                 </Link>
               ) : (

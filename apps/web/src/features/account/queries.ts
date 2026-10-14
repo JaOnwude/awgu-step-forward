@@ -6,6 +6,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import { useSyncExternalStore } from "react";
 
 import {
   fetchProfile,
@@ -18,15 +19,36 @@ import {
 import {
   fetchApplication,
   listApplications,
+  updateTracking,
   withdrawApplication,
+  type TrackingStatus,
 } from "@/lib/api/applications";
 import { fetchCurrentUser, logout, type UserPublic } from "@/lib/api/auth";
 import { isUnauthorized } from "@/lib/api/errors";
 import { queryKeys } from "@/lib/query/keys";
 
-/** The signed-in user, or `null` when nobody is signed in (401). */
+const subscribeNoop = () => () => {};
+
+/** False during server render and hydration, true once the client has taken over. */
+export function useHydrated(): boolean {
+  return useSyncExternalStore(
+    subscribeNoop,
+    () => true,
+    () => false,
+  );
+}
+
+/**
+ * The signed-in user, or `null` when nobody is signed in (401).
+ *
+ * Pages stream in pieces, so another component (the header) may already have
+ * loaded the user before this one hydrates. Until hydration finishes we
+ * report "pending" — the same thing the server rendered — to avoid a
+ * hydration mismatch; the real value follows on the next render.
+ */
 export function useCurrentUser() {
-  return useQuery({
+  const hydrated = useHydrated();
+  const query = useQuery({
     queryKey: queryKeys.me,
     queryFn: async (): Promise<UserPublic | null> => {
       try {
@@ -37,7 +59,24 @@ export function useCurrentUser() {
       }
     },
   });
+  if (hydrated) return query;
+  // A proxy (not a spread) keeps TanStack's tracked-property optimisation.
+  return new Proxy(query, {
+    get(target, prop, receiver) {
+      if (prop in PENDING_VIEW) return PENDING_VIEW[prop as keyof typeof PENDING_VIEW];
+      return Reflect.get(target, prop, receiver);
+    },
+  });
 }
+
+const PENDING_VIEW = {
+  data: undefined,
+  error: null,
+  status: "pending",
+  isPending: true,
+  isSuccess: false,
+  isError: false,
+} as const;
 
 export function useSignOut() {
   const queryClient = useQueryClient();
@@ -126,6 +165,18 @@ export function useApplication(id: string) {
   return useQuery({
     queryKey: queryKeys.application(id),
     queryFn: () => fetchApplication(id),
+  });
+}
+
+export function useUpdateTracking(id: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ status, note }: { status: TrackingStatus; note: string | null }) =>
+      updateTracking(id, status, note),
+    onSuccess: (application) => {
+      queryClient.setQueryData(queryKeys.application(id), application);
+      void queryClient.invalidateQueries({ queryKey: queryKeys.applications, exact: true });
+    },
   });
 }
 

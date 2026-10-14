@@ -11,6 +11,7 @@ import {
   SectionSkeleton,
 } from "@/components/shared/query-states";
 import { ListingStatusBadge, VerificationBadge } from "@/components/shared/status-badge";
+import { ReminderJobCard, ReportReview } from "@/features/admin/report-review";
 import { SessionReview } from "@/features/admin/session-review";
 import { Button } from "@/components/ui/button";
 import {
@@ -46,7 +47,7 @@ function DevStaffSignIn() {
   return (
     <Card>
       <CardHeader>
-        <h2 className="text-lg font-medium">Staff sign-in</h2>
+        <h2 className="text-lg font-bold">Staff sign-in</h2>
         <CardDescription>Development only: sign in as a seeded staff account.</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-3">
@@ -119,7 +120,7 @@ export function ModerationQueue() {
   }
   if (!user) return <DevStaffSignIn />;
 
-  const queue = queueQuery.data ?? { providers: [], listings: [], sessions: [] };
+  const queue = queueQuery.data ?? { providers: [], listings: [], sessions: [], reports: [] };
 
   return (
     <div className="space-y-8">
@@ -154,10 +155,11 @@ export function ModerationQueue() {
         <ErrorState error={queueQuery.error} onRetry={() => queueQuery.refetch()} />
       ) : (
         <>
+          <ReportReview reports={queue.reports} />
           <Card>
             <CardHeader>
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <h2 className="text-lg font-medium">Provider verification queue</h2>
+                <h2 className="text-lg font-bold">Provider verification queue</h2>
                 <Button
                   type="button"
                   variant="outline"
@@ -188,7 +190,7 @@ export function ModerationQueue() {
                   {queue.providers.map((provider) => (
                     <li
                       key={provider.id}
-                      className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-background px-4 py-3"
+                      className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-background px-4 py-3"
                     >
                       <div>
                         <p className="font-medium">{provider.name}</p>
@@ -231,7 +233,7 @@ export function ModerationQueue() {
 
           <Card>
             <CardHeader>
-              <h2 className="text-lg font-medium">Listing review queue</h2>
+              <h2 className="text-lg font-bold">Listing review queue</h2>
               <CardDescription>
                 Approve, request changes, reject, or suspend each submitted listing.
               </CardDescription>
@@ -248,7 +250,7 @@ export function ModerationQueue() {
                     return (
                       <li
                         key={listing.id}
-                        className="grid gap-3 rounded-lg border border-border bg-background p-4"
+                        className="grid gap-3 rounded-xl border bg-background p-4"
                       >
                         <div className="flex flex-wrap items-center justify-between gap-3">
                           <div>
@@ -322,6 +324,8 @@ export function ModerationQueue() {
           </Card>
 
           <SessionReview sessions={queue.sessions} />
+
+          <ReminderJobCard />
         </>
       )}
     </div>

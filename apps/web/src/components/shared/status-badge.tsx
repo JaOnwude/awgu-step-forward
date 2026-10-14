@@ -1,4 +1,17 @@
 import type { ReactNode } from "react";
+import {
+  AlertTriangle,
+  Check,
+  CircleDashed,
+  Clock,
+  Eye,
+  HardHat,
+  MessageSquareWarning,
+  ShieldCheck,
+  type LucideIcon,
+} from "lucide-react";
+
+import { cn } from "@/lib/utils";
 
 export type Tone =
   | "neutral"
@@ -7,81 +20,109 @@ export type Tone =
   | "warning"
   | "danger"
   | "accent"
-  | "primary";
+  | "primary"
+  | "outline";
 
 const toneClasses: Record<Tone, string> = {
-  neutral: "border-border bg-surface-muted text-muted-foreground",
-  verified: "border-verified/30 bg-verified/10 text-verified",
-  success: "border-success/30 bg-success/10 text-success",
-  warning: "border-warning/30 bg-warning/10 text-warning",
-  danger: "border-danger/30 bg-danger/10 text-danger",
-  accent: "border-highlight/30 bg-highlight/10 text-highlight",
-  primary: "border-primary/30 bg-primary-muted text-primary",
+  neutral: "bg-surface-muted text-muted-foreground",
+  verified: "bg-verified-muted text-verified",
+  success: "bg-success-muted text-success",
+  warning: "bg-warning-muted text-warning",
+  danger: "bg-danger-muted text-danger",
+  accent: "bg-highlight-muted text-highlight",
+  primary: "bg-primary-muted text-primary",
+  outline: "border-border text-muted-foreground",
 };
 
+/**
+ * Status pill. Meaning never relies on colour alone: every badge has words,
+ * and status badges also carry an icon (spec R53).
+ */
 export function StatusBadge({
   tone = "neutral",
+  icon: Icon,
   children,
+  className,
 }: {
   tone?: Tone;
+  icon?: LucideIcon;
   children: ReactNode;
+  className?: string;
 }) {
   return (
     <span
-      className={`inline-flex w-fit items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs font-medium ${toneClasses[tone]}`}
+      className={cn(
+        "inline-flex h-[1.625rem] w-fit shrink-0 items-center gap-1.5 rounded-full border border-transparent px-2.5 text-[0.78rem] font-semibold whitespace-nowrap",
+        toneClasses[tone],
+        className,
+      )}
     >
-      <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-current" />
+      {Icon ? <Icon aria-hidden className="size-3.5" /> : null}
       {children}
     </span>
   );
 }
 
-const verificationMeta: Record<string, { tone: Tone; label: string }> = {
-  pending: { tone: "warning", label: "Pending verification" },
-  verified: { tone: "verified", label: "Verified provider" },
-  rejected: { tone: "danger", label: "Verification rejected" },
-  suspended: { tone: "danger", label: "Provider suspended" },
-};
-
-export function VerificationBadge({ status }: { status: string }) {
-  const meta = verificationMeta[status] ?? {
-    tone: "neutral" as Tone,
-    label: status,
-  };
-  return <StatusBadge tone={meta.tone}>{meta.label}</StatusBadge>;
+interface Meta {
+  tone: Tone;
+  label: string;
+  icon?: LucideIcon;
 }
 
-const listingMeta: Record<string, { tone: Tone; label: string }> = {
-  draft: { tone: "neutral", label: "Draft" },
-  pending_review: { tone: "warning", label: "In review" },
-  changes_requested: { tone: "accent", label: "Changes requested" },
-  approved: { tone: "success", label: "Approved" },
-  rejected: { tone: "danger", label: "Rejected" },
-  suspended: { tone: "danger", label: "Suspended" },
-  expired: { tone: "neutral", label: "Expired" },
+const verificationMeta: Record<string, Meta> = {
+  pending: { tone: "warning", label: "Pending verification", icon: Clock },
+  verified: { tone: "verified", label: "Verified provider", icon: ShieldCheck },
+  rejected: { tone: "danger", label: "Verification rejected", icon: AlertTriangle },
+  suspended: { tone: "danger", label: "Provider suspended", icon: AlertTriangle },
+};
+
+export function VerificationBadge({
+  status,
+  label,
+}: {
+  status: string;
+  /** Override the default wording, e.g. "Verified employer". */
+  label?: string;
+}) {
+  const meta = verificationMeta[status] ?? { tone: "neutral" as Tone, label: status };
+  return (
+    <StatusBadge tone={meta.tone} icon={meta.icon}>
+      {label ?? meta.label}
+    </StatusBadge>
+  );
+}
+
+const listingMeta: Record<string, Meta> = {
+  draft: { tone: "neutral", label: "Draft", icon: CircleDashed },
+  pending_review: { tone: "warning", label: "In review", icon: Eye },
+  changes_requested: { tone: "accent", label: "Changes requested", icon: MessageSquareWarning },
+  approved: { tone: "success", label: "Approved", icon: Check },
+  rejected: { tone: "danger", label: "Rejected", icon: AlertTriangle },
+  suspended: { tone: "danger", label: "Suspended", icon: AlertTriangle },
+  expired: { tone: "neutral", label: "Expired", icon: Clock },
 };
 
 export function ListingStatusBadge({ status }: { status: string }) {
-  const meta = listingMeta[status] ?? {
-    tone: "neutral" as Tone,
-    label: status,
-  };
-  return <StatusBadge tone={meta.tone}>{meta.label}</StatusBadge>;
+  const meta = listingMeta[status] ?? { tone: "neutral" as Tone, label: status };
+  return (
+    <StatusBadge tone={meta.tone} icon={meta.icon}>
+      {meta.label}
+    </StatusBadge>
+  );
 }
 
-export const applicationStatusMeta: Record<
-  string,
-  { tone: Tone; label: string }
-> = {
-  draft: { tone: "neutral", label: "Draft" },
-  submitted: { tone: "primary", label: "Submitted" },
-  under_review: { tone: "warning", label: "Under review" },
-  interview: { tone: "accent", label: "Interview" },
-  offered: { tone: "success", label: "Offered" },
-  accepted: { tone: "success", label: "Accepted" },
-  rejected: { tone: "danger", label: "Not successful" },
-  withdrawn: { tone: "neutral", label: "Withdrawn" },
-  closed: { tone: "neutral", label: "Closed" },
+export const applicationStatusMeta: Record<string, Meta> = {
+  draft: { tone: "neutral", label: "Draft", icon: CircleDashed },
+  started: { tone: "neutral", label: "Started", icon: CircleDashed },
+  submitted: { tone: "primary", label: "Submitted", icon: Check },
+  under_review: { tone: "warning", label: "Under review", icon: Eye },
+  interview: { tone: "accent", label: "Interview", icon: MessageSquareWarning },
+  offered: { tone: "success", label: "Offered", icon: Check },
+  accepted: { tone: "success", label: "Accepted", icon: Check },
+  rejected: { tone: "danger", label: "Not successful", icon: AlertTriangle },
+  withdrawn: { tone: "neutral", label: "Withdrawn", icon: CircleDashed },
+  closed: { tone: "neutral", label: "Closed", icon: Clock },
+  completed: { tone: "success", label: "Completed", icon: Check },
 };
 
 export function applicationStatusLabel(status: string): string {
@@ -89,11 +130,21 @@ export function applicationStatusLabel(status: string): string {
 }
 
 export function ApplicationStatusBadge({ status }: { status: string }) {
-  const meta = applicationStatusMeta[status] ?? {
-    tone: "neutral" as Tone,
-    label: status,
-  };
-  return <StatusBadge tone={meta.tone}>{meta.label}</StatusBadge>;
+  const meta = applicationStatusMeta[status] ?? { tone: "neutral" as Tone, label: status };
+  return (
+    <StatusBadge tone={meta.tone} icon={meta.icon}>
+      {meta.label}
+    </StatusBadge>
+  );
+}
+
+/** Adults-only marker for work listings (spec R22a). */
+export function AdultsOnlyBadge({ short = false }: { short?: boolean }) {
+  return (
+    <StatusBadge tone="accent" icon={HardHat}>
+      {short ? "18+" : "Adults only · 18+"}
+    </StatusBadge>
+  );
 }
 
 export const applicationStatusSourceLabels: Record<string, string> = {

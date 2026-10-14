@@ -32,23 +32,26 @@ export default async function SessionsPage({
   const pages = data ? Math.max(1, Math.ceil(data.total / data.page_size)) : 1;
 
   return (
-    <section className="mx-auto w-full max-w-6xl px-4 py-12">
-      <div className="max-w-2xl space-y-3">
-        <h1 className="text-3xl font-semibold tracking-tight">
-          Application support sessions
-        </h1>
-        <p className="text-muted-foreground">
-          Free workshops and help desks run by verified local organisations. Get
-          help filling forms, checking documents, and spotting fee scams. Every
-          session is reviewed by our team before it is listed.
+    <>
+    <div className="border-b bg-muted">
+      <div className="mx-auto grid w-full max-w-6xl items-end gap-6 px-4 py-12 sm:px-6 sm:py-16 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12">
+        <div className="grid gap-3">
+          <p className="eyebrow text-highlight">Free · run by local partners</p>
+          <h1 className="font-display text-4xl leading-[1.08] font-semibold sm:text-5xl">
+            Help with your application, <em className="font-normal">in person.</em>
+          </h1>
+        </div>
+        <p className="text-lg text-muted-foreground">
+          Workshops and help desks for scholarship forms, CVs, interview practice and
+          digital skills. Every session is reviewed by our team before it’s listed. These
+          are not health services.
         </p>
       </div>
+    </div>
+    <section className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
 
       {data === null ? (
-        <div
-          role="alert"
-          className="mt-8 rounded-xl border border-destructive/40 bg-destructive/5 p-6"
-        >
+        <div role="alert" className="rounded-2xl border border-danger/40 bg-danger-muted p-6">
           <p className="font-medium">We couldn’t load sessions right now.</p>
           <p className="mt-1 text-sm text-muted-foreground">
             The service did not respond. Please try again shortly.
@@ -61,7 +64,7 @@ export default async function SessionsPage({
           </Link>
         </div>
       ) : data.items.length === 0 ? (
-        <div className="mt-8 rounded-xl border border-border bg-card p-6">
+        <div className="rounded-2xl border border-dashed bg-card p-8">
           <p className="font-medium">No upcoming sessions yet.</p>
           <p className="mt-1 text-sm text-muted-foreground">
             New sessions are added as local partners propose them. Meanwhile, browse
@@ -74,14 +77,14 @@ export default async function SessionsPage({
         </div>
       ) : (
         <>
-          <p className="mt-8 text-sm text-muted-foreground" aria-live="polite">
-            {data.total} upcoming {data.total === 1 ? "session" : "sessions"}, soonest
-            first.
+          <p className="text-sm text-muted-foreground" aria-live="polite">
+            <span className="font-semibold text-foreground">{data.total}</span> upcoming{" "}
+            {data.total === 1 ? "session" : "sessions"} · soonest first
           </p>
-          <ul className="mt-4 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {data.items.map((session) => (
+          <ul className="mt-4 grid gap-4">
+            {data.items.map((session, index) => (
               <li key={session.id}>
-                <SessionCard session={session} />
+                <SessionCard session={session} index={page === 1 ? index : 1} />
               </li>
             ))}
           </ul>
@@ -111,5 +114,6 @@ export default async function SessionsPage({
         </>
       )}
     </section>
+    </>
   );
 }

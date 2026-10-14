@@ -37,6 +37,8 @@ export interface ApplicationSummary {
   reference: string;
   opportunity_id: string;
   opportunity_title: string;
+  /** "platform" (submitted here) or "external" / "in_person" (tracked by you). */
+  route: string;
   status: string;
   status_source: string;
   submitted_at: string | null;
@@ -46,8 +48,46 @@ export interface ApplicationSummary {
 
 export interface ApplicationDetail extends ApplicationSummary {
   form_version: string;
+  private_note: string | null;
   answers: ApplicationAnswer[];
   history: ApplicationStatusEvent[];
+}
+
+/** Statuses you can report for an application made outside StepForward. */
+export const TRACKING_STATUSES = [
+  "started",
+  "submitted",
+  "interview",
+  "offered",
+  "accepted",
+  "rejected",
+  "withdrawn",
+  "completed",
+] as const;
+
+export type TrackingStatus = (typeof TRACKING_STATUSES)[number];
+
+export function isTracked(application: Pick<ApplicationSummary, "route">): boolean {
+  return application.route !== "platform";
+}
+
+export function startTracking(opportunityId: string): Promise<ApplicationDetail> {
+  return apiRequest<ApplicationDetail>("/api/v1/applications/tracked", {
+    method: "POST",
+    csrf: true,
+    body: { opportunity_id: opportunityId },
+  });
+}
+
+export function updateTracking(
+  id: string,
+  status: TrackingStatus,
+  privateNote: string | null,
+): Promise<ApplicationDetail> {
+  return apiRequest<ApplicationDetail>(
+    `/api/v1/applications/${encodeURIComponent(id)}/tracking`,
+    { method: "PATCH", csrf: true, body: { status, private_note: privateNote } },
+  );
 }
 
 export interface ApplicationReceipt {

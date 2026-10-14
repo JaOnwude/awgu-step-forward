@@ -4,37 +4,51 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /*
- * Semantic design tokens. Brand values live here once; shadcn/ui token names
- * (card, popover, muted, secondary, accent, destructive, input) map onto them
- * so primitives and feature UI share one palette in Light and Dark.
+ * Awgu StepForward design tokens (design/mockups/styles.css is the visual
+ * reference; docs/DECISIONS.md D21). Brand values are declared once and
+ * shadcn/ui token names (card, popover, muted, secondary, accent,
+ * destructive, input) alias them, so primitives and feature UI share one
+ * palette in Light and Dark.
  *
- * Note: shadcn uses `accent` for hover/selection backgrounds, so the brand
- * orange is exposed as `highlight` instead.
+ * shadcn uses `accent` for hover/selection backgrounds, so the brand
+ * laterite colour is exposed as `highlight`.
  */
 :root {
-  --background: #f8f6f1;
-  --foreground: #191c1a;
+  --background: #fbf7ef; /* cream paper */
+  --foreground: #15201a; /* ink */
 
   --surface: #ffffff;
-  --surface-muted: #efece3;
-  --border: #d9d5c9;
+  --surface-muted: #f2ebdd; /* sand */
+  --border: #e3daca;
 
-  --muted-foreground: #57605a;
+  --muted-foreground: #5a6459;
 
-  --primary: #14735a;
+  --primary: #0f5a43; /* forest */
   --primary-foreground: #ffffff;
-  --primary-muted: #e3f0eb;
+  --primary-muted: #e2efe8;
 
-  --highlight: #a9551f;
+  --highlight: #b8501f; /* laterite — Enugu red earth */
   --highlight-foreground: #ffffff;
+  --highlight-muted: #f8e3d6;
 
-  --success: #14735a;
-  --warning: #8a5a12;
-  --danger: #b3261e;
-  --verified: #16588f;
+  --sun: #f2b33d;
+  --sun-foreground: #2a1d02;
+  --sun-muted: #fdf0d2;
 
-  --ring: #14735a;
-  --radius: 0.75rem;
+  --success: #157a4a;
+  --success-muted: #e0f2e8;
+  --warning: #8f5b00;
+  --warning-muted: #fbefd4;
+  --danger: #b42318;
+  --danger-muted: #fbe4e1;
+  --verified: #1d5fa6;
+  --verified-muted: #e3edf8;
+
+  /* Large green areas stay deep forest in both themes. */
+  --brand-panel: #0f5a43;
+
+  --ring: #0f5a43;
+  --radius: 1rem;
 
   /* shadcn/ui aliases */
   --card: var(--surface);
@@ -51,28 +65,39 @@
 }
 
 .dark {
-  --background: #11150f;
-  --foreground: #eceee8;
+  --background: #10140f;
+  --foreground: #eef0e8;
 
-  --surface: #1a1e18;
-  --surface-muted: #232821;
-  --border: #333a30;
+  --surface: #181d17;
+  --surface-muted: #20271f;
+  --border: #2e372c;
 
-  --muted-foreground: #a3aa9f;
+  --muted-foreground: #a6aea2;
 
-  --primary: #4cc39b;
-  --primary-foreground: #06231a;
-  --primary-muted: #1c3a30;
+  --primary: #4fc79c;
+  --primary-foreground: #05251a;
+  --primary-muted: #173a2e;
 
-  --highlight: #e08a4e;
+  --highlight: #e88a55;
   --highlight-foreground: #2a1505;
+  --highlight-muted: #3a2216;
 
-  --success: #4cc39b;
-  --warning: #e0b45e;
-  --danger: #f2837c;
-  --verified: #7fb6e6;
+  --sun: #f2b33d;
+  --sun-foreground: #2a1d02;
+  --sun-muted: #3a2f14;
 
-  --ring: #4cc39b;
+  --success: #5bcb8f;
+  --success-muted: #16301f;
+  --warning: #f0c068;
+  --warning-muted: #3a2c10;
+  --danger: #f59a90;
+  --danger-muted: #3d1814;
+  --verified: #86b8ee;
+  --verified-muted: #1a2b40;
+
+  --brand-panel: #12392d;
+
+  --ring: #4fc79c;
 }
 
 @theme inline {
@@ -87,10 +112,19 @@
   --color-primary-muted: var(--primary-muted);
   --color-highlight: var(--highlight);
   --color-highlight-foreground: var(--highlight-foreground);
+  --color-highlight-muted: var(--highlight-muted);
+  --color-sun: var(--sun);
+  --color-sun-foreground: var(--sun-foreground);
+  --color-sun-muted: var(--sun-muted);
   --color-success: var(--success);
+  --color-success-muted: var(--success-muted);
   --color-warning: var(--warning);
+  --color-warning-muted: var(--warning-muted);
   --color-danger: var(--danger);
+  --color-danger-muted: var(--danger-muted);
   --color-verified: var(--verified);
+  --color-verified-muted: var(--verified-muted);
+  --color-brand-panel: var(--brand-panel);
   --color-ring: var(--ring);
 
   --color-card: var(--card);
@@ -105,24 +139,42 @@
   --color-destructive: var(--destructive);
   --color-input: var(--input);
 
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 8px);
+  --radius-md: calc(var(--radius) - 4px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
 
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-jakarta), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
+
+  --shadow-soft: 0 1px 2px rgb(21 32 26 / 0.05), 0 8px 24px -8px rgb(21 32 26 / 0.12);
+  --shadow-lift: 0 2px 4px rgb(21 32 26 / 0.04), 0 24px 48px -16px rgb(21 32 26 / 0.18);
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "ss01" on;
+  }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
+/* Editorial serif for page and section titles. */
+@utility font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.015em;
+}
+
+/* Small uppercase label above titles. */
+@utility eyebrow {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 @media (prefers-reduced-motion: reduce) {

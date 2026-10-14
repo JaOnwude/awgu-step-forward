@@ -36,7 +36,7 @@ export function SessionReview({ sessions }: { sessions: ManagedSession[] }) {
   return (
     <Card>
       <CardHeader>
-        <h2 className="text-lg font-medium">Support session review queue</h2>
+        <h2 className="text-lg font-bold">Support session review queue</h2>
         <CardDescription>
           Check the organiser, venue and accessibility details before approving.
           Sessions must be free; reject any that charge a fee.
@@ -52,7 +52,7 @@ export function SessionReview({ sessions }: { sessions: ManagedSession[] }) {
               return (
                 <li
                   key={session.id}
-                  className="grid gap-3 rounded-lg border border-border bg-background p-4"
+                  className="grid gap-3 rounded-xl border bg-background p-4"
                 >
                   <div>
                     <p className="font-medium">{session.topic}</p>

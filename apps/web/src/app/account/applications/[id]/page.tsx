@@ -17,10 +17,10 @@ export default async function ApplicationDetailPage({
 }) {
   const { id } = await params;
   return (
-    <section className="mx-auto w-full max-w-4xl px-4 py-12">
+    <section className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
       <Link
         href="/account"
-        className="text-sm font-medium text-primary hover:underline"
+        className="inline-flex items-center gap-1 rounded text-sm text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         ← Back to your account
       </Link>

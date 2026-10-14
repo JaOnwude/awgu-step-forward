@@ -20,6 +20,8 @@ from app.features.providers.schemas import (
     ProviderView,
     VerificationDecisionRequest,
 )
+from app.features.reports import service as report_service
+from app.features.reports.schemas import ReportDecision, ReportView
 from app.features.sessions import service as session_service
 from app.features.sessions.schemas import SessionDecisionRequest, SessionManageOut
 
@@ -41,6 +43,20 @@ async def get_queue(
         providers=[provider_service.serialize_provider(o) for o in providers],
         listings=[OpportunityView.model_validate(o) for o in listings],
         sessions=await session_service.pending_sessions(db),
+        reports=await report_service.open_reports(db),
+    )
+
+
+@router.post("/reports/{report_id}/decision", response_model=ReportView)
+async def decide_report(
+    report_id: uuid.UUID,
+    payload: ReportDecision,
+    ctx: AuthContext = Depends(verify_csrf),
+    db: AsyncSession = Depends(get_db),
+) -> ReportView:
+    _require_staff(ctx)
+    return await report_service.decide_report(
+        db, admin=ctx.user, report_id=report_id, payload=payload
     )
 
 

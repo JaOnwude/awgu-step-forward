@@ -150,7 +150,7 @@ export function ApplyFlow({
     return (
       <Card className="border-verified/40 bg-verified/5">
         <CardHeader>
-          <h2 className="text-lg font-medium">Application submitted</h2>
+          <h2 className="text-lg font-bold">Application submitted</h2>
           <CardDescription>{receipt.message} Keep this reference safe:</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
@@ -177,7 +177,7 @@ export function ApplyFlow({
     <div className="space-y-8">
       <Card>
         <CardHeader>
-          <h2 className="text-lg font-medium">Application form</h2>
+          <h2 className="text-lg font-bold">Application form</h2>
           <CardDescription>
             Applying to{" "}
             <span className="font-medium text-foreground">{opportunityTitle}</span>{" "}
@@ -238,7 +238,7 @@ export function ApplyFlow({
 
       <Card>
         <CardHeader>
-          <h3 className="text-lg font-medium">Review before you submit</h3>
+          <h3 className="text-lg font-bold">Review before you submit</h3>
           <CardDescription>
             {providerName} will receive exactly what is listed here.
           </CardDescription>

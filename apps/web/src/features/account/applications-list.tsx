@@ -3,8 +3,9 @@
 import Link from "next/link";
 
 import { ErrorState, ListSkeleton } from "@/components/shared/query-states";
-import { ApplicationStatusBadge } from "@/components/shared/status-badge";
+import { ApplicationStatusBadge, StatusBadge } from "@/components/shared/status-badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { isTracked } from "@/lib/api/applications";
 import { formatWatDate } from "@/lib/format";
 
 import { useApplications } from "./queries";
@@ -16,7 +17,7 @@ export function ApplicationsList() {
   return (
     <Card>
       <CardHeader>
-        <h2 className="text-lg font-medium">Your applications</h2>
+        <h2 className="text-lg font-bold">Your applications</h2>
       </CardHeader>
       <CardContent>
         {applicationsQuery.isPending ? (
@@ -36,23 +37,29 @@ export function ApplicationsList() {
             {rows.map((row) => (
               <li
                 key={row.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-background px-4 py-3"
+                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-background px-4 py-3"
               >
                 <div>
                   <Link
                     href={`/account/applications/${row.id}`}
-                    className="font-medium hover:underline"
+                    className="font-semibold hover:underline"
                   >
                     {row.opportunity_title}
                   </Link>
-                  <p className="text-sm text-muted-foreground">
-                    Reference {row.reference}
-                    {row.submitted_at
-                      ? ` · submitted ${formatWatDate(row.submitted_at) ?? ""}`
-                      : " · draft"}
+                  <p className="text-xs text-muted-foreground">
+                    {isTracked(row)
+                      ? `${row.route === "in_person" ? "In person" : "Provider’s site"} · tracked by you`
+                      : `Reference ${row.reference}${
+                          row.submitted_at
+                            ? ` · submitted ${formatWatDate(row.submitted_at) ?? ""}`
+                            : " · draft"
+                        }`}
                   </p>
                 </div>
-                <ApplicationStatusBadge status={row.status} />
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <ApplicationStatusBadge status={row.status} />
+                  {isTracked(row) ? <StatusBadge tone="outline">Reported by you</StatusBadge> : null}
+                </div>
               </li>
             ))}
           </ul>
