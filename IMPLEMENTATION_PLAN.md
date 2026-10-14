@@ -1,6 +1,6 @@
 # IMPLEMENTATION_PLAN.md — Awgu StepForward (Week-1 Locked Scope)
 
-**Status:** Approved and in progress (Days 1–5 done; Day 5 awaiting merge). Live status: `PROJECT_STATUS.md`. Deviations: `docs/DECISIONS.md`.
+**Status:** Approved and in progress (Days 1–6 done; Day 6 awaiting merge). Live status: `PROJECT_STATUS.md`. Deviations: `docs/DECISIONS.md`.
 **Target:** 7 days, one developer + one coding agent, active daily decisions
 **Companion authority:** `spec.md` (product source of truth) > `frontend-spec.md` > `docs/*`. This plan does not override them.
 **Success definition:** A deployed, non-sensitive **demo** of the web/PWA core loop. Not production. Not Android. No real applicant data.
@@ -85,7 +85,7 @@ Feature modules own `router.py`, `schemas.py`, `service.py`, `models.py`, `repos
 
 Each day ends deployable and with its own acceptance check ("Exit").
 
-Progress: Days 1–5 ✅ done (Day 5 awaiting merge). Days 6–7 ⬜ not started.
+Progress: Days 1–6 ✅ done (Day 6 awaiting merge). Day 7 ⬜ not started.
 
 **Day 1 — Foundation & vertical slice zero** ✅ (mobile scaffold deferred, see `docs/DECISIONS.md` D13)
 - Scaffold Bun workspace + uv backend, Postgres + Alembic, `core/` config/security/errors.
@@ -113,7 +113,7 @@ Progress: Days 1–5 ✅ done (Day 5 awaiting merge). Days 6–7 ⬜ not started
 - ✅ Support-session list + register/cancel; minimal organizer view; staff approval (`docs/DECISIONS.md` D20). Reminders are stored as an opt-in and sent from Day 6.
 - Exit: under-18 cannot reach work apply; session capacity enforced (`A5` partial).
 
-**Day 6 — Notifications + AI slice**
+**Day 6 — Notifications + AI slice** ✅ (`docs/DECISIONS.md` D22)
 - Notification preferences (in-app + email), `ConsoleEmailAdapter`, deadline-reminder job stub.
 - Feature-flagged opportunity assistant grounded in approved listings; deterministic fallback always visible; no PII.
 - External application tracking: record "external application started", let the applicant mark progress, label it applicant-reported (journey 5, `R28`).
