@@ -2,7 +2,6 @@ import Link from "next/link";
 
 import { Logo } from "@/components/shared/logo";
 import { footerGroups } from "@/lib/navigation";
-import { ThemeToggle } from "@/theme/theme-toggle";
 
 export function SiteFooter() {
   return (
@@ -16,7 +15,6 @@ export function SiteFooter() {
               Verified opportunities for learning, work, and your next step. Enugu
               State, Awgu first.
             </p>
-            <ThemeToggle className="w-fit border-white/15 bg-white/5 sm:hidden" />
           </div>
           {footerGroups.map((group) => (
             <nav key={group.title} aria-label={group.title} className="grid content-start gap-2.5">
