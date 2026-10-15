@@ -74,10 +74,13 @@ export function StoriesCarousel() {
       aria-label="Example stories"
       className="grid gap-5"
     >
+      {/* Focusable so keyboard users can scroll it with the arrow keys. */}
       <div
         ref={track}
         onScroll={onScroll}
-        className="flex snap-x snap-mandatory overflow-x-auto rounded-3xl [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        tabIndex={0}
+        aria-label="Stories, scroll sideways"
+        className="flex snap-x snap-mandatory overflow-x-auto rounded-3xl [scrollbar-width:none] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&::-webkit-scrollbar]:hidden"
       >
         {STORIES.map((story, index) => {
           const image = categoryImage(story.category);
