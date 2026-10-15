@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import {
   ArrowRight,
   Banknote,
@@ -16,6 +17,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+import { DetailSkeleton } from "@/components/shared/detail-skeleton";
 import { CategoryIcon } from "@/components/shared/category-icon";
 import { categoryImage } from "@/lib/images";
 import {
@@ -128,7 +130,7 @@ function ApplyAction({ opportunity }: { opportunity: OpportunityDetail }) {
   );
 }
 
-export default async function OpportunityPage({ params }: { params: Params }) {
+async function OpportunityContent({ params }: { params: Params }) {
   const { id } = await params;
 
   let opportunity: OpportunityDetail | null = null;
@@ -319,7 +321,7 @@ export default async function OpportunityPage({ params }: { params: Params }) {
           </section>
         </div>
 
-        <aside className="grid gap-4 lg:sticky lg:top-24">
+        <div className="grid gap-4 lg:sticky lg:top-24">
           <div className="grid gap-4 rounded-2xl border bg-card p-6 shadow-[var(--shadow-soft)]">
             <div className="flex items-center justify-between gap-2">
               <p className="eyebrow text-muted-foreground">Apply by</p>
@@ -376,8 +378,18 @@ export default async function OpportunityPage({ params }: { params: Params }) {
             Verification means our team reviewed this provider. It is not a government
             endorsement or a guaranteed place.
           </p>
-        </aside>
+        </div>
       </div>
     </article>
+  );
+}
+
+// The data (and the URL id) load inside Suspense, so the page shell and a
+// skeleton can be sent instantly while the content streams in.
+export default function OpportunityPage({ params }: { params: Params }) {
+  return (
+    <Suspense fallback={<DetailSkeleton label="Loading opportunity…" />}>
+      <OpportunityContent params={params} />
+    </Suspense>
   );
 }
