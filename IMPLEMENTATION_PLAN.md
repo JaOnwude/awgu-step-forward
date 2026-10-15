@@ -1,6 +1,6 @@
 # IMPLEMENTATION_PLAN.md — Awgu StepForward (Week-1 Locked Scope)
 
-**Status:** Approved and in progress (Days 1–6 done; Day 6 awaiting merge). Live status: `PROJECT_STATUS.md`. Deviations: `docs/DECISIONS.md`.
+**Status:** Week-1 build complete (Days 1–7 done; deploy is run by the owner from `docs/RUNBOOK.md`). Live status: `PROJECT_STATUS.md`. Deviations: `docs/DECISIONS.md`.
 **Target:** 7 days, one developer + one coding agent, active daily decisions
 **Companion authority:** `spec.md` (product source of truth) > `frontend-spec.md` > `docs/*`. This plan does not override them.
 **Success definition:** A deployed, non-sensitive **demo** of the web/PWA core loop. Not production. Not Android. No real applicant data.
@@ -85,7 +85,7 @@ Feature modules own `router.py`, `schemas.py`, `service.py`, `models.py`, `repos
 
 Each day ends deployable and with its own acceptance check ("Exit").
 
-Progress: Days 1–6 ✅ done (Day 6 awaiting merge). Day 7 ⬜ not started.
+Progress: Days 1–7 ✅ done. Deployment is the owner's step (`docs/RUNBOOK.md` §7).
 
 **Day 1 — Foundation & vertical slice zero** ✅ (mobile scaffold deferred, see `docs/DECISIONS.md` D13)
 - Scaffold Bun workspace + uv backend, Postgres + Alembic, `core/` config/security/errors.
@@ -120,7 +120,7 @@ Progress: Days 1–6 ✅ done (Day 6 awaiting merge). Day 7 ⬜ not started.
 - `POST /reports` (rate-limited, anonymous allowed) plus a basic staff report queue with category and age (`R21`).
 - Exit: disabling AI leaves ordinary search fully usable (`A9` partial); external statuses show as applicant-reported; a visitor can report a listing and staff can see it.
 
-**Day 7 — Stabilize & demo**
+**Day 7 — Stabilize & demo** ✅ (`docs/DECISIONS.md` D24; visuals D23)
 - Moderation `restore` and `expire` actions, audited like the others (`R20`).
 - Run lint/typecheck/tests/build; fix top defects; keyboard + mobile-width pass; a11y (axe) on core routes.
 - Seed a coherent demo; write `docs/DECISIONS.md` + `docs/RUNBOOK.md`; deploy non-sensitive demo.
