@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 
 import { buttonVariants } from "@/components/ui/button";
 import { SessionCard } from "@/features/sessions/session-card";
 import { fetchPublicSessions, type SessionListResponse } from "@/lib/api/sessions";
+import { SESSIONS_IMAGE } from "@/lib/images";
 
 export const metadata: Metadata = {
   title: "Application support sessions — Awgu StepForward",
@@ -34,18 +36,27 @@ export default async function SessionsPage({
   return (
     <>
     <div className="border-b bg-muted">
-      <div className="mx-auto grid w-full max-w-6xl items-end gap-6 px-4 py-12 sm:px-6 sm:py-16 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12">
-        <div className="grid gap-3">
+      <div className="mx-auto grid w-full max-w-6xl items-center gap-8 px-4 py-12 sm:px-6 sm:py-16 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12">
+        <div className="grid gap-4">
           <p className="eyebrow text-highlight">Free · run by local partners</p>
           <h1 className="font-display text-4xl leading-[1.08] font-semibold sm:text-5xl">
             Help with your application, <em className="font-normal">in person.</em>
           </h1>
+          <p className="text-lg text-muted-foreground">
+            Workshops and help desks for scholarship forms, CVs, interview practice and
+            digital skills. Every session is reviewed by our team before it’s listed. These
+            are not health services.
+          </p>
         </div>
-        <p className="text-lg text-muted-foreground">
-          Workshops and help desks for scholarship forms, CVs, interview practice and
-          digital skills. Every session is reviewed by our team before it’s listed. These
-          are not health services.
-        </p>
+        <Image
+          src={SESSIONS_IMAGE.src}
+          width={SESSIONS_IMAGE.width}
+          height={SESSIONS_IMAGE.height}
+          alt=""
+          loading="eager"
+          sizes="(min-width: 1024px) 30rem, 100vw"
+          className="aspect-[3/2] w-full rounded-3xl object-cover shadow-[var(--shadow-soft)]"
+        />
       </div>
     </div>
     <section className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
