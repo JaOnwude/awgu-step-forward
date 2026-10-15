@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Clock, MapPin } from "lucide-react";
 
@@ -11,6 +12,7 @@ import {
 import type { OpportunityCard } from "@/lib/api/discovery";
 import { ADULT_ONLY_TYPES } from "@/lib/api/opportunities";
 import { formatWatDate } from "@/lib/format";
+import { categoryImage } from "@/lib/images";
 import { deliveryModeLabel, opportunityTypeLabel } from "@/lib/opportunity-labels";
 
 function Fact({ label, value }: { label: string; value: string }) {
@@ -34,9 +36,21 @@ export function OpportunityCardView({
   const showsPay = isWork || Boolean(opportunity.pay_details);
   const moneyValue =
     (showsPay ? opportunity.pay_details : opportunity.cost_details) ?? "Not stated";
+  const image = categoryImage(opportunity.opportunity_type);
 
   return (
-    <article className="group relative grid gap-4 rounded-2xl border bg-card p-5 shadow-xs transition-all focus-within:ring-2 focus-within:ring-ring hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-[var(--shadow-soft)]">
+    <article className="group relative grid gap-4 overflow-hidden rounded-2xl border bg-card p-5 pt-0 shadow-xs transition-all duration-300 focus-within:ring-2 focus-within:ring-ring hover:-translate-y-1 hover:border-primary/30 hover:shadow-[var(--shadow-lift)]">
+      {/* Decorative; lazy-loaded because most cards sit below the fold. */}
+      <div className="-mx-5 overflow-hidden">
+        <Image
+          src={image.src}
+          width={image.width}
+          height={image.height}
+          alt=""
+          sizes="(min-width: 1024px) 24rem, (min-width: 768px) 50vw, 100vw"
+          className="aspect-[2/1] w-full object-cover transition-transform duration-500 group-hover:scale-105"
+        />
+      </div>
       <div className="flex items-center gap-2.5 text-[0.8rem] font-semibold text-muted-foreground">
         <CategoryIcon type={opportunity.opportunity_type} size="sm" />
         {opportunityTypeLabel(opportunity.opportunity_type)}
