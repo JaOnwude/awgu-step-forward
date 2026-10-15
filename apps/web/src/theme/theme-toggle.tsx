@@ -1,44 +1,39 @@
 "use client";
 
-import { Monitor, Moon, Sun, type LucideIcon } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { useTheme, type ThemeMode } from "@/theme/theme-provider";
+import { useTheme } from "@/theme/theme-provider";
 
-const OPTIONS: { value: ThemeMode; label: string; icon: LucideIcon }[] = [
-  { value: "system", label: "System", icon: Monitor },
-  { value: "light", label: "Light", icon: Sun },
-  { value: "dark", label: "Dark", icon: Moon },
-];
-
+/**
+ * One button that swaps between light and dark. Until someone taps it the
+ * site follows the device setting. Both icons are always rendered and the
+ * `dark` class on <html> decides which one shows, so there is no flash of
+ * the wrong icon before hydration.
+ */
 export function ThemeToggle({ className }: { className?: string }) {
-  const { mode, setMode } = useTheme();
+  const { resolved, setMode } = useTheme();
+  const next = resolved === "dark" ? "light" : "dark";
 
   return (
-    <div
-      role="group"
-      aria-label="Appearance"
-      className={cn("inline-flex rounded-full border bg-card p-0.5", className)}
+    <button
+      type="button"
+      onClick={() => setMode(next)}
+      aria-label={`Switch to ${next} mode`}
+      title={`Switch to ${next} mode`}
+      className={cn(
+        "grid size-9 shrink-0 place-items-center overflow-hidden rounded-full border bg-card text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        className,
+      )}
     >
-      {OPTIONS.map(({ value, label, icon: Icon }) => {
-        const active = mode === value;
-        return (
-          <button
-            key={value}
-            type="button"
-            onClick={() => setMode(value)}
-            aria-pressed={active}
-            aria-label={label}
-            title={label}
-            className={cn(
-              "grid h-8 w-9 place-items-center rounded-full text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-              active && "bg-muted text-foreground",
-            )}
-          >
-            <Icon aria-hidden className="size-4" />
-          </button>
-        );
-      })}
-    </div>
+      <Moon
+        aria-hidden
+        className="col-start-1 row-start-1 size-[1.1rem] transition-all duration-500 ease-out motion-reduce:transition-none dark:scale-0 dark:-rotate-90 dark:opacity-0"
+      />
+      <Sun
+        aria-hidden
+        className="col-start-1 row-start-1 size-[1.1rem] scale-0 rotate-90 text-sun opacity-0 transition-all duration-500 ease-out motion-reduce:transition-none dark:scale-100 dark:rotate-0 dark:opacity-100"
+      />
+    </button>
   );
 }

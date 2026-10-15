@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 import {
@@ -12,12 +13,15 @@ import {
 } from "lucide-react";
 
 import { CategoryIcon } from "@/components/shared/category-icon";
+import { Reveal } from "@/components/shared/reveal";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { OpportunityCardView } from "@/features/discovery/opportunity-card";
+import { StoriesCarousel } from "@/features/home/stories-carousel";
 import { fetchOpportunityDirectory, type OpportunityCard } from "@/lib/api/discovery";
 import { formatWatDate } from "@/lib/format";
+import { categoryImage, HERO_IMAGE, SESSIONS_IMAGE } from "@/lib/images";
 
 const categories = [
   { type: "scholarship", name: "Scholarships", note: "Tuition and study support" },
@@ -48,22 +52,6 @@ async function loadFeatured(): Promise<OpportunityCard[] | null> {
   } catch {
     return null;
   }
-}
-
-/** Decorative hills-and-sun illustration (inline SVG: no image download). */
-function Hills() {
-  return (
-    <svg
-      viewBox="0 0 400 300"
-      aria-hidden
-      preserveAspectRatio="none"
-      className="absolute inset-x-0 bottom-0 h-[62%] w-full"
-    >
-      <path d="M0 160 C 80 110 150 130 220 100 S 340 70 400 95 V300 H0Z" fill="#0b4836" />
-      <path d="M0 210 C 100 170 190 200 270 165 S 370 150 400 160 V300 H0Z" fill="#B8501F" />
-      <path d="M0 250 C 110 225 220 245 310 225 S 390 220 400 225 V300 H0Z" fill="#8f3c16" />
-    </svg>
-  );
 }
 
 async function HeroListing() {
@@ -102,16 +90,22 @@ async function HeroListing() {
 function HeroArt() {
   return (
     <div className="relative isolate flex aspect-[4/4.3] flex-col justify-between overflow-hidden rounded-[1.75rem] bg-brand-panel p-6 text-white sm:p-7">
-      <Hills />
-      <span aria-hidden className="absolute top-7 left-7 grid size-24 place-items-center rounded-full bg-sun/20">
-        <span className="size-16 rounded-full bg-sun" />
-      </span>
+      {/* Above the fold: load straight away instead of lazily. */}
+      <Image
+        src={HERO_IMAGE.src}
+        alt=""
+        fill
+        loading="eager"
+        fetchPriority="high"
+        sizes="(min-width: 1024px) 28rem, 100vw"
+        className="-z-10 object-cover"
+      />
       <Suspense fallback={<Skeleton className="relative ml-auto h-36 w-[78%] rounded-2xl" />}>
         <HeroListing />
       </Suspense>
       <Link
         href="/sessions"
-        className="relative flex w-fit items-center gap-3 rounded-2xl bg-card px-4 py-3 text-card-foreground shadow-[var(--shadow-lift)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sun"
+        className="relative flex w-fit items-center gap-3 rounded-2xl bg-card px-4 py-3 motion-safe:animate-float text-card-foreground shadow-[var(--shadow-lift)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sun"
       >
         <span className="grid size-9 place-items-center rounded-[10px] bg-highlight-muted text-highlight">
           <Users aria-hidden className="size-4" />
@@ -257,20 +251,37 @@ export default function HomePage() {
             </Link>
           </div>
           <ul className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
-            {categories.map((category) => (
-              <li key={category.type}>
-                <Link
-                  href={`/opportunities?category=${category.type}`}
-                  className="grid h-full gap-7 rounded-2xl border bg-background p-5 transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-[var(--shadow-soft)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  <CategoryIcon type={category.type} size="lg" />
-                  <span>
-                    <span className="block font-bold">{category.name}</span>
-                    <span className="block text-sm text-muted-foreground">{category.note}</span>
-                  </span>
-                </Link>
-              </li>
-            ))}
+            {categories.map((category, index) => {
+              const image = categoryImage(category.type);
+              return (
+                <li key={category.type}>
+                  <Reveal delay={index * 80} className="h-full">
+                    <Link
+                      href={`/opportunities?category=${category.type}`}
+                      className="group grid h-full content-start overflow-hidden rounded-2xl border bg-background transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-[var(--shadow-lift)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <span className="block overflow-hidden">
+                        <Image
+                          src={image.src}
+                          width={image.width}
+                          height={image.height}
+                          alt=""
+                          sizes="(min-width: 1024px) 14rem, (min-width: 768px) 33vw, 50vw"
+                          className="aspect-[3/2] w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      </span>
+                      <span className="grid gap-3 p-4 sm:p-5">
+                        <CategoryIcon type={category.type} size="sm" />
+                        <span>
+                          <span className="block font-bold">{category.name}</span>
+                          <span className="block text-sm text-muted-foreground">{category.note}</span>
+                        </span>
+                      </span>
+                    </Link>
+                  </Reveal>
+                </li>
+              );
+            })}
           </ul>
         </div>
       </section>
@@ -286,11 +297,11 @@ export default function HomePage() {
             View all opportunities →
           </Link>
         </div>
-        <div className="mt-8">
+        <Reveal className="mt-8">
           <Suspense fallback={<FeaturedSkeleton />}>
             <FeaturedListings />
           </Suspense>
-        </div>
+        </Reveal>
       </section>
 
       {/* How it works */}
@@ -308,21 +319,42 @@ export default function HomePage() {
           </div>
           <ol className="grid gap-8 sm:grid-cols-3">
             {steps.map((step, index) => (
-              <li key={step.title} className="grid content-start gap-3">
-                <span className="font-display text-5xl font-semibold text-highlight">
-                  0{index + 1}
-                </span>
-                <h3 className="text-lg font-bold">{step.title}</h3>
-                <p className="text-sm text-muted-foreground">{step.body}</p>
+              <li key={step.title}>
+                <Reveal delay={index * 120} className="grid content-start gap-3">
+                  <span className="font-display text-5xl font-semibold text-highlight">
+                    0{index + 1}
+                  </span>
+                  <h3 className="text-lg font-bold">{step.title}</h3>
+                  <p className="text-sm text-muted-foreground">{step.body}</p>
+                </Reveal>
               </li>
             ))}
           </ol>
         </div>
       </section>
 
+      {/* Stories */}
+      <section className="border-y bg-card">
+        <div className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6">
+          <div className="grid gap-2">
+            <p className="eyebrow text-highlight">Stories</p>
+            <h2 className="font-display text-3xl font-semibold sm:text-4xl">
+              One step can change a year
+            </h2>
+            <p className="max-w-2xl text-sm text-muted-foreground">
+              Example stories for this demo. The people and quotes are illustrative, not
+              real users.
+            </p>
+          </div>
+          <Reveal className="mt-8">
+            <StoriesCarousel />
+          </Reveal>
+        </div>
+      </section>
+
       {/* Trust + sessions */}
-      <section className="mx-auto w-full max-w-6xl px-4 pb-20 sm:px-6">
-        <div className="grid gap-5 md:grid-cols-2">
+      <section className="mx-auto w-full max-w-6xl px-4 py-20 sm:px-6">
+        <Reveal className="grid gap-5 md:grid-cols-2">
           <div id="verification" className="grid scroll-mt-24 content-start gap-4 rounded-3xl bg-muted p-8 sm:p-10">
             <StatusBadge tone="verified" icon={ShieldCheck}>
               Trust &amp; safety
@@ -340,22 +372,32 @@ export default function HomePage() {
               application fee.
             </p>
           </div>
-          <div className="grid content-start gap-4 rounded-3xl bg-brand-panel p-8 text-white sm:p-10">
-            <span className="inline-flex h-[1.625rem] w-fit items-center gap-1.5 rounded-full bg-white/15 px-2.5 text-[0.78rem] font-semibold">
-              <Users aria-hidden className="size-3.5" /> Free support sessions
-            </span>
-            <h2 className="font-display text-3xl font-semibold">
-              Get help with forms, CVs and interviews
-            </h2>
-            <p className="text-sm text-white/85">
-              Workshops and help desks run by verified local partners in Awgu and across
-              Enugu State. These are not health services. Book a place in two taps.
-            </p>
-            <Link href="/sessions" className={buttonVariants({ variant: "sun", className: "w-fit" })}>
-              Find a session <ArrowRight aria-hidden />
-            </Link>
+          <div className="grid content-start gap-4 overflow-hidden rounded-3xl bg-brand-panel text-white">
+            <Image
+              src={SESSIONS_IMAGE.src}
+              width={SESSIONS_IMAGE.width}
+              height={SESSIONS_IMAGE.height}
+              alt=""
+              sizes="(min-width: 768px) 30rem, 100vw"
+              className="aspect-[2/1] w-full object-cover"
+            />
+            <div className="grid content-start gap-4 px-8 pb-8 sm:px-10 sm:pb-10">
+              <span className="inline-flex h-[1.625rem] w-fit items-center gap-1.5 rounded-full bg-white/15 px-2.5 text-[0.78rem] font-semibold">
+                <Users aria-hidden className="size-3.5" /> Free support sessions
+              </span>
+              <h2 className="font-display text-3xl font-semibold">
+                Get help with forms, CVs and interviews
+              </h2>
+              <p className="text-sm text-white/85">
+                Workshops and help desks run by verified local partners in Awgu and across
+                Enugu State. These are not health services. Book a place in two taps.
+              </p>
+              <Link href="/sessions" className={buttonVariants({ variant: "sun", className: "w-fit" })}>
+                Find a session <ArrowRight aria-hidden />
+              </Link>
+            </div>
           </div>
-        </div>
+        </Reveal>
         <div className="mt-5 flex flex-wrap items-center justify-between gap-4 rounded-3xl border bg-card p-8">
           <div className="grid gap-1.5">
             <h2 className="text-xl font-bold">Have an opportunity to share?</h2>

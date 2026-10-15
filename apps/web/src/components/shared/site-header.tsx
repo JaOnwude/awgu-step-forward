@@ -10,7 +10,7 @@ export function SiteHeader() {
         <Logo />
         <PrimaryNav />
         <div className="flex items-center gap-2 sm:gap-3">
-          <ThemeToggle className="hidden sm:inline-flex" />
+          <ThemeToggle />
           <HeaderAccount />
         </div>
       </div>
