@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -16,6 +17,7 @@ import {
 } from "lucide-react";
 
 import { CategoryIcon } from "@/components/shared/category-icon";
+import { categoryImage } from "@/lib/images";
 import {
   AdultsOnlyBadge,
   ListingStatusBadge,
@@ -203,6 +205,16 @@ export default async function OpportunityPage({ params }: { params: Params }) {
               {opportunity.reviewed_at ? ` · Reviewed ${formatWatDate(opportunity.reviewed_at)}` : ""}
             </p>
           </header>
+
+          <Image
+            src={categoryImage(opportunity.opportunity_type).src}
+            width={1200}
+            height={800}
+            alt=""
+            loading="eager"
+            sizes="(min-width: 1024px) 44rem, 100vw"
+            className="aspect-[5/2] w-full rounded-3xl object-cover"
+          />
 
           {opportunity.is_expired ? (
             <Alert>
