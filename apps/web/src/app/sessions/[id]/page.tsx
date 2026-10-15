@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { ChevronLeft, Lock, MapPin, Monitor, ShieldCheck } from "lucide-react";
 
+import { DetailSkeleton } from "@/components/shared/detail-skeleton";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { buttonVariants } from "@/components/ui/button";
 import { ReportDialog } from "@/features/reports/report-dialog";
@@ -38,7 +40,7 @@ function Detail({ label, value }: { label: string; value: string | null }) {
   );
 }
 
-export default async function SessionPage({ params }: { params: Params }) {
+async function SessionContent({ params }: { params: Params }) {
   const { id } = await params;
 
   let session: SupportSession | null = null;
@@ -133,7 +135,7 @@ export default async function SessionPage({ params }: { params: Params }) {
           </section>
         </div>
 
-        <aside className="grid gap-4 lg:sticky lg:top-24">
+        <div className="grid gap-4 lg:sticky lg:top-24">
           <div className="grid gap-4 rounded-2xl border bg-card p-6 shadow-[var(--shadow-soft)]">
             <p className="eyebrow text-muted-foreground">Register · free</p>
             <RegisterPanel initial={session} />
@@ -146,8 +148,18 @@ export default async function SessionPage({ params }: { params: Params }) {
           <div className="px-1">
             <ReportDialog targetType="support_session" targetId={session.id} targetLabel="session" />
           </div>
-        </aside>
+        </div>
       </div>
     </article>
+  );
+}
+
+// The data (and the URL id) load inside Suspense, so the page shell and a
+// skeleton can be sent instantly while the content streams in.
+export default function SessionPage({ params }: { params: Params }) {
+  return (
+    <Suspense fallback={<DetailSkeleton label="Loading session…" />}>
+      <SessionContent params={params} />
+    </Suspense>
   );
 }
