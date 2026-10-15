@@ -57,9 +57,15 @@ async def list_members(
 
 
 async def list_pending_organizations(db: AsyncSession) -> list[Organization]:
+    return await list_organizations_by_status(db, "pending")
+
+
+async def list_organizations_by_status(
+    db: AsyncSession, status: str
+) -> list[Organization]:
     result = await db.execute(
         select(Organization)
-        .where(Organization.verification_status == "pending")
+        .where(Organization.verification_status == status)
         .order_by(Organization.created_at)
     )
     return list(result.scalars().all())
