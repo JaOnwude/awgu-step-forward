@@ -43,12 +43,14 @@ export function HeaderAccount() {
       <div className="flex items-center gap-1.5">
         <Link
           href="/account"
-          className={buttonVariants({ variant: "ghost", size: "sm", className: "hidden sm:inline-flex" })}
+          // cn() rather than cva's className so "hidden" beats the base "inline-flex".
+          className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "hidden sm:inline-flex")}
         >
           Sign in
         </Link>
         <Link href="/account" className={buttonVariants({ size: "sm" })}>
-          Create account
+          <span className="sm:hidden">Join</span>
+          <span className="hidden sm:inline">Create account</span>
         </Link>
       </div>
     );
@@ -62,7 +64,7 @@ export function HeaderAccount() {
       {isStaff ? (
         <Link
           href="/admin"
-          className={buttonVariants({ variant: "outline", size: "sm", className: "hidden sm:inline-flex" })}
+          className={cn(buttonVariants({ variant: "outline", size: "sm" }), "hidden sm:inline-flex")}
         >
           Staff
         </Link>
