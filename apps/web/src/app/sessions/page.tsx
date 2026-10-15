@@ -88,6 +88,8 @@ export default async function SessionsPage({
         </div>
       ) : (
         <>
+          {/* Keeps the heading order h1 → h2 → h3 (each card title is an h3). */}
+          <h2 className="sr-only">Upcoming sessions</h2>
           <p className="text-sm text-muted-foreground" aria-live="polite">
             <span className="font-semibold text-foreground">{data.total}</span> upcoming{" "}
             {data.total === 1 ? "session" : "sessions"} · soonest first
