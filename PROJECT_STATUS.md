@@ -1,6 +1,6 @@
 # PROJECT_STATUS.md — Awgu StepForward
 
-**Last updated:** 2026-10-14
+**Last updated:** 2026-10-15
 **Purpose:** Handoff/status document so another coding agent (e.g. Claude) can pick up mid-project without re-planning.
 
 ---
@@ -25,20 +25,22 @@ Read `IMPLEMENTATION_PLAN.md` before doing anything — it holds the locked scop
 | Day 3 — Public discovery | Done, merged to `main` |
 | Day 4 — Applicant workflows | Done, merged to `main`, **pushed** (external-application tracking moved to Day 6) |
 | Day 5 — Local work + support sessions | Done, merged to `main` (PR #2) |
-| Redesign (D21) | Done on `day-6-notify-ai` (brand, shadcn/ui, all screens) |
-| Day 6 — Notifications + AI slice | Done on `day-6-notify-ai` (D22); **not merged yet** |
-| Day 7 — Stabilize & demo | Not started |
-| Backend tests | `57 passed` (`uv run pytest -q`) |
+| Redesign (D21) | Done, merged to `main` (PR #3) |
+| Day 6 — Notifications + AI slice | Done, merged to `main` (PR #3, D22) |
+| Visuals (D23) | Done, merged to `main` (PR #4): illustrations, motion, stories carousel, single theme button |
+| Day 7 — Stabilize & demo | Done on `day-7-demo` (D24): restore/expire, provider suspend/restore, instant-navigation fix, axe pass, deploy proxy, `docs/RUNBOOK.md`. **Deploy is run by the owner** (RUNBOOK §7). |
+| Backend tests | `62 passed` (`uv run pytest -q`) |
 | Backend lint | `uv run ruff check .` — All checks passed |
-| Web lint / typecheck / build | `bun run lint`, `bun run typecheck` and `bun run build` pass (2026-10-14) |
+| Web lint / typecheck / build | `bun run lint`, `bun run typecheck` and `bun run build` pass (2026-10-15) |
+| Accessibility | axe (WCAG 2.1 A/AA + best practice) clean on all main routes (2026-10-15) |
 
 **Branches:**
-- `main` — includes Days 1–5 (Day 5 via PR #2). Pushed to `origin`.
-- `day-6-notify-ai` — redesign + Day 6. **Not merged.**
+- `main` — includes Days 1–6, the redesign and the visuals (PRs #2–#4). Pushed to `origin`.
+- `day-7-demo` — Day 7, ready for its PR.
 
 **Workflow the owner has locked in (IMPORTANT — respect it):**
 - One commit per file.
-- The **agent runs `git add`; the owner runs commit + push.** Agent must NOT commit or push unless explicitly told.
+- The **owner runs `git add`, commit and push.** The agent does not stage, commit or push; it hands over small one-file `git add && git commit` command blocks plus the push command, and a PR title/description when asked.
 - One branch per day, hyphens only: `day-1-auth`, `day-2-provider-moderation`, `day-3-discovery`, `day-4-applicant`, `day-5-local-work`, `day-6-notify-ai`, `day-7-demo`.
 - Each day merged back to `main` with `git merge --no-ff`.
 
@@ -51,7 +53,7 @@ Feature modules present under `backend/app/features/`:
 - `identity/` — one-time-code auth (no passwords). Session cookie `awgu_session` (HttpOnly), CSRF cookie `awgu_csrf` + `X-CSRF-Token` header. `OtpChallenge` model with resend cooldown and attempt limit.
 - `providers/` — provider org, membership, verification case.
 - `opportunities/` — listing catalog, `WorkTerms` (Day 5), adults-only rule for work listings, discovery queries (`search_public`, `get_opportunity`), expiry job.
-- `moderation/` — admin approve / reject-with-reason / request-changes / suspend; audit event per transition. (Restore and expire are scheduled for Day 7.)
+- `moderation/` — admin approve / reject-with-reason / request-changes / suspend / restore / expire for listings, and suspend / restore for providers (suspending a provider suspends its live listings and sessions); audit event per transition. `GET /admin/moderation/catalog` lists live and suspended items (D24).
 - `applicant/` — private profile (under-18 blocked), saved opportunities.
 - `applications/` — in-platform application workflow, idempotent submit, receipt + status history, min-age check. Has `form.py`.
 - `sessions/` — application-support sessions and registrations (Day 5, D20).
@@ -106,11 +108,12 @@ Then: one commit per file, `git merge --no-ff day-5-local-work` into `main`.
 - **Assistant** (`features/assistant/`): `GET /opportunity-assistant/status`, `POST /opportunity-assistant/search`; off unless `AI_ENABLED=true`; rule-based interpreter, no external model; redacts contacts/IDs; logs `AIUsageEvent` without the query. UI: panel above the directory, hidden when off.
 - **Exit met:** disabling AI leaves ordinary search fully usable (tested); external statuses are applicant-reported; a visitor can report a listing and staff see it.
 
-### 4c. Day 7 — Stabilize & demo
-- Moderation restore + expire actions (`R20`).
-- Run lint / typecheck / tests / production build; fix top defects; keyboard + mobile-width pass; axe a11y on core routes.
-- Seed a coherent demo; keep `docs/DECISIONS.md` current; write `docs/RUNBOOK.md`; deploy non-sensitive demo (Vercel + Render + Neon).
-- **Exit:** documented known limits; demo works end to end.
+### 4c. Day 7 — Done (2026-10-15, `docs/DECISIONS.md` D24)
+- Restore + expire for listings and suspend + restore for providers (`R20`), audited, with a "Published listings & providers" staff card; 5 new tests.
+- Lint / typecheck / 62 tests / production build pass. Detail pages read params and data inside `<Suspense>` (dev "1 issue" warning gone). Phone header overflow fixed. axe clean on all main routes; contrast checked for every token pair in both themes.
+- Demo seed reviewed (3 providers, 6 listings across all categories, 2 sessions). `docs/RUNBOOK.md` covers run, demo script, checks, jobs, reset, deploy and **known limits**.
+- `next.config.ts` proxies `/api` to `API_ORIGIN` so deployed sign-in cookies are first-party (verified locally).
+- **Remaining:** the owner deploys (RUNBOOK §7) and checks the live demo end to end.
 
 ### 4d. Decisions taken / still open
 - **Forgotten password:** decided 2026-10-14 — recovery is requesting a new one-time code (D14). Do not build a password flow.
@@ -181,6 +184,6 @@ bun run build
 ## 8. Suggested next action for the picking-up agent
 
 1. Read `IMPLEMENTATION_PLAN.md`, `docs/DECISIONS.md`, and the `spec.md` sections cited above.
-2. Owner merges `day-6-notify-ai` into `main`, then starts `day-7-demo`.
-3. One commit per file; hand the owner the `git add`/commit/merge commands (agent does not commit or push).
-4. Day 7: restore/expire moderation actions, the metadata-caching dev warning on detail pages, a11y (axe) pass, `docs/RUNBOOK.md`, demo deploy.
+2. Owner merges `day-7-demo` into `main` and deploys from `docs/RUNBOOK.md` §7.
+3. One commit per file; hand the owner the `git add`/commit commands (agent does not stage, commit or push).
+4. After the demo: the follow-ups in RUNBOOK "Known limits" (real sign-in codes, scheduled jobs, session restore, mobile scaffold).
