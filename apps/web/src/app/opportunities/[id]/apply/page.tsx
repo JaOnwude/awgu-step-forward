@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
 import { ApplyFlow } from "@/features/discovery/apply-flow";
 import { fetchOpportunityDetail } from "@/lib/api/discovery";
+import { DetailSkeleton } from "@/components/shared/detail-skeleton";
 import { buttonVariants } from "@/components/ui/button";
 
 type Params = Promise<{ id: string }>;
@@ -26,7 +28,7 @@ export async function generateMetadata({
   }
 }
 
-export default async function ApplyPage({ params }: { params: Params }) {
+async function ApplyContent({ params }: { params: Params }) {
   const { id } = await params;
 
   let opportunity = null;
@@ -98,5 +100,15 @@ export default async function ApplyPage({ params }: { params: Params }) {
         )}
       </div>
     </section>
+  );
+}
+
+// The data (and the URL id) load inside Suspense, so the page shell and a
+// skeleton can be sent instantly while the content streams in.
+export default function ApplyPage({ params }: { params: Params }) {
+  return (
+    <Suspense fallback={<DetailSkeleton label="Loading application form…" />}>
+      <ApplyContent params={params} />
+    </Suspense>
   );
 }
