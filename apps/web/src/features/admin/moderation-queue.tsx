@@ -11,6 +11,7 @@ import {
   SectionSkeleton,
 } from "@/components/shared/query-states";
 import { ListingStatusBadge, VerificationBadge } from "@/components/shared/status-badge";
+import { LiveCatalog } from "@/features/admin/live-catalog";
 import { ReminderJobCard, ReportReview } from "@/features/admin/report-review";
 import { SessionReview } from "@/features/admin/session-review";
 import { Button } from "@/components/ui/button";
@@ -324,6 +325,8 @@ export function ModerationQueue() {
           </Card>
 
           <SessionReview sessions={queue.sessions} />
+
+          <LiveCatalog />
 
           <ReminderJobCard />
         </>
