@@ -16,6 +16,13 @@ def ai_on(monkeypatch):
     monkeypatch.setattr(get_settings(), "ai_enabled", True)
 
 
+@pytest.fixture
+def ai_off(monkeypatch):
+    # The default, set explicitly so a local .env with AI_ENABLED=true can't
+    # change the result.
+    monkeypatch.setattr(get_settings(), "ai_enabled", False)
+
+
 def test_redaction_removes_contacts_and_ids():
     cleaned, redacted = redact(
         "Call me on 0803 123 4567 or ada@mail.test, NIN 12345678901"
@@ -37,7 +44,9 @@ def test_interpreter_maps_words_to_filters():
     assert interpret("solar panels").q == "solar"
 
 
-async def test_assistant_is_off_by_default_and_search_still_works(client, seeded_admin):
+async def test_assistant_is_off_by_default_and_search_still_works(
+    client, seeded_admin, ai_off
+):
     await publish_listing(client, seeded_admin)
     status = (await client.get("/api/v1/opportunity-assistant/status")).json()
     assert status["enabled"] is False
