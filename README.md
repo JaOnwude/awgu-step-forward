@@ -4,7 +4,7 @@ A verified opportunity directory and application-tracking service for Enugu Stat
 
 ## Project status
 
-Week-1 demo build in progress (web/PWA + FastAPI). Days 1–4 are merged to `main`; Day 5 is on `day-5-local-work`. See `PROJECT_STATUS.md` for current state and `IMPLEMENTATION_PLAN.md` for the day plan. Read `docs/README.md` for the document map and source-of-truth order, and `docs/DECISIONS.md` for week-1 defaults and deviations.
+Week-1 demo build complete (web/PWA + FastAPI): Days 1–7 are done. To run, demo or deploy it, follow `docs/RUNBOOK.md`. See `PROJECT_STATUS.md` for current state and `IMPLEMENTATION_PLAN.md` for the day plan. Read `docs/README.md` for the document map and source-of-truth order, and `docs/DECISIONS.md` for week-1 defaults and deviations.
 
 This is a non-sensitive demo with synthetic data only. It is not production-ready.
 
