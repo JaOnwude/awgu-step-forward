@@ -29,7 +29,8 @@ const toneClasses: Record<Tone, string> = {
   success: "bg-success-muted text-success",
   warning: "bg-warning-muted text-warning",
   danger: "bg-danger-muted text-danger",
-  accent: "bg-highlight-muted text-highlight",
+  // Deeper laterite in light mode: plain highlight is under 4.5:1 on this tint.
+  accent: "bg-highlight-muted text-[#9a3f14] dark:text-highlight",
   primary: "bg-primary-muted text-primary",
   outline: "border-border text-muted-foreground",
 };
