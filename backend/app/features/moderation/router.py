@@ -10,7 +10,7 @@ from app.core.errors import PermissionDeniedError
 from app.core.roles import STAFF_ROLES
 from app.db.session import get_db
 from app.features.moderation import service
-from app.features.moderation.schemas import ModerationQueue
+from app.features.moderation.schemas import ModerationCatalog, ModerationQueue
 from app.features.opportunities.schemas import (
     ModerationDecisionRequest,
     OpportunityView,
@@ -44,6 +44,30 @@ async def get_queue(
         listings=[OpportunityView.model_validate(o) for o in listings],
         sessions=await session_service.pending_sessions(db),
         reports=await report_service.open_reports(db),
+    )
+
+
+@router.get("/catalog", response_model=ModerationCatalog)
+async def get_catalog(
+    ctx: AuthContext = Depends(require_roles(*STAFF_ROLES)),
+    db: AsyncSession = Depends(get_db),
+) -> ModerationCatalog:
+    catalog = await service.live_catalog(db)
+    return ModerationCatalog(
+        live_listings=[
+            OpportunityView.model_validate(o) for o in catalog["live_listings"]
+        ],
+        suspended_listings=[
+            OpportunityView.model_validate(o) for o in catalog["suspended_listings"]
+        ],
+        verified_providers=[
+            provider_service.serialize_provider(o)
+            for o in catalog["verified_providers"]
+        ],
+        suspended_providers=[
+            provider_service.serialize_provider(o)
+            for o in catalog["suspended_providers"]
+        ],
     )
 
 

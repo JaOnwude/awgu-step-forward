@@ -55,6 +55,6 @@ class ProviderDetail(ProviderView):
 
 
 class VerificationDecisionRequest(BaseModel):
-    decision: Literal["approve", "reject"]
+    decision: Literal["approve", "reject", "suspend", "restore"]
     rationale: str = Field(min_length=3, max_length=2000)
     recheck_days: int | None = Field(default=None, ge=1, le=3650)

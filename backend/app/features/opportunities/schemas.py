@@ -223,7 +223,9 @@ class OpportunityDetail(OpportunityCard):
 
 
 class ModerationDecisionRequest(BaseModel):
-    decision: Literal["approve", "reject", "request_changes", "suspend"]
+    decision: Literal[
+        "approve", "reject", "request_changes", "suspend", "restore", "expire"
+    ]
     reason: str | None = Field(default=None, max_length=2000)
 
 OpportunityView = OpportunityOut

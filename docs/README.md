@@ -14,6 +14,7 @@ This folder contains the technical and requirements documents for the Awgu StepF
 | [ERD](ERD.md) | Conceptual relational data model, key fields, relationships, constraints, and privacy notes | Starting model; migration/schema implementation must be reviewed against product rules |
 | [API contract guide](API-CONTRACT.md) | API conventions and endpoint families for frontend/backend coordination | FastAPI OpenAPI schema is the executable contract once generated |
 | [Decisions](DECISIONS.md) | Week-1 defaults, deviations from the specs, and owner decisions | Records how conflicts were resolved; does not override `../spec.md` |
+| [Runbook](RUNBOOK.md) | Run, demo, check, reset and deploy the demo; known limits | Operational guide for the week-1 demo |
 
 ## Source-of-truth order
 

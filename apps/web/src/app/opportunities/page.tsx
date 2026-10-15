@@ -176,6 +176,8 @@ function DirectoryResults({
         </div>
       ) : (
         <>
+          {/* Keeps the heading order h1 → h2 → h3 (each card title is an h3). */}
+          <h2 className="sr-only">Results</h2>
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {data.items.map((opportunity) => (
               <OpportunityCardView key={opportunity.id} opportunity={opportunity} />

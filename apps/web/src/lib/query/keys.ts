@@ -18,6 +18,7 @@ export const queryKeys = {
   managedSessions: ["sessions", "managed"] as const,
   roster: (id: string) => ["sessions", "roster", id] as const,
   moderationQueue: ["moderation", "queue"] as const,
+  moderationCatalog: ["moderation", "catalog"] as const,
   notifications: ["notifications", "inbox"] as const,
   notificationPrefs: ["notifications", "preferences"] as const,
   assistantStatus: ["assistant", "status"] as const,

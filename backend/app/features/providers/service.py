@@ -3,13 +3,15 @@ from __future__ import annotations
 import uuid
 from datetime import timedelta
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.errors import NotFoundError
+from app.core.errors import ConflictError, NotFoundError
 from app.core.roles import PROVIDER_ROLE
 from app.features.audit.service import record_event
 from app.features.identity import repository as identity_repo
 from app.features.identity.models import User, utcnow
+from app.features.opportunities.models import Opportunity
 from app.features.providers import repository as repo
 from app.features.providers.models import (
     Organization,
@@ -22,6 +24,7 @@ from app.features.providers.schemas import (
     ProviderRequestCreate,
     ProviderView,
 )
+from app.features.sessions.models import ApplicationSupportSession
 
 
 def serialize_provider(org: Organization) -> ProviderView:
@@ -105,6 +108,55 @@ async def get_provider_detail(db: AsyncSession, *, org: Organization) -> Provide
     )
 
 
+async def _suspend_published_items(
+    db: AsyncSession, *, org: Organization, admin: User, rationale: str
+) -> None:
+    """Take a suspended provider's live listings and sessions offline.
+
+    Each one is suspended and audited individually, so the ordinary public
+    rules hide it everywhere (directory, detail, apply, register, reports).
+    """
+    reason = f"Provider suspended: {rationale}"
+    now = utcnow()
+    listings = await db.scalars(
+        select(Opportunity).where(
+            Opportunity.organization_id == org.id, Opportunity.status == "approved"
+        )
+    )
+    for opp in listings:
+        opp.status = "suspended"
+        opp.decision_reason = reason
+        opp.reviewed_at = now
+        opp.reviewed_by_user_id = admin.id
+        await record_event(
+            db,
+            action="listing.suspend",
+            actor_user_id=admin.id,
+            target_type="opportunity",
+            target_id=opp.id,
+            metadata={"decision": "suspend", "cause": "provider_suspended"},
+        )
+    sessions = await db.scalars(
+        select(ApplicationSupportSession).where(
+            ApplicationSupportSession.organization_id == org.id,
+            ApplicationSupportSession.status == "approved",
+        )
+    )
+    for session in sessions:
+        session.status = "suspended"
+        session.decision_reason = reason
+        session.reviewed_at = now
+        session.reviewed_by_user_id = admin.id
+        await record_event(
+            db,
+            action="session.suspended",
+            actor_user_id=admin.id,
+            target_type="support_session",
+            target_id=session.id,
+            metadata={"decision": "suspend", "cause": "provider_suspended"},
+        )
+
+
 async def decide_verification(
     db: AsyncSession,
     *,
@@ -119,14 +171,25 @@ async def decide_verification(
         raise NotFoundError("Provider not found.")
 
     now = utcnow()
-    approved = decision == "approve"
-    org.verification_status = "verified" if approved else "rejected"
-    org.verified_at = now if approved else None
-    org.recheck_at = (
-        now + timedelta(days=recheck_days)
-        if approved and recheck_days is not None
-        else None
-    )
+    if decision == "suspend":
+        if org.verification_status != "verified":
+            raise ConflictError("Only a verified provider can be suspended.")
+        org.verification_status = "suspended"
+        await _suspend_published_items(db, org=org, admin=admin, rationale=rationale)
+    elif decision == "restore":
+        if org.verification_status != "suspended":
+            raise ConflictError("Only a suspended provider can be restored.")
+        # Its listings and sessions stay suspended; staff restore each one.
+        org.verification_status = "verified"
+    else:
+        approved = decision == "approve"
+        org.verification_status = "verified" if approved else "rejected"
+        org.verified_at = now if approved else None
+        org.recheck_at = (
+            now + timedelta(days=recheck_days)
+            if approved and recheck_days is not None
+            else None
+        )
 
     db.add(
         VerificationCase(
@@ -141,7 +204,11 @@ async def decide_verification(
     )
     await record_event(
         db,
-        action=f"provider.{org.verification_status}",
+        action=(
+            "provider.restored"
+            if decision == "restore"
+            else f"provider.{org.verification_status}"
+        ),
         actor_user_id=admin.id,
         target_type="organization",
         target_id=org.id,

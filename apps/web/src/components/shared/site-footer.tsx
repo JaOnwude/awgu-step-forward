@@ -10,7 +10,8 @@ export function SiteFooter() {
       <div className="mx-auto w-full max-w-6xl px-4 pt-14 pb-28 sm:px-6 lg:pb-10">
         <div className="grid gap-10 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div className="grid content-start gap-4">
-            <Logo className="[&_.font-display]:text-[#eef0e8]" />
+            {/* Light laterite so "AWGU" keeps 4.5:1 contrast on the ink footer. */}
+            <Logo className="[&_.font-display]:text-[#eef0e8] [&_.text-highlight]:text-[#e88a55]" />
             <p className="max-w-xs text-sm text-[#eef0e8]/70">
               Verified opportunities for learning, work, and your next step. Enugu
               State, Awgu first.

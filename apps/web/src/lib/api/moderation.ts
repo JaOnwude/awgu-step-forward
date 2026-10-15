@@ -4,12 +4,14 @@ import type { ProviderSummary } from "@/lib/api/providers";
 import type { StaffReport } from "@/lib/api/reports";
 import type { ManagedSession } from "@/lib/api/sessions";
 
-export type ProviderDecision = "approve" | "reject";
+export type ProviderDecision = "approve" | "reject" | "suspend" | "restore";
 export type ListingDecision =
   | "approve"
   | "reject"
   | "request_changes"
-  | "suspend";
+  | "suspend"
+  | "restore"
+  | "expire";
 
 export interface ModerationQueue {
   providers: ProviderSummary[];
@@ -20,6 +22,18 @@ export interface ModerationQueue {
 
 export function fetchModerationQueue(): Promise<ModerationQueue> {
   return apiRequest<ModerationQueue>("/api/v1/admin/moderation/queue");
+}
+
+/** Published and suspended items staff can suspend, expire or restore. */
+export interface ModerationCatalog {
+  live_listings: Opportunity[];
+  suspended_listings: Opportunity[];
+  verified_providers: ProviderSummary[];
+  suspended_providers: ProviderSummary[];
+}
+
+export function fetchModerationCatalog(): Promise<ModerationCatalog> {
+  return apiRequest<ModerationCatalog>("/api/v1/admin/moderation/catalog");
 }
 
 export function decideProvider(
