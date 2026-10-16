@@ -7,6 +7,8 @@ export interface UserPublic {
   account_status: string;
   roles: string[];
   created_at: string;
+  /** Own profile picture (API-relative, versioned), or null. */
+  avatar_url: string | null;
 }
 
 export interface LoginResponse {
@@ -66,6 +68,17 @@ export function logout(): Promise<{ detail: string }> {
     method: "POST",
     csrf: true,
   });
+}
+
+/** Upload a profile picture; the server crops, resizes and strips metadata. */
+export function uploadAvatar(file: File): Promise<UserPublic> {
+  const form = new FormData();
+  form.append("file", file);
+  return apiRequest<UserPublic>("/api/v1/me/avatar", { method: "PUT", body: form, csrf: true });
+}
+
+export function removeAvatar(): Promise<UserPublic> {
+  return apiRequest<UserPublic>("/api/v1/me/avatar", { method: "DELETE", csrf: true });
 }
 
 export function adminPing(): Promise<AdminPingResponse> {
