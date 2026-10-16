@@ -5,6 +5,7 @@ import { Bookmark, BookmarkCheck } from "lucide-react";
 
 import { InlineError } from "@/components/shared/query-states";
 import { Button } from "@/components/ui/button";
+import { signInHref } from "@/lib/sign-in";
 import {
   useCurrentUser,
   useSaveListing,
@@ -24,7 +25,7 @@ export function SaveListingButton({
   if (userQuery.isSuccess && !signedIn) {
     return (
       <Button asChild variant="outline" className="w-full">
-        <Link href="/account">
+        <Link href={signInHref(`/opportunities/${opportunityId}`)}>
           <Bookmark aria-hidden /> Sign in to save
         </Link>
       </Button>
