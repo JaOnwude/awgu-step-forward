@@ -23,8 +23,8 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useCurrentUser, useSignOut, useSignedIn } from "@/features/account/queries";
-import { devLogin } from "@/lib/api/auth";
+import { useCurrentUser, useSignOut } from "@/features/account/queries";
+import { RedirectToSignIn } from "@/features/account/redirect-to-sign-in";
 import { ApiError } from "@/lib/api/client";
 import {
   decideListing,
@@ -36,48 +36,6 @@ import {
 import { queryKeys } from "@/lib/query/keys";
 
 const STAFF_ROLES = new Set(["admin", "super_admin"]);
-
-function DevStaffSignIn() {
-  const [email, setEmail] = useState("admin@awgu.local");
-  const signedIn = useSignedIn();
-  const signIn = useMutation({
-    mutationFn: () => devLogin(email.trim().toLowerCase()),
-    onSuccess: (result) => signedIn(result.user),
-  });
-
-  return (
-    <Card>
-      <CardHeader>
-        <h2 className="text-lg font-bold">Staff sign-in</h2>
-        <CardDescription>Development only: sign in as a seeded staff account.</CardDescription>
-      </CardHeader>
-      <CardContent className="grid gap-3">
-        <form
-          className="flex flex-wrap items-end gap-3"
-          onSubmit={(event) => {
-            event.preventDefault();
-            signIn.mutate();
-          }}
-        >
-          <div className="grid gap-1.5">
-            <Label htmlFor="staff-email">Development email</Label>
-            <Input
-              id="staff-email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              type="email"
-              autoComplete="off"
-            />
-          </div>
-          <Button type="submit" disabled={signIn.isPending}>
-            Sign in
-          </Button>
-        </form>
-        <InlineError error={signIn.error} />
-      </CardContent>
-    </Card>
-  );
-}
 
 export function ModerationQueue() {
   const queryClient = useQueryClient();
@@ -119,7 +77,7 @@ export function ModerationQueue() {
   if (userQuery.isError) {
     return <ErrorState error={userQuery.error} onRetry={() => userQuery.refetch()} />;
   }
-  if (!user) return <DevStaffSignIn />;
+  if (!user) return <RedirectToSignIn next="/admin" />;
 
   const queue = queueQuery.data ?? { providers: [], listings: [], sessions: [], reports: [] };
 
