@@ -10,7 +10,8 @@ import {
   InlineError,
   SectionSkeleton,
 } from "@/components/shared/query-states";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { signInHref } from "@/lib/sign-in";
 import {
   Card,
   CardContent,
@@ -142,6 +143,18 @@ export function ApplyFlow({
   }
 
   if (formQuery.isError) {
+    if (isUnauthorized(formQuery.error)) {
+      return (
+        <ErrorState error={formQuery.error}>
+          <Link
+            href={signInHref(`/opportunities/${opportunityId}/apply`)}
+            className={buttonVariants({ size: "sm" })}
+          >
+            Sign in to apply
+          </Link>
+        </ErrorState>
+      );
+    }
     return <ErrorState error={formQuery.error} onRetry={() => formQuery.refetch()} />;
   }
 
