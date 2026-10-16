@@ -52,7 +52,9 @@ export async function apiRequest<T>(
     ...extraHeaders,
   };
 
-  if (body !== undefined) headers["Content-Type"] = "application/json";
+  // FormData (file uploads) sets its own multipart Content-Type and boundary.
+  const isForm = typeof FormData !== "undefined" && body instanceof FormData;
+  if (body !== undefined && !isForm) headers["Content-Type"] = "application/json";
   if (csrf) {
     const token = readCookie(CSRF_COOKIE_NAME);
     if (token) headers[CSRF_HEADER_NAME] = token;
@@ -65,7 +67,7 @@ export async function apiRequest<T>(
       headers,
       credentials: "include",
       cache: "no-store",
-      body: body === undefined ? undefined : JSON.stringify(body),
+      body: body === undefined ? undefined : isForm ? body : JSON.stringify(body),
     });
   } catch {
     throw new ApiError(
