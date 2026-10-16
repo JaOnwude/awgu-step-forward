@@ -33,11 +33,15 @@ cd apps/web && bun install && bun run dev              # 3. Web on :3000
 
 Development sign-in has no passwords or real codes (`DEV_AUTH_ENABLED=true`).
 
-| Role | Account | Where |
+Everyone signs in at **`/sign-in`** (header → **Sign in**). Under "Demo accounts", tap a role:
+
+| Role | Account | Lands on |
 |---|---|---|
-| Applicant | `applicant@awgu.local` | `/account` → **Use applicant@awgu.local** → **Dev sign in** |
-| Provider | `provider@awgu.local` | `/providers` → **Sign in** |
-| Staff (admin) | `admin@awgu.local` | `/admin` → **Sign in** |
+| Applicant | `applicant@awgu.local` | `/account` |
+| Provider | `provider@awgu.local` | `/providers` |
+| Staff (admin) | `admin@awgu.local` | `/admin` |
+
+Coming from a page (for example "Sign in to save" on a listing) returns you to that page instead. A "You're signed in" message confirms it; signing out shows "You're signed out" and goes home.
 
 Seeded by `app/scripts/seed.py` and `app/scripts/seed_demo.py` (both safe to run again — they skip what exists):
 
@@ -52,7 +56,7 @@ One browser window holds one signed-in person. Use a second window in Incognito 
 1. **Home** — illustrations, categories, featured listings, example stories (labelled illustrative). Toggle the sun/moon button.
 2. **Directory** — filter by category and town; open *Market stall construction*: adults-only notice, pay, PPE, verified employer.
 3. **Report** — "Report this listing" as a visitor → *Report received*.
-4. **Applicant** — sign in, create an 18+ profile, save a listing, apply in-platform to *Solar installation apprenticeship* (review → consent → receipt), open the application timeline; apply on the provider site for the scholarship and update its tracked status.
+4. **Applicant** — sign in, add a profile picture, create an 18+ profile, save a listing, apply in-platform to *Solar installation apprenticeship* (review → consent → receipt), open the application timeline; apply on the provider site for the scholarship and update its tracked status.
 5. **Support session** — register with a reminder; places left drops.
 6. **Provider** — create a *Local paid work* listing with work terms; submit for review.
 7. **Staff** — approve it; handle the report (resolve / dismiss / suspend); in **Published listings & providers** close a listing early, suspend and restore a listing, suspend and restore a provider. Every action is audited.
