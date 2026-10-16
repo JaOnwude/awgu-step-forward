@@ -3,7 +3,7 @@ from __future__ import annotations
 import uuid
 from datetime import UTC, datetime
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Uuid
+from sqlalchemy import DateTime, ForeignKey, Integer, LargeBinary, String, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -24,6 +24,8 @@ class User(Base):
     )
     email_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     phone_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # Set when a profile picture is stored (UserAvatar); doubles as its version.
+    avatar_updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=utcnow, nullable=False
     )
@@ -115,4 +117,24 @@ class OtpChallenge(Base):
     consumed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=utcnow, nullable=False
+    )
+
+
+class UserAvatar(Base):
+    """A profile picture, already resized to a small square WebP.
+
+    Kept in the database (about 10-30 KB each) rather than on disk, because
+    the demo host's disk is wiped on every deploy and there is no object
+    storage yet (IMPLEMENTATION_PLAN §5).
+    """
+
+    __tablename__ = "user_avatars"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    content: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
+    content_type: Mapped[str] = mapped_column(String(32), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utcnow, onupdate=utcnow, nullable=False
     )
