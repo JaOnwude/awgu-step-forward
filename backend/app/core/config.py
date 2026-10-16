@@ -51,6 +51,10 @@ class Settings(BaseSettings):
     report_hash_secret: str = "dev-only-report-secret"
     report_rate_limit_per_hour: int = 5
 
+    # Profile pictures: largest upload accepted, and the stored square size.
+    avatar_max_upload_bytes: int = 5 * 1024 * 1024
+    avatar_size_px: int = 256
+
 
 @lru_cache
 def get_settings() -> Settings:
