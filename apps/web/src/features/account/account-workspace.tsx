@@ -13,13 +13,15 @@ import { useMySessionRegistrations } from "@/features/sessions/queries";
 import type { ApplicantProfile } from "@/lib/api/applicant";
 import { formatWatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { UserAvatar } from "@/components/shared/user-avatar";
 
 import { ApplicationsList } from "./applications-list";
 import { MySessions } from "./my-sessions";
+import { ProfilePhotoCard } from "./profile-photo";
 import { ProfileForm } from "./profile-form";
 import { useApplications, useCurrentUser, useProfile, useSavedListings, useSignOut } from "./queries";
 import { SavedListings } from "./saved-listings";
-import { SignInCard } from "./sign-in-card";
+import { RedirectToSignIn } from "./redirect-to-sign-in";
 
 const PROFILE_FIELDS: (keyof ApplicantProfile)[] = [
   "preferred_name",
@@ -74,24 +76,7 @@ export function AccountWorkspace() {
     return <ErrorState error={userQuery.error} onRetry={() => userQuery.refetch()} />;
   }
 
-  if (!user) {
-    return (
-      <div className="mx-auto grid max-w-xl gap-6">
-        <header className="grid gap-2 text-center">
-          <p className="eyebrow text-highlight">Your private space</p>
-          <h1 className="font-display text-4xl font-semibold sm:text-5xl">Sign in to StepForward</h1>
-          <p className="text-muted-foreground">
-            Save opportunities, keep a private profile, and track every application in
-            one place.
-          </p>
-        </header>
-        <SignInCard />
-        <p className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-          <Lock aria-hidden className="size-3.5" /> Your profile is never public.
-        </p>
-      </div>
-    );
-  }
+  if (!user) return <RedirectToSignIn next="/account" />;
 
   const profile = profileQuery.data;
   const name = profile?.preferred_name ?? user.email?.split("@")[0] ?? user.phone ?? "there";
@@ -104,9 +89,12 @@ export function AccountWorkspace() {
   return (
     <div className="grid gap-8">
       <header className="flex flex-wrap items-end justify-between gap-4">
-        <div className="grid gap-2">
-          <p className="eyebrow text-muted-foreground">Welcome back</p>
-          <h1 className="font-display text-4xl font-semibold sm:text-5xl">Hello, {name}</h1>
+        <div className="flex items-center gap-4">
+          <UserAvatar user={user} size="md" />
+          <div className="grid gap-2">
+            <p className="eyebrow text-muted-foreground">Welcome back</p>
+            <h1 className="font-display text-4xl font-semibold sm:text-5xl">Hello, {name}</h1>
+          </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <span className="inline-flex h-9 items-center gap-1.5 rounded-full border px-3 text-xs font-semibold text-muted-foreground">
@@ -164,6 +152,7 @@ export function AccountWorkspace() {
           <MySessions />
         </div>
         <div id="profile" className="grid scroll-mt-24 gap-6">
+          <ProfilePhotoCard user={user} />
           {profileQuery.isPending ? (
             <SectionSkeleton label="Loading your profile…" />
           ) : profileQuery.isError ? (
