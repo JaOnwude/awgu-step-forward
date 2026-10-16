@@ -29,6 +29,11 @@ def serialize_user(user: User) -> UserPublic:
         account_status=user.account_status,
         roles=user.role_names,
         created_at=user.created_at,
+        avatar_url=(
+            f"/api/v1/me/avatar?v={int(user.avatar_updated_at.timestamp())}"
+            if user.avatar_updated_at
+            else None
+        ),
     )
 
 
