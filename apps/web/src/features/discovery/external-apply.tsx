@@ -6,6 +6,7 @@ import { ExternalLink, MapPin } from "lucide-react";
 
 import { InlineError } from "@/components/shared/query-states";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { signInHref } from "@/lib/sign-in";
 import { useCurrentUser } from "@/features/account/queries";
 import { startTracking } from "@/lib/api/applications";
 import { queryKeys } from "@/lib/query/keys";
@@ -76,7 +77,10 @@ export function ExternalApply({
         </p>
       ) : (
         <p className="text-xs text-muted-foreground">
-          <Link href="/account" className="font-semibold text-primary">
+          <Link
+            href={signInHref(`/opportunities/${opportunityId}`)}
+            className="font-semibold text-primary"
+          >
             Sign in
           </Link>{" "}
           to keep track of this application.

@@ -6,7 +6,9 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { useSyncExternalStore } from "react";
+import { toast } from "sonner";
 
 import {
   fetchProfile,
@@ -78,8 +80,22 @@ const PENDING_VIEW = {
   isError: false,
 } as const;
 
-export function useSignOut() {
+// When someone signs out on a page that needs an account, that page would
+// otherwise send them to sign in before our own redirect lands. Pages check
+// this (see RedirectToSignIn) and stand aside for a moment.
+let signedOutAt = 0;
+
+export function justSignedOut(): boolean {
+  return Date.now() - signedOutAt < 3000;
+}
+
+/**
+ * Sign out, confirm it with a message, and go to `redirectTo` (the home page
+ * by default; `null` stays on the current page).
+ */
+export function useSignOut({ redirectTo = "/" }: { redirectTo?: string | null } = {}) {
   const queryClient = useQueryClient();
+  const router = useRouter();
   return useMutation({
     mutationFn: async () => {
       try {
@@ -88,7 +104,12 @@ export function useSignOut() {
         // Sign-out errors are ignored; local state resets regardless.
       }
     },
-    onSettled: () => switchUser(queryClient, null),
+    onSettled: () => {
+      if (redirectTo) signedOutAt = Date.now();
+      switchUser(queryClient, null);
+      toast("You're signed out", { description: "See you next time." });
+      if (redirectTo) router.replace(redirectTo);
+    },
   });
 }
 

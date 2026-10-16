@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { InlineError } from "@/components/shared/query-states";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { signInHref } from "@/lib/sign-in";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useCurrentUser } from "@/features/account/queries";
@@ -40,7 +41,10 @@ export function RegisterPanel({ initial }: { initial: SupportSession }) {
   if (userQuery.isSuccess && !signedIn) {
     return (
       <div className="grid gap-2">
-        <Link href="/account" className={buttonVariants({ className: "w-full" })}>
+        <Link
+          href={signInHref(`/sessions/${initial.id}`)}
+          className={buttonVariants({ className: "w-full" })}
+        >
           Sign in to register
         </Link>
         <p className="text-xs text-muted-foreground">

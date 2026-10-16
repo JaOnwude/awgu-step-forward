@@ -25,6 +25,14 @@ import {
 
 import { useSignedIn } from "./queries";
 
+// Seeded by backend/app/scripts (synthetic data). Dev sign-in only works
+// while the API runs with DEV_AUTH_ENABLED=true.
+const DEMO_ACCOUNTS = [
+  { role: "Applicant", email: "applicant@awgu.local" },
+  { role: "Provider", email: "provider@awgu.local" },
+  { role: "Staff", email: "admin@awgu.local" },
+];
+
 export function SignInCard({
   onSignedIn,
 }: {
@@ -49,7 +57,7 @@ export function SignInCard({
     onSuccess: (result) => finish(result.user),
   });
   const dev = useMutation({
-    mutationFn: () => devLogin(destination.trim().toLowerCase()),
+    mutationFn: (email: string) => devLogin(email),
     onSuccess: (result) => finish(result.user),
   });
 
@@ -150,28 +158,22 @@ export function SignInCard({
         <Separator />
         <div className="grid gap-2">
           <p className="text-xs text-muted-foreground">
-            Demo shortcut (development only)
+            Demo accounts (development only) — sign in with one tap:
           </p>
-          <div className="flex flex-wrap gap-3">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                setChannel("email");
-                setDestination("applicant@awgu.local");
-              }}
-              disabled={busy}
-            >
-              Use applicant@awgu.local
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => dev.mutate()}
-              disabled={busy || destination.trim().length === 0}
-            >
-              Dev sign in
-            </Button>
+          <div className="grid gap-2 sm:grid-cols-3">
+            {DEMO_ACCOUNTS.map((account) => (
+              <Button
+                key={account.email}
+                type="button"
+                variant="outline"
+                onClick={() => dev.mutate(account.email)}
+                disabled={busy}
+                className="h-auto flex-col items-start gap-0 py-2.5 text-left"
+              >
+                <span>{account.role}</span>
+                <span className="text-xs font-normal text-muted-foreground">{account.email}</span>
+              </Button>
+            ))}
           </div>
         </div>
 

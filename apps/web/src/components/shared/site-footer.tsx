@@ -1,7 +1,18 @@
+import { cacheLife } from "next/cache";
 import Link from "next/link";
 
 import { Logo } from "@/components/shared/logo";
 import { footerGroups } from "@/lib/navigation";
+
+/**
+ * The current year. Cached for a day (Cache Components won't render a bare
+ * `new Date()`), so it rolls over within a day of New Year.
+ */
+async function CurrentYear() {
+  "use cache";
+  cacheLife("days");
+  return <>{new Date().getFullYear()}</>;
+}
 
 export function SiteFooter() {
   return (
@@ -32,9 +43,11 @@ export function SiteFooter() {
             </nav>
           ))}
         </div>
-        <div className="mt-10 border-t border-white/15 pt-5 text-xs text-[#eef0e8]/60">
-          Demo build · all listings, names and accounts are sample data. Verification
-          means our team reviewed a provider — it is not a government endorsement.
+        <div className="mt-10 flex flex-wrap items-center justify-between gap-3 border-t border-white/15 pt-5 text-xs text-[#eef0e8]/60">
+          <p>
+            &copy; <CurrentYear /> Awgu StepForward. All rights reserved.
+          </p>
+          <p>Made in Awgu, Enugu State, Nigeria.</p>
         </div>
       </div>
     </footer>

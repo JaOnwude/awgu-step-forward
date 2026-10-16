@@ -16,6 +16,8 @@ class UserPublic(BaseModel):
     account_status: str
     roles: list[str] = Field(default_factory=list)
     created_at: datetime
+    # Own profile picture, versioned so browsers refetch after a change.
+    avatar_url: str | None = None
 
 
 class DevLoginRequest(BaseModel):

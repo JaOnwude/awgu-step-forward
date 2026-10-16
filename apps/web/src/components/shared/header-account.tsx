@@ -6,6 +6,8 @@ import { Bell } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { useCurrentUser } from "@/features/account/queries";
 import { useNotifications } from "@/features/notifications/queries";
+import { UserAvatar } from "@/components/shared/user-avatar";
+import { signInHref } from "@/lib/sign-in";
 import { cn } from "@/lib/utils";
 
 const STAFF_ROLES = new Set(["admin", "super_admin"]);
@@ -42,13 +44,13 @@ export function HeaderAccount() {
     return (
       <div className="flex items-center gap-1.5">
         <Link
-          href="/account"
+          href={signInHref()}
           // cn() rather than cva's className so "hidden" beats the base "inline-flex".
           className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "hidden sm:inline-flex")}
         >
           Sign in
         </Link>
-        <Link href="/account" className={buttonVariants({ size: "sm" })}>
+        <Link href={signInHref()} className={buttonVariants({ size: "sm" })}>
           <span className="sm:hidden">Join</span>
           <span className="hidden sm:inline">Create account</span>
         </Link>
@@ -74,11 +76,11 @@ export function HeaderAccount() {
         href="/account"
         aria-label={`My account (${name})`}
         className={cn(
-          "grid size-9 place-items-center rounded-full bg-sun font-bold text-sun-foreground uppercase",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          "rounded-full",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
         )}
       >
-        {name.charAt(0)}
+        <UserAvatar user={user} />
       </Link>
     </div>
   );

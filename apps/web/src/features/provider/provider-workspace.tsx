@@ -24,9 +24,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
-import { useCurrentUser, useSignOut, useSignedIn } from "@/features/account/queries";
+import { useCurrentUser, useSignOut } from "@/features/account/queries";
+import { RedirectToSignIn } from "@/features/account/redirect-to-sign-in";
 import { OrganizerPanel } from "@/features/sessions/organizer-panel";
-import { devLogin } from "@/lib/api/auth";
 import {
   ADULT_ONLY_TYPES,
   OPPORTUNITY_TYPES,
@@ -68,51 +68,6 @@ const EMPTY_TERMS: WorkTerms = {
   hazards_reviewed: false,
   adult_only_construction: false,
 };
-
-function DevProviderSignIn() {
-  const [email, setEmail] = useState("provider@awgu.local");
-  const signedIn = useSignedIn();
-  const signIn = useMutation({
-    mutationFn: () => devLogin(email.trim().toLowerCase()),
-    onSuccess: (result) => signedIn(result.user),
-  });
-
-  return (
-    <Card>
-      <CardHeader>
-        <h2 className="text-lg font-bold">Provider sign-in</h2>
-        <CardDescription>
-          Development only: sign in as a provider member. Applicants sign in on
-          the account page.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="grid gap-3">
-        <form
-          className="flex flex-wrap items-end gap-3"
-          onSubmit={(event) => {
-            event.preventDefault();
-            signIn.mutate();
-          }}
-        >
-          <div className="grid gap-1.5">
-            <Label htmlFor="provider-email">Development email</Label>
-            <Input
-              id="provider-email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              type="email"
-              autoComplete="off"
-            />
-          </div>
-          <Button type="submit" disabled={signIn.isPending}>
-            Sign in
-          </Button>
-        </form>
-        <InlineError error={signIn.error} />
-      </CardContent>
-    </Card>
-  );
-}
 
 export function ProviderWorkspace() {
   const queryClient = useQueryClient();
@@ -195,7 +150,7 @@ export function ProviderWorkspace() {
   if (userQuery.isError) {
     return <ErrorState error={userQuery.error} onRetry={() => userQuery.refetch()} />;
   }
-  if (!user) return <DevProviderSignIn />;
+  if (!user) return <RedirectToSignIn next="/providers" />;
 
   return (
     <div className="space-y-8">

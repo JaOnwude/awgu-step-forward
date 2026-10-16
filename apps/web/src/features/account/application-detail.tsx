@@ -15,6 +15,7 @@ import {
   applicationStatusSourceLabels,
 } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
+import { signInHref } from "@/lib/sign-in";
 import {
   Card,
   CardContent,
@@ -53,10 +54,14 @@ export function ApplicationDetailView({ id }: { id: string }) {
         }
       >
         <Button asChild variant="outline" size="sm">
-          <Link href="/account">
-            {isUnauthorized(applicationQuery.error)
-              ? "Sign in on your account page"
-              : "Back to your account"}
+          <Link
+            href={
+              isUnauthorized(applicationQuery.error)
+                ? signInHref(`/account/applications/${id}`)
+                : "/account"
+            }
+          >
+            {isUnauthorized(applicationQuery.error) ? "Sign in" : "Back to your account"}
           </Link>
         </Button>
       </ErrorState>
