@@ -127,3 +127,11 @@ Tests use `sqlite+aiosqlite` for speed. Production and local dev use PostgreSQL,
 - **Deployment proxy:** when `API_ORIGIN` is set, `next.config.ts` forwards `/api/*` to the API, so the deployed browser only talks to the web domain and the session cookie is first-party (Vercel and Render are different sites). Set `NEXT_PUBLIC_API_BASE_URL` to the web app's own URL. See `docs/RUNBOOK.md`.
 - **Tests:** the "assistant off" test pins `ai_enabled=False`, so a local `.env` with `AI_ENABLED=true` no longer breaks it.
 
+### D25 — One sign-in page, confirmations, profile pictures, footer
+**Status:** Adopted (2026-10-16, owner feedback before the hackathon pitch)
+- **One sign-in page (`/sign-in`)** replaces the three separate sign-in boxes on `/account`, `/providers` and `/admin`. Pages that need an account send visitors there with `?next=<this page>`. After signing in we show a "You're signed in" message and go to `next` (same-site paths only, so a crafted link can't redirect elsewhere), or to the account's home: staff → `/admin`, providers → `/providers`, applicants → `/account`. Signing out shows "You're signed out" and goes home. Before this, sign-in swapped the page in place with no message and left the page scrolled, so it looked as if nothing had happened.
+- **Messages** use Sonner (a small toast library) themed to the brand; they are announced to screen readers.
+- **Demo accounts** are one-tap buttons on the sign-in page (development only, needs `DEV_AUTH_ENABLED=true`).
+- **Profile pictures:** `PUT/GET/DELETE /api/v1/me/avatar`. Only JPEG, PNG and WebP up to 5 MB are accepted; the server re-encodes every upload into a 256 px square WebP (about 2–30 KB), which also removes metadata such as GPS location. Pictures are private (only the owner can fetch theirs) and stored in the database (`user_avatars`), because the demo host's disk is wiped on deploy and object storage is deferred. `UserPublic.avatar_url` carries a version so browsers refetch after a change. Upload and removal are audited.
+- **Footer:** "© <year> Awgu StepForward. All rights reserved." The year is computed in a component cached for a day (Cache Components won't prerender a bare `new Date()`).
+
