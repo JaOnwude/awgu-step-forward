@@ -5,6 +5,7 @@ import "./globals.css";
 import { MobileTabBar } from "@/components/shared/primary-nav";
 import { SiteFooter } from "@/components/shared/site-footer";
 import { SiteHeader } from "@/components/shared/site-header";
+import { Toaster } from "@/components/shared/toaster";
 import { QueryProvider } from "@/lib/query/provider";
 import { ThemeProvider } from "@/theme/theme-provider";
 
@@ -71,6 +72,7 @@ export default function RootLayout({
               <SiteFooter />
             </div>
             <MobileTabBar />
+            <Toaster />
           </QueryProvider>
         </ThemeProvider>
       </body>
