@@ -1,8 +1,9 @@
 """Deadline and support-session reminders (spec R34/R36).
 
-Run on a schedule in production (one scheduler, not one per API replica —
-TRD §8). In week 1 it runs by hand: `uv run python -m app.jobs.reminders`, or
-from the staff workspace. Messages are deduplicated per channel, and their
+Runs hourly through POST /api/v1/internal/jobs/run, called by GitHub Actions
+(one scheduler, not one per API replica — TRD §8, DECISIONS D27). It can also
+run by hand: `uv run python -m app.jobs.reminders`, or from the staff
+workspace. Messages are deduplicated per channel, and their
 wording stays neutral because phones are often shared (R37).
 """
 
