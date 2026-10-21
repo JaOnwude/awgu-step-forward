@@ -19,11 +19,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { formatWatDate } from "@/lib/format";
+import { formatWatDate, formatWatDateTime } from "@/lib/format";
+import { decideSession, type SessionDecision } from "@/lib/api/sessions";
 import {
   decideListing,
   decideProvider,
   fetchModerationCatalog,
+  type ModerationCatalog,
   type ListingDecision,
   type ProviderDecision,
 } from "@/lib/api/moderation";
@@ -97,8 +99,8 @@ function Empty({ children }: { children: React.ReactNode }) {
 }
 
 /**
- * Published and suspended listings and providers (spec R20): staff can
- * suspend or expire what is live, and restore what was suspended.
+ * Published and suspended listings, sessions and providers (spec R20): staff
+ * can suspend or expire what is live, and restore what was suspended.
  */
 export function LiveCatalog() {
   const queryClient = useQueryClient();
@@ -123,16 +125,35 @@ export function LiveCatalog() {
       decideProvider(v.id, v.decision, v.reason),
     onSuccess: refresh,
   });
+  const session = useMutation({
+    mutationFn: (v: { id: string; decision: SessionDecision; reason: string }) =>
+      decideSession(v.id, v.decision, v.reason || null),
+    onSuccess: refresh,
+  });
+  // Missing lists count as empty: during a deploy the web app can briefly talk
+  // to an older API that does not return every list yet.
+  const data = {
+    live_listings: [],
+    suspended_listings: [],
+    live_sessions: [],
+    suspended_sessions: [],
+    verified_providers: [],
+    suspended_providers: [],
+    ...catalog.data,
+  } satisfies ModerationCatalog;
+
   const busyId = listing.isPending
     ? listing.variables?.id
     : provider.isPending
       ? provider.variables?.id
-      : undefined;
+      : session.isPending
+        ? session.variables?.id
+        : undefined;
 
   return (
     <Card>
       <CardHeader>
-        <h2 className="text-lg font-bold">Published listings &amp; providers</h2>
+        <h2 className="text-lg font-bold">Published listings, sessions &amp; providers</h2>
         <CardDescription>
           Suspend or close what is live, and restore what was suspended. Every action is
           written to the audit log. Suspending a provider also suspends its live listings
@@ -147,22 +168,26 @@ export function LiveCatalog() {
         ) : (
           <Tabs defaultValue="live">
             <TabsList className="h-auto flex-wrap">
-              <TabsTrigger value="live">Live listings ({catalog.data.live_listings.length})</TabsTrigger>
+              <TabsTrigger value="live">Live listings ({data.live_listings.length})</TabsTrigger>
               <TabsTrigger value="suspended">
-                Suspended listings ({catalog.data.suspended_listings.length})
+                Suspended listings ({data.suspended_listings.length})
+              </TabsTrigger>
+              <TabsTrigger value="sessions">
+                Sessions (
+                {data.live_sessions.length + data.suspended_sessions.length})
               </TabsTrigger>
               <TabsTrigger value="providers">
                 Providers (
-                {catalog.data.verified_providers.length + catalog.data.suspended_providers.length})
+                {data.verified_providers.length + data.suspended_providers.length})
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="live" className="mt-3">
-              {catalog.data.live_listings.length === 0 ? (
+              {data.live_listings.length === 0 ? (
                 <Empty>No live listings.</Empty>
               ) : (
                 <ul className="grid gap-3">
-                  {catalog.data.live_listings.map((item) => (
+                  {data.live_listings.map((item) => (
                     <CatalogRow<ListingDecision>
                       key={item.id}
                       id={item.id}
@@ -187,11 +212,11 @@ export function LiveCatalog() {
             </TabsContent>
 
             <TabsContent value="suspended" className="mt-3">
-              {catalog.data.suspended_listings.length === 0 ? (
+              {data.suspended_listings.length === 0 ? (
                 <Empty>No suspended listings.</Empty>
               ) : (
                 <ul className="grid gap-3">
-                  {catalog.data.suspended_listings.map((item) => (
+                  {data.suspended_listings.map((item) => (
                     <CatalogRow<ListingDecision>
                       key={item.id}
                       id={item.id}
@@ -211,9 +236,44 @@ export function LiveCatalog() {
               )}
             </TabsContent>
 
+            <TabsContent value="sessions" className="mt-3">
+              {data.live_sessions.length + data.suspended_sessions.length ===
+              0 ? (
+                <Empty>No upcoming or suspended sessions.</Empty>
+              ) : (
+                <ul className="grid gap-3">
+                  {[...data.suspended_sessions, ...data.live_sessions].map(
+                    (item) => {
+                      const suspended = item.status === "suspended";
+                      return (
+                        <CatalogRow<SessionDecision>
+                          key={item.id}
+                          id={item.id}
+                          title={item.topic}
+                          meta={`${item.provider?.name ?? "Unknown provider"} · ${formatWatDateTime(item.starts_at)} · ${item.registered_count} registered`}
+                          badge={<ListingStatusBadge status={item.status} />}
+                          note={suspended ? item.decision_reason : null}
+                          reasonHint="required"
+                          actions={
+                            suspended
+                              ? [{ decision: "restore", label: "Restore" }]
+                              : [{ decision: "suspend", label: "Suspend", destructive: true }]
+                          }
+                          busy={busyId === item.id}
+                          onDecide={(decision, reason) =>
+                            session.mutate({ id: item.id, decision, reason })
+                          }
+                        />
+                      );
+                    },
+                  )}
+                </ul>
+              )}
+            </TabsContent>
+
             <TabsContent value="providers" className="mt-3">
               <ul className="grid gap-3">
-                {[...catalog.data.suspended_providers, ...catalog.data.verified_providers].map(
+                {[...data.suspended_providers, ...data.verified_providers].map(
                   (item) => {
                     const suspended = item.verification_status === "suspended";
                     return (
@@ -241,7 +301,7 @@ export function LiveCatalog() {
             </TabsContent>
           </Tabs>
         )}
-        <InlineError error={listing.error ?? provider.error} />
+        <InlineError error={listing.error ?? provider.error ?? session.error} />
       </CardContent>
     </Card>
   );
