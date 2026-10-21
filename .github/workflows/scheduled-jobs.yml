@@ -1,0 +1,70 @@
+# Runs the API's background jobs on a schedule (DECISIONS D27).
+#
+# The demo has no background worker (free hosting), so GitHub calls the API:
+#   - every hour: expire listings past their deadline and send reminders
+#   - every 10 minutes, only if the repository variable KEEP_AWAKE is "true":
+#     ping the API so Render's free plan doesn't put it to sleep
+#
+# Setup (GitHub → Settings → Secrets and variables → Actions):
+#   Secrets:   API_URL     e.g. https://awgu-api.onrender.com (no trailing slash)
+#              JOBS_TOKEN  the same long random value as JOBS_TOKEN on Render
+#   Variables: KEEP_AWAKE  true (optional; turn on before a demo or pitch)
+#
+# GitHub may start scheduled runs a few minutes late, and pauses schedules in
+# repositories with no activity for 60 days.
+
+name: Scheduled jobs
+
+on:
+  schedule:
+    - cron: "17 * * * *" # hourly, at :17 to avoid the busy top of the hour (UTC)
+    - cron: "*/10 * * * *" # keep-awake ping
+  workflow_dispatch: # "Run workflow" button: runs the jobs now
+
+permissions: {}
+
+jobs:
+  run-jobs:
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '17 * * * *'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Run reminders and expiry
+        env:
+          API_URL: ${{ secrets.API_URL }}
+          JOBS_TOKEN: ${{ secrets.JOBS_TOKEN }}
+        run: |
+          if [ -z "$API_URL" ] || [ -z "$JOBS_TOKEN" ]; then
+            echo "::notice::Add the API_URL and JOBS_TOKEN secrets to enable scheduled jobs."
+            exit 0
+          fi
+          # A sleeping free Render API takes up to a minute to wake: retry.
+          for attempt in 1 2 3 4 5 6; do
+            code=$(curl -s -o result.json -w '%{http_code}' --max-time 60 \
+              -X POST -H "Authorization: Bearer $JOBS_TOKEN" \
+              "$API_URL/api/v1/internal/jobs/run") || code=000
+            if [ "$code" = "200" ]; then
+              echo "Done: $(cat result.json)"
+              exit 0
+            fi
+            if [ "$code" = "403" ] || [ "$code" = "404" ]; then
+              echo "::error::The API refused the job token ($code). Check JOBS_TOKEN on GitHub and Render."
+              exit 1
+            fi
+            echo "Attempt $attempt got HTTP $code; retrying in 20 seconds."
+            sleep 20
+          done
+          echo "::error::The API did not respond."
+          exit 1
+
+  keep-awake:
+    if: github.event.schedule == '*/10 * * * *' && vars.KEEP_AWAKE == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Ping the API
+        env:
+          API_URL: ${{ secrets.API_URL }}
+        run: |
+          if [ -z "$API_URL" ]; then exit 0; fi
+          curl -s -o /dev/null -w "healthz: %{http_code}\n" --max-time 90 "$API_URL/healthz" || true

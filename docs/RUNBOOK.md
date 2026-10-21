@@ -76,14 +76,14 @@ Expected (2026-10-15): 62 backend tests pass; lint, typecheck and build pass. An
 
 ## 5. Jobs
 
-Neither job runs on a schedule yet; run them by hand.
+Once deployed, **both jobs run every hour** from GitHub Actions (`.github/workflows/scheduled-jobs.yml`, set up in §7.5). Locally, or any time, run them by hand:
 
 | Job | Command (in `backend/`) | Also from |
 |---|---|---|
 | Reminders (saved deadlines ≤ 3 days, sessions ≤ 24 h) | `uv run python -m app.jobs.reminders` | Staff page → **Run reminder job** |
 | Expire listings past their deadline | `uv run python -m app.jobs.expiry` | — (past-deadline listings are already hidden from the directory) |
 
-Messages go to the **console adapters** only: they are logged with masked recipients and never delivered.
+Reminder emails are really delivered when an email provider is set (§8); otherwise they are only logged. Running a job twice is safe: nothing is expired or sent twice.
 
 ## 6. Reset the local data
 
@@ -133,6 +133,7 @@ Environment:
 | `SMS_PROVIDER` | `console` |
 | `AI_ENABLED` | `true` or `false` |
 | `REPORT_HASH_SECRET` | a long random string |
+| `JOBS_TOKEN` | another long random string (the hourly schedule's password, §7.5) |
 
 ### 7.3 Web — Vercel
 - Root directory `apps/web`, framework Next.js, default build/install commands.
@@ -148,9 +149,25 @@ Environment:
 ### 7.4 After deploying
 - `https://<api>/healthz` returns OK; `https://<app>` lists opportunities.
 - Sign in as the applicant, refresh: still signed in (also in Incognito).
-- The free Render API sleeps after 15 minutes idle; the first request then takes ~50 s. Open the API URL a minute before a demo.
+- The free Render API sleeps after 15 minutes idle; the first request then takes ~50 s. Turn on keep-awake (§7.5) before a demo, or open the API URL a minute before.
 
-### 7.5 Troubleshooting
+### 7.5 Scheduled jobs and keep-awake (GitHub Actions)
+
+The repository's workflow calls the API every hour to expire overdue listings and send reminders, and can ping it every 10 minutes so it doesn't fall asleep.
+
+1. Make a token: run `python -c "import secrets; print(secrets.token_urlsafe(32))"` (or any long random string).
+2. Render → your API → **Environment** → add `JOBS_TOKEN` = that value → save (it redeploys).
+3. GitHub → your repo → **Settings → Secrets and variables → Actions**:
+   - **Secrets** tab → *New repository secret*: `API_URL` = `https://<your-api>.onrender.com` (no trailing slash), and `JOBS_TOKEN` = the same value.
+   - **Variables** tab → *New repository variable*: `KEEP_AWAKE` = `true` (optional; set it to `false` after the pitch).
+4. GitHub → **Actions** → *Scheduled jobs* → **Run workflow** to test now. The log ends with `Done: {"expired_listings": …}`.
+
+Notes:
+- GitHub runs schedules in UTC and can start them a few minutes late. Keep-awake pings may occasionally miss, so still open the site a minute before you present.
+- Render's free plan includes 750 hours a month, enough for one API kept awake all month.
+- GitHub pauses schedules in a repository with no activity for 60 days; any push re-enables them.
+
+### 7.6 Troubleshooting
 
 | Symptom | Fix |
 |---|---|
@@ -198,7 +215,7 @@ Tips:
 The demo meets the week-1 plan (`IMPLEMENTATION_PLAN.md`) but deliberately stops short of production:
 
 - **Sign-in:** real one-time codes by **email** (Brevo or Resend, §8). Phone codes need a funded SMS sender (Termii), so phone sign-in only works in demo mode. While demo mode is on, anyone can use the sample accounts: turn it off before real users.
-- **Messages:** email reminders are delivered through the same provider; SMS is console-only. Reminders and expiry run by hand, not on a schedule.
+- **Messages:** email reminders are delivered through the same provider; SMS is console-only. Reminders and expiry run hourly via GitHub Actions (a stand-in for a proper worker; runs can start a few minutes late).
 - **Assistant:** a rule-based interpreter, not an AI model (D22).
 - **Adults only:** under-18 applicants are blocked; guardian consent and minor flows are not built.
 - **Moderation:** restoring a provider does not restore its listings and sessions automatically; staff restore each listing. Support sessions can be suspended but not restored from the staff page yet.

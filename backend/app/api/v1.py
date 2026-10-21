@@ -19,6 +19,7 @@ from app.features.providers.router import router as providers_router
 from app.features.reports.router import router as reports_router
 from app.features.sessions.router import me_router as session_me_router
 from app.features.sessions.router import router as sessions_router
+from app.jobs.router import router as scheduled_jobs_router
 
 api_router = APIRouter()
 api_router.include_router(identity_router)
@@ -33,6 +34,7 @@ api_router.include_router(session_me_router)
 api_router.include_router(reports_router)
 api_router.include_router(notifications_router)
 api_router.include_router(jobs_router)
+api_router.include_router(scheduled_jobs_router)
 api_router.include_router(assistant_router)
 
 
