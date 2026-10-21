@@ -259,3 +259,49 @@ async def test_roster_is_minimal_and_scoped_to_organizer(
     async with session_factory() as db:
         actions = set((await db.execute(select(AuditEvent.action))).scalars().all())
     assert {"session.roster_viewed", "session.attendance_recorded"} <= actions
+
+
+async def test_suspended_session_can_be_restored(client, seeded_admin, session_factory):
+    session = await _approved_session(client, seeded_admin)
+    decision = f"/api/v1/admin/moderation/sessions/{session['id']}/decision"
+    admin_csrf = await _login(client, seeded_admin)
+
+    restore_live = await client.post(
+        decision,
+        headers={CSRF: admin_csrf},
+        json={"decision": "restore", "reason": "Not suspended."},
+    )
+    assert restore_live.status_code == 409
+
+    suspended = await client.post(
+        decision,
+        headers={CSRF: admin_csrf},
+        json={"decision": "suspend", "reason": "Venue unconfirmed."},
+    )
+    assert suspended.json()["status"] == "suspended"
+    public = (await client.get(BASE)).json()["items"]
+    assert session["id"] not in [item["id"] for item in public]
+
+    catalog = (await client.get("/api/v1/admin/moderation/catalog")).json()
+    assert session["id"] in [s["id"] for s in catalog["suspended_sessions"]]
+
+    no_reason = await client.post(
+        decision, headers={CSRF: admin_csrf}, json={"decision": "restore"}
+    )
+    assert no_reason.status_code == 422
+
+    restored = await client.post(
+        decision,
+        headers={CSRF: admin_csrf},
+        json={"decision": "restore", "reason": "Venue confirmed by phone."},
+    )
+    assert restored.status_code == 200, restored.text
+    assert restored.json()["status"] == "approved"
+    public = (await client.get(BASE)).json()["items"]
+    assert session["id"] in [item["id"] for item in public]
+    catalog = (await client.get("/api/v1/admin/moderation/catalog")).json()
+    assert session["id"] in [s["id"] for s in catalog["live_sessions"]]
+
+    async with session_factory() as db:
+        actions = set((await db.execute(select(AuditEvent.action))).scalars().all())
+    assert {"session.suspended", "session.restored"} <= actions
