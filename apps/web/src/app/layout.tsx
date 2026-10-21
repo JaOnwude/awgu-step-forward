@@ -4,6 +4,7 @@ import { Fraunces, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { MobileTabBar } from "@/components/shared/primary-nav";
 import { SiteFooter } from "@/components/shared/site-footer";
+import { ServiceWorkerRegistration } from "@/components/shared/service-worker";
 import { SiteHeader } from "@/components/shared/site-header";
 import { Toaster } from "@/components/shared/toaster";
 import { QueryProvider } from "@/lib/query/provider";
@@ -73,6 +74,7 @@ export default function RootLayout({
             </div>
             <MobileTabBar />
             <Toaster />
+            <ServiceWorkerRegistration />
           </QueryProvider>
         </ThemeProvider>
       </body>
