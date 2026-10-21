@@ -45,9 +45,10 @@ Coming from a page (for example "Sign in to save" on a listing) returns you to t
 
 Seeded by `app/scripts/seed.py` and `app/scripts/seed_demo.py` (both safe to run again — they skip what exists):
 
-- 3 verified providers: Awgu Skills Centre, Enugu State Education Trust, Awgu Market Traders Union.
-- 6 published listings covering every category: training, apprenticeship, two scholarships, entry-level job, and adults-only paid construction work (with work terms).
-- 2 approved support sessions (in person and online).
+- 8 verified providers (skills centre, state education trust, market traders, tailoring cooperative, health centre, tech hub, farmers' cooperative, schools bursary fund).
+- 20 listings across every category and 7 towns (Awgu, Nenwe, Mgbowo, Ugbo, Ihe, Enugu, Enugu North): 19 open plus 1 closed bursary to show "closed" states.
+- 4 approved support sessions (in person and online).
+- **Always fresh:** each run moves the deadline of an open demo listing forward if it has passed, and moves a finished demo session to its future date (listings staff suspended are left alone). Deploys re-run it on start; locally, run `uv run python -m app.scripts.seed_demo` before a demo.
 
 One browser window holds one signed-in person. Use a second window in Incognito to act as two roles at once.
 
@@ -230,6 +231,19 @@ How it stays safe and cheap:
 - If Claude is slow (8 s timeout), out of credit, or declines, the keyword rules answer instead and the page says so.
 - Model: `claude-opus-5-5` at low effort (`ASSISTANT_MODEL`). Roughly 1 US cent per search; `claude-haiku-5-5` costs far less if you prefer — your choice.
 
+
+## 10. Install it as an app (PWA)
+
+StepForward installs to a phone's home screen and opens full-screen like an app, with its own icon, splash colour and shortcuts (long-press the icon on Android). Installing needs HTTPS, so try it on the deployed site.
+
+- **Android (Chrome):** open the site → footer → **Install the app** (or Chrome menu → *Install app*).
+- **iPhone (Safari):** tap **Share** → **Add to Home Screen** (the footer shows this hint on iPhones).
+- **Offline:** with no connection, pages show a friendly "You're offline" screen; app files and illustrations load from the phone. Listings, applications and anything private are never stored on the phone (shared phones).
+
+Check it in desktop Chrome: DevTools (F12) → **Application** → *Manifest* (no errors, icons shown) and *Service workers* (`sw.js` activated). Tick **Offline** there and reload to see the offline page. The service worker only runs in production builds, not in `bun run dev`.
+
+Icons are drawn by `bun run icons` in `apps/web` (`scripts/make-icons.mjs`).
+
 ---
 
 ## Known limits
@@ -242,8 +256,8 @@ The demo meets the week-1 plan (`IMPLEMENTATION_PLAN.md`) but deliberately stops
 - **Adults only:** under-18 applicants are blocked; guardian consent and minor flows are not built.
 - **Moderation:** restoring a provider does not restore its listings and sessions automatically; staff restore each one (on purpose, so nothing reappears unreviewed).
 - **Files:** no document uploads or object storage.
-- **Offline:** basic loading/error/offline states only; no offline sync.
-- **Mobile app:** not scaffolded (D13); the web app is the phone experience.
+- **Offline:** an offline page and cached app files only (§10); listings and account data need a connection, by design.
+- **Mobile app:** the web app installs to the home screen as an app (§10); a native Android app is not built (D13).
 - **Images:** illustrations are placeholders (D23); the example stories are fictional and labelled.
 - **Operations:** free plans (API sleeps, no SLA, single instance), no load testing, no penetration test, no privacy impact assessment. Data is synthetic and must stay that way.
 - **Language:** English only (no Igbo yet).

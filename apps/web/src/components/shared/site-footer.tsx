@@ -1,6 +1,7 @@
 import { cacheLife } from "next/cache";
 import Link from "next/link";
 
+import { InstallAppButton } from "@/components/shared/install-app";
 import { Logo } from "@/components/shared/logo";
 import { footerGroups } from "@/lib/navigation";
 
@@ -27,6 +28,10 @@ export function SiteFooter() {
               Verified opportunities for learning, work, and your next step. Enugu
               State, Awgu first.
             </p>
+            <InstallAppButton
+              buttonClassName="bg-[#f2b33d] text-[#2a1d02] hover:bg-[#f2b33d]/90 focus-visible:ring-[#4fc79c]"
+              hintClassName="text-[#eef0e8]/75"
+            />
           </div>
           {footerGroups.map((group) => (
             <nav key={group.title} aria-label={group.title} className="grid content-start gap-2.5">

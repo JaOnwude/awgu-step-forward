@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0f5a43" />
+    <title>You're offline — Awgu StepForward</title>
+    <style>
+      :root {
+        --bg: #fbf7ef;
+        --card: #ffffff;
+        --ink: #15201a;
+        --muted: #5a6459;
+        --primary: #0f5a43;
+        --border: #e3daca;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #10140f;
+          --card: #181d17;
+          --ink: #eef0e8;
+          --muted: #a6aea2;
+          --primary: #4fc79c;
+          --border: #2e372c;
+        }
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 16px;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      }
+      main {
+        max-width: 420px;
+        width: 100%;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        padding: 32px 24px;
+        text-align: center;
+      }
+      h1 { margin: 16px 0 8px; font-size: 1.5rem; }
+      p { margin: 0 0 12px; color: var(--muted); line-height: 1.5; }
+      button {
+        margin-top: 8px;
+        border: 0;
+        border-radius: 999px;
+        padding: 12px 24px;
+        font: inherit;
+        font-weight: 600;
+        background: var(--primary);
+        color: #fff;
+        cursor: pointer;
+      }
+      @media (prefers-color-scheme: dark) { button { color: #05251a; } }
+      button:focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <svg width="56" height="56" viewBox="0 0 40 40" aria-hidden="true">
+        <rect width="40" height="40" rx="11" fill="#0f5a43" />
+        <rect x="7.5" y="24" width="7" height="8.5" rx="1.6" fill="#fbf7ef" />
+        <rect x="16.5" y="18" width="7" height="14.5" rx="1.6" fill="#fbf7ef" />
+        <rect x="25.5" y="12" width="7" height="20.5" rx="1.6" fill="#fbf7ef" />
+        <circle cx="14" cy="11.5" r="4" fill="#f2b33d" />
+      </svg>
+      <h1>You're offline</h1>
+      <p>
+        StepForward needs a connection to show current, verified listings. Check your
+        data or Wi-Fi, then try again.
+      </p>
+      <p>Your saved opportunities and applications are safe and will be there when you reconnect.</p>
+      <button type="button" onclick="location.reload()">Try again</button>
+    </main>
+  </body>
+</html>
