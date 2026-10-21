@@ -53,7 +53,12 @@ async def get_catalog(
     db: AsyncSession = Depends(get_db),
 ) -> ModerationCatalog:
     catalog = await service.live_catalog(db)
+    live_sessions, suspended_sessions = await session_service.published_and_suspended(
+        db
+    )
     return ModerationCatalog(
+        live_sessions=live_sessions,
+        suspended_sessions=suspended_sessions,
         live_listings=[
             OpportunityView.model_validate(o) for o in catalog["live_listings"]
         ],

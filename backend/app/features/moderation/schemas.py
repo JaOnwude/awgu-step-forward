@@ -22,3 +22,5 @@ class ModerationCatalog(BaseModel):
     suspended_listings: list[OpportunityView]
     verified_providers: list[ProviderView]
     suspended_providers: list[ProviderView]
+    live_sessions: list[SessionManageOut]
+    suspended_sessions: list[SessionManageOut]

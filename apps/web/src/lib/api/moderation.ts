@@ -30,6 +30,9 @@ export interface ModerationCatalog {
   suspended_listings: Opportunity[];
   verified_providers: ProviderSummary[];
   suspended_providers: ProviderSummary[];
+  /** Upcoming approved sessions (can be suspended). */
+  live_sessions: ManagedSession[];
+  suspended_sessions: ManagedSession[];
 }
 
 export function fetchModerationCatalog(): Promise<ModerationCatalog> {
