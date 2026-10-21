@@ -45,6 +45,9 @@ class Settings(BaseSettings):
     reminder_deadline_days: int = 3
     # Remind about registered sessions this many hours before they start.
     reminder_session_hours: int = 24
+    # Shared secret for POST /internal/jobs/run (the hourly schedule). Empty
+    # switches that endpoint off. Use a long random value; never commit it.
+    jobs_token: str = ""
 
     # Opportunity assistant (spec R46/R48, DECISIONS D6). Off by default; when
     # off, ordinary search is the only path and stays fully usable.
