@@ -31,6 +31,19 @@ export interface OtpRequestResponse {
   dev_code: string | null;
 }
 
+/** What the sign-in page should offer on this server. */
+export interface AuthConfig {
+  /** Demo accounts and on-screen codes. Off for real users. */
+  demo_mode: boolean;
+  /** Email codes are really sent (not just logged). */
+  email_codes_delivered: boolean;
+  phone_sign_in: boolean;
+}
+
+export function fetchAuthConfig(): Promise<AuthConfig> {
+  return apiRequest<AuthConfig>("/api/v1/auth/config");
+}
+
 export function devLogin(email: string): Promise<LoginResponse> {
   return apiRequest<LoginResponse>("/api/v1/auth/dev-login", {
     method: "POST",

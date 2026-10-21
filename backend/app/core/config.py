@@ -35,7 +35,11 @@ class Settings(BaseSettings):
 
     # Messaging adapters (DECISIONS D3/D4). Week 1 only has "console": messages
     # are logged, never delivered to a real person.
-    email_provider: str = "console"
+    email_provider: str = "console"  # console | brevo | resend
+    email_api_key: str = ""
+    # The verified sender address at Brevo/Resend, e.g. hello@yourdomain.com.
+    email_from_address: str = ""
+    email_from_name: str = "Awgu StepForward"
     sms_provider: str = "console"
     # Remind about saved listings this many days before their deadline.
     reminder_deadline_days: int = 3

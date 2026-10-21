@@ -29,6 +29,17 @@ class OtpRequest(BaseModel):
     destination: str = Field(min_length=3, max_length=320)
 
 
+class AuthConfig(BaseModel):
+    """What the sign-in page should offer on this server."""
+
+    # Demo accounts and on-screen codes (DEV_AUTH_ENABLED). Off for real users.
+    demo_mode: bool
+    # True when email codes are really sent (not just logged).
+    email_codes_delivered: bool
+    # Phone sign-in works: real SMS, or demo mode showing the code on screen.
+    phone_sign_in: bool
+
+
 class OtpRequestResponse(BaseModel):
     channel: str
     destination: str

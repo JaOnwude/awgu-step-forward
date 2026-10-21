@@ -31,7 +31,7 @@ cd apps/web && bun install && bun run dev              # 3. Web on :3000
 
 ## 2. Demo accounts and data
 
-Development sign-in has no passwords or real codes (`DEV_AUTH_ENABLED=true`).
+**Demo mode** (`DEV_AUTH_ENABLED=true`) adds one-tap sample accounts to the sign-in page, and shows the code on screen when no real email is configured. Turn it off for real users; the sample accounts and phone option then disappear. See §8 to send real emailed codes.
 
 Everyone signs in at **`/sign-in`** (header → **Sign in**). Under "Demo accounts", tap a role:
 
@@ -125,9 +125,12 @@ Environment:
 | `CORS_ORIGINS` | `["https://<your-app>.vercel.app"]` |
 | `COOKIE_SECURE` | `true` |
 | `COOKIE_SAMESITE` | `lax` |
-| `DEV_AUTH_ENABLED` | `true` (demo sign-in; see limits) |
+| `DEV_AUTH_ENABLED` | `true` for the pitch (sample accounts); `false` for real users |
 | `DEV_BOOTSTRAP` | `false` |
-| `EMAIL_PROVIDER` / `SMS_PROVIDER` | `console` |
+| `EMAIL_PROVIDER` | `brevo` (or `resend`); `console` sends nothing — see §8 |
+| `EMAIL_API_KEY` | your provider API key (secret) |
+| `EMAIL_FROM_ADDRESS` | the sender address you verified |
+| `SMS_PROVIDER` | `console` |
 | `AI_ENABLED` | `true` or `false` |
 | `REPORT_HASH_SECRET` | a long random string |
 
@@ -159,14 +162,43 @@ Environment:
 
 Rollback: Vercel → Deployments → a previous deployment → **Promote**; Render → Events → a previous deploy → **Rollback**. Migrations are forward-only; restore Neon from a branch/point-in-time if a migration must be undone.
 
+
+## 8. Send real sign-in codes by email
+
+The API emails codes through **Brevo** or **Resend** over HTTPS. (Classic SMTP such as Gmail won't work once deployed: Render's free plan blocks outgoing SMTP.)
+
+| | Brevo (recommended to start) | Resend |
+|---|---|---|
+| Free allowance | 300 emails/day | 3,000/month, 100/day |
+| Sender | verify a sender address; a domain you own is best | **a verified domain is required** to email anyone but yourself |
+
+**Brevo:**
+1. Create a free account at brevo.com.
+2. *Senders, Domains & Dedicated IPs* → add and verify your sender address (or, better, authenticate a domain you own).
+3. *SMTP & API* → *API keys* → create a key and copy it.
+4. In `backend/.env` (local) or Render → Environment:
+   ```
+   EMAIL_PROVIDER=brevo
+   EMAIL_API_KEY=<the key>
+   EMAIL_FROM_ADDRESS=<the verified sender>
+   ```
+5. Restart the API. On `/sign-in`, enter your own email → **Send code** → the email arrives (check spam the first time).
+
+**Resend:** the same, with `EMAIL_PROVIDER=resend`, after verifying a domain in Resend.
+
+Tips:
+- Emails from a free address (for example @gmail.com) sent through a provider can land in spam; a cheap domain with SPF/DKIM set up in the provider fixes that.
+- If sending fails, the page says so and the API log shows the provider's reason (`EMAIL via brevo rejected …`). The API key is never logged.
+- Keep `DEV_AUTH_ENABLED=true` during the pitch as a backup: the sample accounts still work if email is slow.
+
 ---
 
 ## Known limits
 
 The demo meets the week-1 plan (`IMPLEMENTATION_PLAN.md`) but deliberately stops short of production:
 
-- **Sign-in:** development sign-in only (`DEV_AUTH_ENABLED=true`) — anyone can sign in as any demo account. Real one-time codes by SMS/email are not connected. Turn dev sign-in off before any real user.
-- **Messages:** email and SMS are console-only; nothing is delivered. Reminders and expiry run by hand, not on a schedule.
+- **Sign-in:** real one-time codes by **email** (Brevo or Resend, §8). Phone codes need a funded SMS sender (Termii), so phone sign-in only works in demo mode. While demo mode is on, anyone can use the sample accounts: turn it off before real users.
+- **Messages:** email reminders are delivered through the same provider; SMS is console-only. Reminders and expiry run by hand, not on a schedule.
 - **Assistant:** a rule-based interpreter, not an AI model (D22).
 - **Adults only:** under-18 applicants are blocked; guardian consent and minor flows are not built.
 - **Moderation:** restoring a provider does not restore its listings and sessions automatically; staff restore each listing. Support sessions can be suspended but not restored from the staff page yet.

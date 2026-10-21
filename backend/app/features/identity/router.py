@@ -8,6 +8,7 @@ from app.core.config import get_settings
 from app.db.session import get_db
 from app.features.identity import service
 from app.features.identity.schemas import (
+    AuthConfig,
     DevLoginRequest,
     LoginResponse,
     MessageResponse,
@@ -16,14 +17,13 @@ from app.features.identity.schemas import (
     OtpVerifyRequest,
     UserPublic,
 )
+from app.integrations.messaging import email_delivers, sms_delivers
 
 _settings = get_settings()
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-def _set_auth_cookies(
-    response: Response, raw_token: str, raw_csrf: str
-) -> None:
+def _set_auth_cookies(response: Response, raw_token: str, raw_csrf: str) -> None:
     max_age = _settings.session_ttl_hours * 3600
     response.set_cookie(
         _settings.session_cookie_name,
@@ -54,6 +54,16 @@ async def dev_login(
     user, raw_token, raw_csrf = await service.dev_login(db, payload.email)
     _set_auth_cookies(response, raw_token, raw_csrf)
     return LoginResponse(user=user, csrf_token=raw_csrf)
+
+
+@router.get("/config", response_model=AuthConfig)
+async def auth_config() -> AuthConfig:
+    demo = get_settings().dev_auth_enabled
+    return AuthConfig(
+        demo_mode=demo,
+        email_codes_delivered=email_delivers(),
+        phone_sign_in=sms_delivers() or demo,
+    )
 
 
 @router.post("/otp/request", response_model=OtpRequestResponse)

@@ -135,3 +135,11 @@ Tests use `sqlite+aiosqlite` for speed. Production and local dev use PostgreSQL,
 - **Profile pictures:** `PUT/GET/DELETE /api/v1/me/avatar`. Only JPEG, PNG and WebP up to 5 MB are accepted; the server re-encodes every upload into a 256 px square WebP (about 2–30 KB), which also removes metadata such as GPS location. Pictures are private (only the owner can fetch theirs) and stored in the database (`user_avatars`), because the demo host's disk is wiped on deploy and object storage is deferred. `UserPublic.avatar_url` carries a version so browsers refetch after a change. Upload and removal are audited.
 - **Footer:** "© <year> Awgu StepForward. All rights reserved." The year is computed in a component cached for a day (Cache Components won't prerender a bare `new Date()`).
 
+### D26 — Real emailed sign-in codes and a demo-mode switch
+**Status:** Adopted (2026-10-21, before the hackathon pitch)
+- **Delivery:** `EMAIL_PROVIDER=brevo|resend` sends email through the provider's HTTPS API (`app/integrations/messaging.py`); `console` still only logs. HTTPS rather than SMTP because Render's free plan blocks outgoing SMTP ports. Settings: `EMAIL_API_KEY`, `EMAIL_FROM_ADDRESS`, `EMAIL_FROM_NAME`. Brevo is the suggested start (300/day free); Resend needs a verified domain to reach anyone but the account owner.
+- **Codes:** when email delivers, the code is emailed and **never** returned to the browser. The email keeps the code out of the subject line (shared-phone lock screens) and reminds people that StepForward never charges to apply. If sending fails, the challenge is deleted (so the 60 s cooldown doesn't block a retry) and the API answers 503 `email_send_failed`.
+- **Demo mode** is `DEV_AUTH_ENABLED`. On: one-tap sample accounts, and the code is shown on screen (labelled "no message was sent") only when the channel can't deliver. Off: no sample accounts, and channels that can't deliver are refused (`email_unavailable` / `phone_unavailable`). `GET /api/v1/auth/config` tells the sign-in page which options to show.
+- **Phone:** SMS stays console-only (Termii needs a funded account and a registered sender ID), so phone sign-in appears only in demo mode.
+- Email reminders use the same adapter, so they are delivered too once a provider is configured.
+
