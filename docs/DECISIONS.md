@@ -157,3 +157,11 @@ Tests use `sqlite+aiosqlite` for speed. Production and local dev use PostgreSQL,
 - The card treats a missing list as empty, because during a deploy the web app (Vercel) can briefly run against an older API (Render) that doesn't return it yet.
 - With this, every R20 transition is available for listings, sessions and providers.
 
+### D29 — Claude-backed opportunity assistant (replaces the rules-only engine when connected)
+**Status:** Adopted (2026-10-21, before the hackathon pitch). Supersedes the "no external model" part of D6/D22.
+- **Engine:** `ASSISTANT_ENGINE=claude` + `ANTHROPIC_API_KEY` makes the assistant call Claude (`claude-opus-5-5`, `ASSISTANT_MODEL`) through the official Anthropic Python SDK. Claude returns `category`, `location`, `delivery_mode`, `keyword` and a short explanation as **structured JSON** (`output_config.format` with a JSON schema whose enums match the directory's allow-lists), at `effort: low` for speed and cost.
+- **Same guardrails as before (R46–R48):** redaction runs before the request leaves the server; the query is never stored (`AIUsageEvent` keeps filters, listing ids, engine, timing, outcome); the model never sees listings or people and only picks filters; every returned value is re-validated (unknown category/mode dropped, location and keyword must be plain words). The system prompt tells the model to treat the request as data, not instructions.
+- **Always works:** any failure (no key, bad key, rate limit, 8 s timeout, network, refusal, non-JSON) falls back to the rule-based interpreter; the response says `fell_back: true` and the page tells the user. Server-side refusal fallbacks (`fallbacks: "default"`, beta `server-side-fallback-2026-07-01`) are enabled, so a safety decline is retried on a suitable model first.
+- **Honest labelling:** each answer shows "Understood by Claude (AI)" or "simple keyword rules".
+- **Not done:** an evaluation set to measure Claude vs rules on real Awgu phrasings (including Nigerian English and Igbo words), and a formal data-processing review before real users.
+
