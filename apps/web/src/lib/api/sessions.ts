@@ -161,7 +161,7 @@ export function recordAttendance(
   );
 }
 
-export type SessionDecision = "approve" | "reject" | "suspend";
+export type SessionDecision = "approve" | "reject" | "suspend" | "restore";
 
 export function decideSession(
   id: string,
