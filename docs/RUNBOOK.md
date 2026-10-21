@@ -27,7 +27,7 @@ cd apps/web && bun install && bun run dev              # 3. Web on :3000
 - Open **http://localhost:3000** — use `localhost`, never `127.0.0.1`, or sign-in cookies are dropped (DECISIONS D19).
 - On start the API applies migrations and seeds demo data (only when `ENVIRONMENT=development` and `DEV_BOOTSTRAP=true`). Allow ~30 s on first run.
 - API docs: http://localhost:8000/docs. Health: http://localhost:8000/healthz.
-- Search assistant: set `AI_ENABLED=true` in `backend/.env` and restart the API.
+- Search assistant: set `AI_ENABLED=true` in `backend/.env` and restart the API. It uses keyword rules unless you connect Claude (§9).
 
 ## 2. Demo accounts and data
 
@@ -132,6 +132,8 @@ Environment:
 | `EMAIL_FROM_ADDRESS` | the sender address you verified |
 | `SMS_PROVIDER` | `console` |
 | `AI_ENABLED` | `true` or `false` |
+| `ASSISTANT_ENGINE` | `claude` (or `rules`) — see §9 |
+| `ANTHROPIC_API_KEY` | your Anthropic API key (secret) |
 | `REPORT_HASH_SECRET` | a long random string |
 | `JOBS_TOKEN` | another long random string (the hourly schedule's password, §7.5) |
 
@@ -208,6 +210,26 @@ Tips:
 - If sending fails, the page says so and the API log shows the provider's reason (`EMAIL via brevo rejected …`). The API key is never logged.
 - Keep `DEV_AUTH_ENABLED=true` during the pitch as a backup: the sample accounts still work if email is slow.
 
+
+## 9. Connect the search assistant to Claude
+
+The assistant on `/opportunities` turns plain words ("a free computer course in Awgu") into ordinary search filters. With Claude connected it understands far more phrasings; without it, keyword rules answer.
+
+1. Create an API key at console.anthropic.com (add a small amount of credit).
+2. In `backend/.env` (local) or Render → Environment:
+   ```
+   AI_ENABLED=true
+   ASSISTANT_ENGINE=claude
+   ANTHROPIC_API_KEY=<your key>
+   ```
+3. Restart the API. Under each answer the page says "Understood by Claude (AI)".
+
+How it stays safe and cheap:
+- Phone numbers, emails and ID numbers are removed **before** the request leaves the server; the query text is never stored.
+- Claude only returns filters as structured JSON; every value is checked against the same allow-lists as normal search, so it cannot invent listings or judge eligibility.
+- If Claude is slow (8 s timeout), out of credit, or declines, the keyword rules answer instead and the page says so.
+- Model: `claude-opus-5-5` at low effort (`ASSISTANT_MODEL`). Roughly 1 US cent per search; `claude-haiku-5-5` costs far less if you prefer — your choice.
+
 ---
 
 ## Known limits
@@ -216,7 +238,7 @@ The demo meets the week-1 plan (`IMPLEMENTATION_PLAN.md`) but deliberately stops
 
 - **Sign-in:** real one-time codes by **email** (Brevo or Resend, §8). Phone codes need a funded SMS sender (Termii), so phone sign-in only works in demo mode. While demo mode is on, anyone can use the sample accounts: turn it off before real users.
 - **Messages:** email reminders are delivered through the same provider; SMS is console-only. Reminders and expiry run hourly via GitHub Actions (a stand-in for a proper worker; runs can start a few minutes late).
-- **Assistant:** a rule-based interpreter, not an AI model (D22).
+- **Assistant:** Claude reads the request when connected (§9), otherwise keyword rules. Either way it only picks search filters; results always come from verified listings.
 - **Adults only:** under-18 applicants are blocked; guardian consent and minor flows are not built.
 - **Moderation:** restoring a provider does not restore its listings and sessions automatically; staff restore each one (on purpose, so nothing reappears unreviewed).
 - **Files:** no document uploads or object storage.

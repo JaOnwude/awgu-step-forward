@@ -21,8 +21,16 @@ export interface AssistantResult {
   relaxed: boolean;
   items: OpportunityCard[];
   total: number;
+  /** "claude:<model>" or "rule-based-interpreter-v1". */
   engine: string;
+  /** True when Claude was unavailable and keyword rules answered instead. */
+  fell_back: boolean;
   disclaimer: string;
+}
+
+/** Plain-language name for the engine that read the request. */
+export function engineLabel(engine: string): string {
+  return engine.startsWith("claude:") ? "Claude (AI)" : "simple keyword rules";
 }
 
 export function fetchAssistantStatus(): Promise<AssistantStatus> {

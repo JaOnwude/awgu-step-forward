@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
 from app.core.errors import AppError
+from app.features.assistant import claude_interpreter
 from app.features.assistant.interpreter import MODEL_NAME, interpret, redact
 from app.features.assistant.models import AIUsageEvent
 from app.features.assistant.schemas import (
@@ -27,11 +28,15 @@ class AssistantDisabledError(AppError):
     message = "The search assistant is switched off. Ordinary search works as usual."
 
 
+def _claude_engine() -> str:
+    return f"claude:{get_settings().assistant_model}"
+
+
 def status() -> AssistantStatus:
     enabled = get_settings().ai_enabled
     return AssistantStatus(
         enabled=enabled,
-        engine=MODEL_NAME,
+        engine=_claude_engine() if claude_interpreter.available() else MODEL_NAME,
         notice=(
             "Describe what you need in plain words. Don’t include your name, phone "
             "number or other personal details."
@@ -44,8 +49,19 @@ async def search(db: AsyncSession, *, query: str) -> AssistantResult:
         raise AssistantDisabledError()
 
     started = time.perf_counter()
+    # Personal details are removed before anything else, including the model.
     cleaned, redacted = redact(query)
-    plan = interpret(cleaned)
+    engine = MODEL_NAME
+    fell_back = False
+    plan = None
+    if claude_interpreter.available():
+        plan = await claude_interpreter.interpret_with_claude(cleaned)
+        if plan is None:
+            fell_back = True
+        else:
+            engine = _claude_engine()
+    if plan is None:
+        plan = interpret(cleaned)
 
     def run(q: str | None):
         return opportunity_service.list_public_opportunities(
@@ -77,12 +93,13 @@ async def search(db: AsyncSession, *, query: str) -> AssistantResult:
     db.add(
         AIUsageEvent(
             feature="opportunity_assistant",
-            model=MODEL_NAME,
+            model=engine,
             filters=plan.filters(),
             listing_ids=[str(item.id) for item in listing.items],
             redacted=redacted,
             latency_ms=int((time.perf_counter() - started) * 1000),
-            outcome="results" if listing.total else "no_results",
+            outcome=("fallback_" if fell_back else "")
+            + ("results" if listing.total else "no_results"),
         )
     )
     await db.commit()
@@ -94,6 +111,7 @@ async def search(db: AsyncSession, *, query: str) -> AssistantResult:
         relaxed=relaxed,
         items=listing.items,
         total=listing.total,
-        engine=MODEL_NAME,
+        engine=engine,
+        fell_back=fell_back,
         disclaimer=DISCLAIMER,
     )

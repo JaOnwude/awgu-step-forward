@@ -9,7 +9,12 @@ import { InlineError } from "@/components/shared/query-states";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { OpportunityCardView } from "@/features/discovery/opportunity-card";
-import { askAssistant, fetchAssistantStatus, type AssistantFilters } from "@/lib/api/assistant";
+import {
+  askAssistant,
+  engineLabel,
+  fetchAssistantStatus,
+  type AssistantFilters,
+} from "@/lib/api/assistant";
 import { queryKeys } from "@/lib/query/keys";
 
 function filtersHref(filters: AssistantFilters): string {
@@ -91,7 +96,12 @@ export function AssistantPanel() {
                 <li>Personal details (like a phone number) were removed before searching.</li>
               ) : null}
             </ul>
-            <p className="text-xs text-muted-foreground">{result.disclaimer}</p>
+            {/* Say honestly what read the request (AI or keyword rules). */}
+            <p className="text-xs text-muted-foreground">
+              Understood by {engineLabel(result.engine)}.
+              {result.fell_back ? " The AI was unavailable, so simple keyword rules were used." : ""}{" "}
+              {result.disclaimer}
+            </p>
             <Link
               href={filtersHref(result.filters)}
               className={buttonVariants({ variant: "outline", size: "sm", className: "w-fit" })}

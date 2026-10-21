@@ -32,4 +32,6 @@ class AssistantResult(BaseModel):
     items: list[OpportunityCard]
     total: int
     engine: str
+    #: True when the model was unavailable and the rule-based engine answered.
+    fell_back: bool = False
     disclaimer: str
