@@ -59,7 +59,7 @@ One browser window holds one signed-in person. Use a second window in Incognito 
 4. **Applicant** — sign in, add a profile picture, create an 18+ profile, save a listing, apply in-platform to *Solar installation apprenticeship* (review → consent → receipt), open the application timeline; apply on the provider site for the scholarship and update its tracked status.
 5. **Support session** — register with a reminder; places left drops.
 6. **Provider** — create a *Local paid work* listing with work terms; submit for review.
-7. **Staff** — approve it; handle the report (resolve / dismiss / suspend); in **Published listings & providers** close a listing early, suspend and restore a listing, suspend and restore a provider. Every action is audited.
+7. **Staff** — approve it; handle the report (resolve / dismiss / suspend); in **Published listings, sessions & providers** close a listing early, suspend and restore a listing or a session, suspend and restore a provider. Every action is audited.
 8. **Reminders** — **Run reminder job**; the applicant's bell shows reminders for deadlines within 3 days.
 
 ## 4. Checks before a merge or deploy
@@ -218,7 +218,7 @@ The demo meets the week-1 plan (`IMPLEMENTATION_PLAN.md`) but deliberately stops
 - **Messages:** email reminders are delivered through the same provider; SMS is console-only. Reminders and expiry run hourly via GitHub Actions (a stand-in for a proper worker; runs can start a few minutes late).
 - **Assistant:** a rule-based interpreter, not an AI model (D22).
 - **Adults only:** under-18 applicants are blocked; guardian consent and minor flows are not built.
-- **Moderation:** restoring a provider does not restore its listings and sessions automatically; staff restore each listing. Support sessions can be suspended but not restored from the staff page yet.
+- **Moderation:** restoring a provider does not restore its listings and sessions automatically; staff restore each one (on purpose, so nothing reappears unreviewed).
 - **Files:** no document uploads or object storage.
 - **Offline:** basic loading/error/offline states only; no offline sync.
 - **Mobile app:** not scaffolded (D13); the web app is the phone experience.
