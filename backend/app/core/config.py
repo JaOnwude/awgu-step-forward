@@ -52,6 +52,12 @@ class Settings(BaseSettings):
     # Opportunity assistant (spec R46/R48, DECISIONS D6). Off by default; when
     # off, ordinary search is the only path and stays fully usable.
     ai_enabled: bool = False
+    # Which interpreter turns words into filters: "rules" (no external call)
+    # or "claude" (needs ANTHROPIC_API_KEY; falls back to rules on any error).
+    assistant_engine: str = "rules"
+    assistant_model: str = "claude-opus-5-5"
+    assistant_timeout_seconds: float = 8.0
+    anthropic_api_key: str = ""
 
     # Secret mixed into hashed reporter fingerprints for report rate limits.
     # Override in every non-development environment.
