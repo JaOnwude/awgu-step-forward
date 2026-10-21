@@ -33,7 +33,7 @@ from app.features.sessions.schemas import (
     SessionOut,
 )
 
-REASON_REQUIRED = frozenset({"reject", "suspend"})
+REASON_REQUIRED = frozenset({"reject", "suspend", "restore"})
 
 
 def _as_aware(value: datetime) -> datetime:
@@ -402,6 +402,20 @@ async def pending_sessions(db: AsyncSession) -> list[SessionManageOut]:
     return await _serialize_many(db, sessions, manage=True)
 
 
+async def published_and_suspended(
+    db: AsyncSession,
+) -> tuple[list[SessionManageOut], list[SessionManageOut]]:
+    """Upcoming approved sessions (to suspend) and suspended ones (to restore)."""
+    now = utcnow()
+    approved = await repo.list_by_status(db, "approved")
+    live = [s for s in approved if _as_aware(s.ends_at) >= now]
+    suspended = await repo.list_by_status(db, "suspended")
+    return (
+        await _serialize_many(db, live, manage=True),
+        await _serialize_many(db, suspended, manage=True),
+    )
+
+
 async def decide_session(
     db: AsyncSession,
     *,
@@ -417,11 +431,19 @@ async def decide_session(
         raise ValidationError("A reason is required for this decision.")
 
     org = await provider_repo.get_organization(db, session.organization_id)
-    if decision == "approve":
+    if decision == "restore":
+        # Spec R20: suspended items can be brought back, audited like the rest.
+        if session.status != "suspended":
+            raise ConflictError("Only a suspended session can be restored.")
+        if _as_aware(session.ends_at) <= utcnow():
+            raise ConflictError("This session has already ended.")
+    if decision in ("approve", "restore"):
         if org is None or org.verification_status != "verified":
-            raise ConflictError("Cannot approve a session from an unverified provider.")
+            raise ConflictError(
+                f"Cannot {decision} a session from an unverified provider."
+            )
         session.status = "approved"
-        session.decision_reason = None
+        session.decision_reason = None if decision == "approve" else reason
     elif decision == "reject":
         session.status = "rejected"
         session.decision_reason = reason
@@ -433,7 +455,9 @@ async def decide_session(
     session.reviewed_by_user_id = admin.id
     await record_event(
         db,
-        action=f"session.{session.status}",
+        action="session.restored"
+        if decision == "restore"
+        else f"session.{session.status}",
         actor_user_id=admin.id,
         target_type="support_session",
         target_id=session.id,
