@@ -165,3 +165,10 @@ Tests use `sqlite+aiosqlite` for speed. Production and local dev use PostgreSQL,
 - **Honest labelling:** each answer shows "Understood by Claude (AI)" or "simple keyword rules".
 - **Not done:** an evaluation set to measure Claude vs rules on real Awgu phrasings (including Nigerian English and Igbo words), and a formal data-processing review before real users.
 
+### D30 — Installable web app (PWA) and a fuller, self-refreshing demo
+**Status:** Adopted (2026-10-21)
+- **Install instead of a native app:** `app/manifest.ts` (name, theme colours, maskable and Apple icons, shortcuts) makes the site installable on Android and desktop; iPhone users add it via Share → Add to Home Screen. This answers "where is the mobile app?" without a second codebase (the Expo app stays deferred, D13).
+- **Service worker (`public/sw.js`), deliberately small:** navigations are network-first with an offline page; fingerprinted `/_next/static`, `/images` and `/icons` files are cached after first use; `/api` and all private data are never cached (shared phones; listings must be current). Served with `Cache-Control: no-store` so updates reach phones. Registered in production builds only.
+- **Install button:** uses `beforeinstallprompt` where available (Chrome/Edge/Android) and shows the Share → Add to Home Screen hint on iOS; hidden once installed. Next.js's guide cautions that the prompt API isn't cross-browser, hence the iOS fallback text.
+- **Demo data:** 8 providers, 20 listings across all categories and 7 towns, 4 sessions. Seeding is idempotent and now refreshes passed deadlines and finished sessions of demo items (never staff-suspended ones), so the deployed demo doesn't decay before the pitch.
+
