@@ -1,16 +1,32 @@
 from __future__ import annotations
 
+import logging
 import secrets
 from datetime import UTC, datetime, timedelta
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
-from app.core.errors import AuthRequiredError, RateLimitedError, ValidationError
+from app.core.errors import (
+    AuthRequiredError,
+    RateLimitedError,
+    ServiceUnavailableError,
+    ValidationError,
+)
 from app.core.security import generate_token, hash_token, safe_equals
 from app.features.identity import repository as repo
+from app.features.identity.emails import sign_in_code_email
 from app.features.identity.models import OtpChallenge, User, UserSession
 from app.features.identity.schemas import UserPublic
+from app.integrations.messaging import (
+    AdapterNotConfiguredError,
+    OutgoingMessage,
+    email_delivers,
+    get_email_adapter,
+    sms_delivers,
+)
+
+logger = logging.getLogger("awgu.identity")
 
 _settings = get_settings()
 
@@ -84,16 +100,53 @@ async def dev_login(db: AsyncSession, email: str) -> tuple[UserPublic, str, str]
     return serialize_user(user), raw_token, raw_csrf
 
 
+def _delivers(channel: str) -> bool:
+    return email_delivers() if channel == "email" else sms_delivers()
+
+
+async def _send_code_email(to: str, code: str) -> bool:
+    subject, text, html = sign_in_code_email(code, OTP_TTL_MINUTES)
+    try:
+        adapter = get_email_adapter()
+    except AdapterNotConfiguredError:
+        logger.error("Email sign-in codes are enabled but the provider is not set up.")
+        return False
+    result = await adapter.send(
+        OutgoingMessage(to=to, subject=subject, body=text, html=html)
+    )
+    return result.ok
+
+
 async def request_otp(
     db: AsyncSession, *, channel: str, destination: str
 ) -> tuple[OtpChallenge, str | None]:
-    """Create an OTP challenge. In dev the code is also returned for testing."""
+    """Create an OTP challenge and deliver the code.
+
+    Email codes are really sent when an email provider is configured. When a
+    channel can't deliver (console adapters) the code is only returned in
+    demo mode (DEV_AUTH_ENABLED), so it can be shown on screen, clearly
+    labelled; otherwise that channel is refused.
+    """
     if channel not in OTP_CHANNELS:
         raise ValidationError("channel must be 'email' or 'phone'.")
 
     normalized = _normalize(channel, destination)
     if not normalized:
         raise ValidationError("A destination is required.")
+    if channel == "email" and ("@" not in normalized or "." not in normalized):
+        raise ValidationError("Enter a valid email address.")
+
+    delivers = _delivers(channel)
+    if not delivers and not _settings.dev_auth_enabled:
+        if channel == "phone":
+            raise ValidationError(
+                "Phone sign-in isn't available yet. Please use your email address.",
+                code="phone_unavailable",
+            )
+        raise ServiceUnavailableError(
+            "Email sign-in isn't set up on this server yet.",
+            code="email_unavailable",
+        )
 
     now = datetime.now(UTC)
     existing = await repo.latest_otp_challenge(
@@ -117,11 +170,20 @@ async def request_otp(
     await db.commit()
     await db.refresh(challenge)
 
-    dev_code: str | None = None
-    if _settings.dev_auth_enabled:
-        dev_code = code
-        print(f"[otp] {channel} -> {normalized} code={code}")
-    return challenge, dev_code
+    if channel == "email" and delivers:
+        if not await _send_code_email(normalized, code):
+            # Remove the challenge so the resend cooldown doesn't block a retry.
+            await db.delete(challenge)
+            await db.commit()
+            raise ServiceUnavailableError(
+                "We couldn't send the email just now. Check the address and try "
+                "again in a minute.",
+                code="email_send_failed",
+            )
+        return challenge, None
+
+    # Not delivered anywhere: only reachable in demo mode (checked above).
+    return challenge, code
 
 
 async def verify_otp(
