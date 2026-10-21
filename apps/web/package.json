@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "images": "node scripts/make-illustrations.mjs"
+    "images": "node scripts/make-illustrations.mjs",
+    "icons": "node scripts/make-icons.mjs"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.104.2",
