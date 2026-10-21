@@ -14,6 +14,8 @@ SEARCH = "/api/v1/opportunity-assistant/search"
 @pytest.fixture
 def ai_on(monkeypatch):
     monkeypatch.setattr(get_settings(), "ai_enabled", True)
+    # Rule-based engine only: never call the real Claude API from tests.
+    monkeypatch.setattr(get_settings(), "assistant_engine", "rules")
 
 
 @pytest.fixture
