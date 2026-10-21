@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { InlineError } from "@/components/shared/query-states";
@@ -17,16 +17,19 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { Separator } from "@/components/ui/separator";
 import {
   devLogin,
+  fetchAuthConfig,
   requestOtp,
   verifyOtp,
   type OtpChannel,
   type UserPublic,
 } from "@/lib/api/auth";
 
+import { queryKeys } from "@/lib/query/keys";
+
 import { useSignedIn } from "./queries";
 
-// Seeded by backend/app/scripts (synthetic data). Dev sign-in only works
-// while the API runs with DEV_AUTH_ENABLED=true.
+// Seeded by backend/app/scripts (synthetic data). Shown only in demo mode
+// (the API runs with DEV_AUTH_ENABLED=true).
 const DEMO_ACCOUNTS = [
   { role: "Applicant", email: "applicant@awgu.local" },
   { role: "Provider", email: "provider@awgu.local" },
@@ -43,6 +46,13 @@ export function SignInCard({
   const [destination, setDestination] = useState("");
   const [code, setCode] = useState("");
   const signedIn = useSignedIn();
+  const config = useQuery({
+    queryKey: queryKeys.authConfig,
+    queryFn: fetchAuthConfig,
+    staleTime: Infinity,
+  }).data;
+  const demo = config?.demo_mode ?? false;
+  const phoneAvailable = config?.phone_sign_in ?? false;
 
   const finish = (user: UserPublic) => {
     signedIn(user);
@@ -83,23 +93,30 @@ export function SignInCard({
       <CardContent className="grid gap-4">
         {!sent ? (
           <form
-            className="grid gap-4 sm:grid-cols-[10rem_1fr_auto] sm:items-end"
+            className={
+              phoneAvailable
+                ? "grid gap-4 sm:grid-cols-[10rem_1fr_auto] sm:items-end"
+                : "grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end"
+            }
             onSubmit={(event) => {
               event.preventDefault();
               request.mutate();
             }}
           >
-            <div className="grid gap-1.5">
-              <Label htmlFor="signin-channel">Sign in with</Label>
-              <NativeSelect
-                id="signin-channel"
-                value={channel}
-                onChange={(event) => setChannel(event.target.value as OtpChannel)}
-              >
-                <option value="email">Email</option>
-                <option value="phone">Phone</option>
-              </NativeSelect>
-            </div>
+            {/* Phone needs a funded SMS sender; until then it's demo-only. */}
+            {phoneAvailable ? (
+              <div className="grid gap-1.5">
+                <Label htmlFor="signin-channel">Sign in with</Label>
+                <NativeSelect
+                  id="signin-channel"
+                  value={channel}
+                  onChange={(event) => setChannel(event.target.value as OtpChannel)}
+                >
+                  <option value="email">Email</option>
+                  <option value="phone">Phone</option>
+                </NativeSelect>
+              </div>
+            ) : null}
             <div className="grid gap-1.5">
               <Label htmlFor="signin-destination">
                 {channel === "email" ? "Email address" : "Phone number"}
@@ -143,39 +160,48 @@ export function SignInCard({
           </form>
         )}
 
-        {request.data ? (
+        {request.data && !request.data.dev_code ? (
           <p role="status" className="text-sm text-muted-foreground">
-            We sent a code to {request.data.destination}.
+            We emailed a code to{" "}
+            <span className="font-medium text-foreground">{request.data.destination}</span>.
+            It expires in 10 minutes. Not there after a minute? Check your spam folder.
           </p>
         ) : null}
         {request.data?.dev_code ? (
-          <p className="rounded-lg border border-dashed border-border bg-muted px-3 py-2 text-xs text-muted-foreground">
-            Development mode: your code is{" "}
+          <p
+            role="status"
+            className="rounded-lg border border-dashed border-border bg-muted px-3 py-2 text-xs text-muted-foreground"
+          >
+            Demo mode — no message was sent. Your code is{" "}
             <span className="font-medium text-foreground">{request.data.dev_code}</span>.
           </p>
         ) : null}
 
-        <Separator />
-        <div className="grid gap-2">
-          <p className="text-xs text-muted-foreground">
-            Demo accounts (development only) — sign in with one tap:
-          </p>
-          <div className="grid gap-2 sm:grid-cols-3">
-            {DEMO_ACCOUNTS.map((account) => (
-              <Button
-                key={account.email}
-                type="button"
-                variant="outline"
-                onClick={() => dev.mutate(account.email)}
-                disabled={busy}
-                className="h-auto flex-col items-start gap-0 py-2.5 text-left"
-              >
-                <span>{account.role}</span>
-                <span className="text-xs font-normal text-muted-foreground">{account.email}</span>
-              </Button>
-            ))}
-          </div>
-        </div>
+        {demo ? (
+          <>
+            <Separator />
+            <div className="grid gap-2">
+              <p className="text-xs text-muted-foreground">
+                Demo mode — try a sample account with one tap:
+              </p>
+              <div className="grid gap-2 sm:grid-cols-3">
+                {DEMO_ACCOUNTS.map((account) => (
+                  <Button
+                    key={account.email}
+                    type="button"
+                    variant="outline"
+                    onClick={() => dev.mutate(account.email)}
+                    disabled={busy}
+                    className="h-auto flex-col items-start gap-0 py-2.5 text-left"
+                  >
+                    <span>{account.role}</span>
+                    <span className="text-xs font-normal text-muted-foreground">{account.email}</span>
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </>
+        ) : null}
 
         <InlineError error={error} />
       </CardContent>
