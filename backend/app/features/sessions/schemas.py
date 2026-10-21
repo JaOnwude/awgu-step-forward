@@ -114,5 +114,5 @@ class AttendanceUpdate(BaseModel):
 
 
 class SessionDecisionRequest(BaseModel):
-    decision: Literal["approve", "reject", "suspend"]
+    decision: Literal["approve", "reject", "suspend", "restore"]
     reason: str | None = Field(default=None, max_length=2000)
