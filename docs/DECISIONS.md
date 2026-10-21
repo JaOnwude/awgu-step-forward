@@ -150,3 +150,10 @@ Tests use `sqlite+aiosqlite` for speed. Production and local dev use PostgreSQL,
 - **Why not a worker or in-process scheduler:** free hosting has no background worker, and an in-process scheduler would stop whenever the API sleeps. The repo is public, so Actions minutes are free. Runs are idempotent, so a late or doubled run does no harm.
 - **Later:** move to a real scheduler (Render cron job or a worker) when on paid hosting; TRD §8 still says one scheduler, not one per API replica.
 
+### D28 — Restore support sessions
+**Status:** Adopted (2026-10-21)
+- Staff can **restore** a suspended support session (reason required; only while it hasn't ended and its provider is verified). Audited as `session.restored`; any other state returns 409.
+- The staff card is now "Published listings, sessions & providers": a Sessions tab lists upcoming approved sessions (Suspend) and suspended ones (Restore). `GET /admin/moderation/catalog` adds `live_sessions` and `suspended_sessions`.
+- The card treats a missing list as empty, because during a deploy the web app (Vercel) can briefly run against an older API (Render) that doesn't return it yet.
+- With this, every R20 transition is available for listings, sessions and providers.
+
