@@ -143,3 +143,10 @@ Tests use `sqlite+aiosqlite` for speed. Production and local dev use PostgreSQL,
 - **Phone:** SMS stays console-only (Termii needs a funded account and a registered sender ID), so phone sign-in appears only in demo mode.
 - Email reminders use the same adapter, so they are delivered too once a provider is configured.
 
+### D27 — Scheduled jobs and keep-awake via GitHub Actions
+**Status:** Adopted (2026-10-21)
+- **Problem:** reminders and listing expiry only ran by hand, and the free Render API sleeps after 15 minutes idle (about 50 s to wake, which would hurt a live pitch).
+- **Decision:** `POST /api/v1/internal/jobs/run` runs expiry then reminders and returns the counts. It is protected by a shared secret (`JOBS_TOKEN`, sent as a bearer token and compared in constant time); with no token set it answers 404. Each run is audited (`job.scheduled_run`). A GitHub Actions workflow (`.github/workflows/scheduled-jobs.yml`) calls it hourly, retrying while a sleeping API wakes, and, when the repo variable `KEEP_AWAKE` is `true`, pings `/healthz` every 10 minutes.
+- **Why not a worker or in-process scheduler:** free hosting has no background worker, and an in-process scheduler would stop whenever the API sleeps. The repo is public, so Actions minutes are free. Runs are idempotent, so a late or doubled run does no harm.
+- **Later:** move to a real scheduler (Render cron job or a worker) when on paid hosting; TRD §8 still says one scheduler, not one per API replica.
+
