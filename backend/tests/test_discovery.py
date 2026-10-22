@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import uuid
 from datetime import UTC, datetime, timedelta
 
 import pytest
@@ -203,6 +204,52 @@ async def test_search_filters_sort_and_awgu_first_ranking(client, seeded_admin):
     assert (
         await client.get("/api/v1/opportunities?category=not-a-type")
     ).status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_featured_listing_ranks_first_and_shows_its_source(
+    client, seeded_admin, session_factory
+):
+    from app.features.opportunities.models import Opportunity
+
+    now = datetime.now(UTC)
+    await _verified_provider(
+        client, admin_email=seeded_admin, email="feat@test.local", name="Feature Org"
+    )
+    awgu = await _publish(
+        client,
+        provider_email="feat@test.local",
+        admin_email=seeded_admin,
+        payload=_listing_payload(
+            title="Awgu listing", deadline_at=(now + timedelta(days=5)).isoformat()
+        ),
+    )
+    pinned = await _publish(
+        client,
+        provider_email="feat@test.local",
+        admin_email=seeded_admin,
+        payload=_listing_payload(
+            title="Enugu bootcamp",
+            location="Enugu",
+            deadline_at=(now + timedelta(days=90)).isoformat(),
+        ),
+    )
+    async with session_factory() as db:
+        opp = await db.get(Opportunity, uuid.UUID(pinned["id"]))
+        opp.is_featured = True
+        opp.image_url = "/images/listings/coding.webp"
+        opp.source_url = "https://example.test/announcement"
+        await db.commit()
+
+    client.cookies.clear()
+    items = (await client.get("/api/v1/opportunities")).json()["items"]
+    # Featured beats both the Awgu-first rule and the sooner deadline.
+    assert [item["id"] for item in items] == [pinned["id"], awgu["id"]]
+    assert items[0]["is_featured"] is True
+    assert items[0]["image_url"] == "/images/listings/coding.webp"
+    assert items[0]["source_url"] == "https://example.test/announcement"
+    assert items[1]["is_featured"] is False
+    assert items[1]["source_url"] is None
 
 
 @pytest.mark.asyncio
