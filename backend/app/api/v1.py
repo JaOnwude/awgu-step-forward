@@ -11,6 +11,7 @@ from app.features.assistant.router import router as assistant_router
 from app.features.audit.service import record_event
 from app.features.identity.avatar import router as avatar_router
 from app.features.identity.router import router as identity_router
+from app.features.impact.router import router as impact_router
 from app.features.moderation.router import router as moderation_router
 from app.features.notifications.router import router as notifications_router
 from app.features.notifications.router import staff_router as jobs_router
@@ -27,6 +28,7 @@ api_router.include_router(avatar_router)
 api_router.include_router(providers_router)
 api_router.include_router(opportunities_router)
 api_router.include_router(moderation_router)
+api_router.include_router(impact_router)
 api_router.include_router(applicant_router)
 api_router.include_router(applications_router)
 api_router.include_router(sessions_router)
