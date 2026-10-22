@@ -165,6 +165,9 @@ def _card(
         status=opp.status,
         is_expired=is_expired(opp, now=now),
         is_closing_soon=is_closing_soon(opp, now=now),
+        image_url=opp.image_url,
+        is_featured=opp.is_featured,
+        source_url=opp.source_url,
         updated_at=opp.updated_at,
         provider=_provider_ref(org),
     )
