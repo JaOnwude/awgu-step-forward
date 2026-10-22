@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { BarChart3 } from "lucide-react";
 
+import { buttonVariants } from "@/components/ui/button";
 import { ModerationQueue } from "@/features/admin/moderation-queue";
 
 export const metadata: Metadata = {
@@ -18,6 +21,12 @@ export default function AdminPage() {
           Routine target: first decision within 48 hours. Every decision is written to the
           audit log with your name and reason. Access is checked on the server.
         </p>
+        <Link
+          href="/admin/impact"
+          className={buttonVariants({ variant: "outline", className: "mt-2 w-fit" })}
+        >
+          <BarChart3 aria-hidden /> Impact dashboard
+        </Link>
       </header>
       <div className="mt-8">
         <ModerationQueue />
