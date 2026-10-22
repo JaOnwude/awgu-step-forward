@@ -22,7 +22,7 @@ export function SavedListings() {
   const rows = savedQuery.data ?? [];
 
   return (
-    <Card>
+    <Card id="saved" className="scroll-mt-24">
       <CardHeader>
         <h2 className="text-lg font-bold">Saved opportunities</h2>
       </CardHeader>
