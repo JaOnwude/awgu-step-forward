@@ -2,6 +2,8 @@
 @import "tw-animate-css";
 
 @custom-variant dark (&:where(.dark, .dark *));
+/* Styles for the left sidebar when folded to its icon rail (app-sidebar.tsx). */
+@custom-variant sidebar-collapsed (&:where([data-sidebar="collapsed"] *));
 
 /*
  * Awgu StepForward design tokens (design/mockups/styles.css is the visual
@@ -215,4 +217,26 @@
 }
 @utility animate-float {
   animation: float-soft 6s ease-in-out infinite;
+}
+
+/* Left sidebar width. The layout script sets data-sidebar on <html> before
+   first paint, so a folded sidebar never flashes open on load. */
+:root {
+  --sidebar-width: 15.5rem;
+}
+:root[data-sidebar="collapsed"] {
+  --sidebar-width: 4.5rem;
+}
+
+/* Slow zoom on the visible hero photo (hero-slideshow.tsx). */
+@keyframes hero-zoom {
+  from {
+    scale: 1;
+  }
+  to {
+    scale: 1.08;
+  }
+}
+@utility animate-hero-zoom {
+  animation: hero-zoom 9s ease-out forwards;
 }

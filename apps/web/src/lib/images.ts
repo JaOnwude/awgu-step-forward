@@ -16,7 +16,12 @@ const scene = (name: string): Illustration => ({
   height: 800,
 });
 
-export const HERO_IMAGE: Illustration = { src: "/images/hero.webp", width: 880, height: 960 };
+/** Home hero background photos (1920x1080), cross-faded in this order. */
+export const HERO_SLIDES: Illustration[] = [1, 2, 3, 4, 5].map((n) => ({
+  src: `/images/hero/slide-${n}.webp`,
+  width: 1920,
+  height: 1080,
+}));
 export const SESSIONS_IMAGE = scene("sessions");
 export const PROVIDERS_IMAGE = scene("providers");
 

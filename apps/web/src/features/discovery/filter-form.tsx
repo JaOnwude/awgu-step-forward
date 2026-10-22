@@ -12,7 +12,7 @@ import { deliveryModeLabel, opportunityTypeLabel } from "@/lib/opportunity-label
 import { cn } from "@/lib/utils";
 
 const fieldClass =
-  "h-12 w-full bg-transparent text-[0.95rem] outline-none placeholder:text-muted-foreground";
+  "h-10 w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground";
 
 // A plain GET form: filtering works without JavaScript and every filter
 // state has a shareable URL.
@@ -23,11 +23,11 @@ export function FilterForm({ query }: { query: DirectoryQuery }) {
       action="/opportunities"
       role="search"
       aria-label="Filter opportunities"
-      className="grid gap-2 rounded-3xl border bg-card p-2 shadow-[var(--shadow-soft)] md:grid-cols-[1.5fr_1fr_0.9fr_1fr_auto] md:items-center md:rounded-full md:p-1.5"
+      className="grid gap-1 rounded-2xl border bg-card p-1.5 shadow-xs md:grid-cols-[1.4fr_1.1fr_auto_auto_auto] md:items-center md:rounded-full md:p-1"
     >
       {query.category ? <input type="hidden" name="category" value={query.category} /> : null}
-      <label className="flex items-center gap-2.5 px-3 md:px-4">
-        <Search aria-hidden className="size-5 shrink-0 text-muted-foreground" />
+      <label className="flex items-center gap-2 px-3">
+        <Search aria-hidden className="size-4 shrink-0 text-muted-foreground" />
         <span className="sr-only">Keyword</span>
         <input
           type="search"
@@ -37,7 +37,7 @@ export function FilterForm({ query }: { query: DirectoryQuery }) {
           className={fieldClass}
         />
       </label>
-      <label className="flex items-center gap-2.5 border-t px-3 md:border-t-0 md:border-l md:px-4">
+      <label className="flex items-center gap-2 border-t px-3 md:border-t-0 md:border-l">
         <MapPin aria-hidden className="size-4 shrink-0 text-muted-foreground" />
         <span className="sr-only">Location</span>
         <input
@@ -48,9 +48,9 @@ export function FilterForm({ query }: { query: DirectoryQuery }) {
           className={fieldClass}
         />
       </label>
-      <label className="border-t px-3 md:border-t-0 md:border-l md:px-4">
+      <label className="border-t px-3 md:border-t-0 md:border-l">
         <span className="sr-only">Delivery</span>
-        <select name="delivery_mode" defaultValue={query.delivery_mode ?? ""} className={cn(fieldClass, "cursor-pointer")}>
+        <select name="delivery_mode" defaultValue={query.delivery_mode ?? ""} className={cn(fieldClass, "cursor-pointer text-muted-foreground")}>
           <option value="">In person or online</option>
           {FILTER_DELIVERY_MODES.map((mode) => (
             <option key={mode} value={mode}>
@@ -59,9 +59,9 @@ export function FilterForm({ query }: { query: DirectoryQuery }) {
           ))}
         </select>
       </label>
-      <label className="border-t px-3 md:border-t-0 md:border-l md:px-4">
+      <label className="border-t px-3 md:border-t-0 md:border-l">
         <span className="sr-only">Sort</span>
-        <select name="sort" defaultValue={query.sort ?? "relevance"} className={cn(fieldClass, "cursor-pointer")}>
+        <select name="sort" defaultValue={query.sort ?? "relevance"} className={cn(fieldClass, "cursor-pointer text-muted-foreground")}>
           {SORT_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
@@ -69,7 +69,7 @@ export function FilterForm({ query }: { query: DirectoryQuery }) {
           ))}
         </select>
       </label>
-      <Button type="submit" size="lg">
+      <Button type="submit" className="md:rounded-full">
         Search
       </Button>
     </form>
@@ -98,7 +98,7 @@ export function CategoryChips({
             href={hrefFor(option.value)}
             aria-current={active ? "true" : undefined}
             className={cn(
-              "inline-flex h-10 shrink-0 items-center rounded-full border bg-card px-4 text-sm font-semibold transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              "inline-flex h-8 shrink-0 items-center rounded-full border bg-card px-3.5 text-[0.8rem] font-semibold transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
               active && "border-foreground bg-foreground text-background hover:bg-foreground",
             )}
           >

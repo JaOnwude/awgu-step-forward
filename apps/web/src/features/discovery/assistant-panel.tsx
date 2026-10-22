@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { ArrowRight, ShieldAlert, Sparkles } from "lucide-react";
+import { ArrowRight, ShieldAlert, Sparkles, X } from "lucide-react";
 import { useState } from "react";
 
 import { InlineError } from "@/components/shared/query-states";
@@ -37,22 +37,51 @@ export function AssistantPanel() {
     staleTime: 5 * 60 * 1000,
   });
   const [query, setQuery] = useState("");
+  // Folded by default so the ordinary search bar stays the main way in.
+  const [open, setOpen] = useState(false);
   const ask = useMutation({ mutationFn: (text: string) => askAssistant(text) });
 
   if (!status.data?.enabled) return null;
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-expanded={false}
+        aria-controls="assistant-panel"
+        className="inline-flex w-fit items-center gap-2 rounded-full text-sm font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        <Sparkles aria-hidden className="size-4" />
+        Not sure what to search? Describe it in your own words
+      </button>
+    );
+  }
 
   const result = ask.data;
 
   return (
     <section
+      id="assistant-panel"
       aria-labelledby="assistant-title"
-      className="grid gap-4 rounded-3xl border border-primary/25 bg-primary-muted/50 p-5 sm:p-6"
+      className="grid gap-3 rounded-2xl border border-primary/25 bg-primary-muted/40 p-4 sm:p-5"
     >
-      <div className="flex items-center gap-2">
-        <Sparkles aria-hidden className="size-5 text-primary" />
-        <h2 id="assistant-title" className="text-lg font-bold">
-          Describe what you’re looking for
-        </h2>
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <Sparkles aria-hidden className="size-4 text-primary" />
+          <h2 id="assistant-title" className="text-base font-bold">
+            Describe what you’re looking for
+          </h2>
+        </div>
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          aria-expanded
+          aria-label="Close"
+          className="grid size-8 place-items-center rounded-full text-muted-foreground hover:bg-card hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <X aria-hidden className="size-4" />
+        </button>
       </div>
       <form
         className="grid gap-3"
@@ -63,6 +92,7 @@ export function AssistantPanel() {
       >
         <Textarea
           aria-label="Describe what you’re looking for"
+          autoFocus
           rows={2}
           maxLength={300}
           value={query}

@@ -15,7 +15,7 @@ export function ApplicationsList() {
   const rows = applicationsQuery.data ?? [];
 
   return (
-    <Card>
+    <Card id="applications" className="scroll-mt-24">
       <CardHeader>
         <h2 className="text-lg font-bold">Your applications</h2>
       </CardHeader>

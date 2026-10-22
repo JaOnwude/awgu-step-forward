@@ -18,10 +18,11 @@ import { ListingTrustBadge, StatusBadge } from "@/components/shared/status-badge
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { OpportunityCardView } from "@/features/discovery/opportunity-card";
+import { HeroSlideshow } from "@/features/home/hero-slideshow";
 import { StoriesCarousel } from "@/features/home/stories-carousel";
 import { fetchOpportunityDirectory, type OpportunityCard } from "@/lib/api/discovery";
 import { formatWatDate } from "@/lib/format";
-import { categoryImage, HERO_IMAGE, SESSIONS_IMAGE } from "@/lib/images";
+import { categoryImage, listingImage, SESSIONS_IMAGE } from "@/lib/images";
 
 const categories = [
   { type: "scholarship", name: "Scholarships", note: "Tuition and study support" },
@@ -58,11 +59,20 @@ async function HeroListing() {
   const featured = await loadFeatured();
   const listing = featured?.[0];
   if (!listing) return null;
+  const image = listingImage(listing);
   return (
     <Link
       href={`/opportunities/${listing.id}`}
-      className="relative ml-auto block w-[78%] rounded-2xl bg-card p-4 text-card-foreground shadow-[var(--shadow-lift)] transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sun"
+      className="relative block w-full max-w-sm overflow-hidden rounded-2xl bg-card p-4 pt-0 text-card-foreground shadow-[var(--shadow-lift)] transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sun"
     >
+      <Image
+        src={image.src}
+        width={image.width}
+        height={image.height}
+        alt=""
+        sizes="24rem"
+        className="-mx-4 mb-3 aspect-[2.4/1] w-[calc(100%+2rem)] max-w-none object-cover"
+      />
       <div className="flex items-center justify-between gap-2">
         <ListingTrustBadge listing={listing} verifiedLabel="Verified" />
         <span className="text-xs text-muted-foreground">Featured</span>
@@ -85,25 +95,16 @@ async function HeroListing() {
   );
 }
 
-function HeroArt() {
+// The featured listing and the help-sessions card, floating over the hero photos.
+function HeroCards() {
   return (
-    <div className="relative isolate flex aspect-[4/4.3] flex-col justify-between overflow-hidden rounded-[1.75rem] bg-brand-panel p-6 text-white sm:p-7">
-      {/* Above the fold: load straight away instead of lazily. */}
-      <Image
-        src={HERO_IMAGE.src}
-        alt=""
-        fill
-        loading="eager"
-        fetchPriority="high"
-        sizes="(min-width: 1024px) 28rem, 100vw"
-        className="-z-10 object-cover"
-      />
-      <Suspense fallback={<Skeleton className="relative ml-auto h-36 w-[78%] rounded-2xl" />}>
+    <div className="grid content-center gap-5 lg:justify-items-end">
+      <Suspense fallback={<Skeleton className="h-36 w-full max-w-sm rounded-2xl" />}>
         <HeroListing />
       </Suspense>
       <Link
         href="/sessions"
-        className="relative flex w-fit items-center gap-3 rounded-2xl bg-card px-4 py-3 motion-safe:animate-float text-card-foreground shadow-[var(--shadow-lift)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sun"
+        className="relative flex w-fit items-center gap-3 rounded-2xl bg-card/95 px-4 py-3 text-card-foreground shadow-[var(--shadow-lift)] backdrop-blur motion-safe:animate-float focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sun lg:mr-10"
       >
         <span className="grid size-9 place-items-center rounded-[10px] bg-highlight-muted text-highlight">
           <Users aria-hidden className="size-4" />
@@ -173,17 +174,20 @@ function FeaturedSkeleton() {
 export default function HomePage() {
   return (
     <>
-      {/* Hero */}
-      <section className="mx-auto grid w-full max-w-6xl items-center gap-12 px-4 pt-10 pb-16 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:pt-14 lg:pb-20">
+      {/* Hero: graduation photos cross-fade behind the text. */}
+      <section className="relative isolate overflow-hidden text-white">
+        <HeroSlideshow />
+        <div className="mx-auto grid w-full max-w-6xl items-center gap-12 px-4 pt-12 pb-20 sm:px-6 lg:min-h-[38rem] lg:grid-cols-[1.15fr_0.85fr] lg:pt-16 lg:pb-24">
         <div className="grid gap-7">
-          <StatusBadge tone="primary" icon={MapPin}>
+          <span className="inline-flex h-[1.625rem] w-fit items-center gap-1.5 rounded-full bg-white/15 px-2.5 text-[0.78rem] font-semibold text-white backdrop-blur">
+            <MapPin aria-hidden className="size-3.5" />
             Enugu State · Awgu first
-          </StatusBadge>
-          <h1 className="font-display text-[2.6rem] leading-[1.05] font-semibold sm:text-6xl lg:text-[4.25rem]">
+          </span>
+          <h1 className="font-display text-[2.6rem] leading-[1.05] font-semibold text-white [text-shadow:0_2px_24px_rgb(0_0_0/0.35)] sm:text-6xl lg:text-[4.25rem]">
             Find your next step,{" "}
-            <em className="font-normal text-primary">closer to home.</em>
+            <em className="font-normal text-sun">closer to home.</em>
           </h1>
-          <p className="max-w-xl text-lg leading-relaxed text-muted-foreground">
+          <p className="max-w-xl text-lg leading-relaxed text-white/85">
             Scholarships, training, apprenticeships, jobs and safe local paid work. Every
             provider is checked by our team before a listing goes live.
           </p>
@@ -193,7 +197,7 @@ export default function HomePage() {
             method="get"
             role="search"
             aria-label="Search opportunities"
-            className="grid gap-2 rounded-3xl border bg-card p-2 shadow-[var(--shadow-soft)] sm:grid-cols-[1.3fr_1fr_auto] sm:rounded-full sm:p-1.5"
+            className="grid gap-2 rounded-3xl bg-card p-2 text-card-foreground shadow-[var(--shadow-lift)] sm:grid-cols-[1.3fr_1fr_auto] sm:rounded-full sm:p-1.5"
           >
             <label className="flex items-center gap-2.5 px-3 sm:px-4">
               <Search aria-hidden className="size-5 text-muted-foreground" />
@@ -218,22 +222,23 @@ export default function HomePage() {
             </Button>
           </form>
 
-          <ul className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground">
+          <ul className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-white/85">
             <li className="flex items-center gap-1.5">
-              <ShieldCheck aria-hidden className="size-4 text-primary" />
+              <ShieldCheck aria-hidden className="size-4 text-sun" />
               Providers verified by staff
             </li>
             <li className="flex items-center gap-1.5">
-              <Banknote aria-hidden className="size-4 text-primary" />
+              <Banknote aria-hidden className="size-4 text-sun" />
               Never a fee to apply
             </li>
             <li className="flex items-center gap-1.5">
-              <Lock aria-hidden className="size-4 text-primary" />
+              <Lock aria-hidden className="size-4 text-sun" />
               Your profile stays private
             </li>
           </ul>
         </div>
-        <HeroArt />
+        <HeroCards />
+        </div>
       </section>
 
       {/* Categories */}

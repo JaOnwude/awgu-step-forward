@@ -32,6 +32,9 @@ async def _seed() -> None:
 
     try:
         await seed_demo.seed_demo()
+        from app.scripts.seed_demo_activity import seed_demo_activity
+
+        await seed_demo_activity()
     except Exception:
         logger.warning("Demo data seeding skipped.", exc_info=True)
 
