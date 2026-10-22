@@ -30,6 +30,10 @@ export interface OpportunityCard {
   status: string;
   is_expired: boolean;
   is_closing_soon: boolean;
+  image_url: string | null;
+  is_featured: boolean;
+  /** Set when the listing was copied from a public announcement. */
+  source_url: string | null;
   updated_at: string;
   provider: ProviderRef | null;
 }
