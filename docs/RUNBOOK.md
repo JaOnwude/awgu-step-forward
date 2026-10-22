@@ -43,11 +43,12 @@ Everyone signs in at **`/sign-in`** (header → **Sign in**). Under "Demo accoun
 
 Coming from a page (for example "Sign in to save" on a listing) returns you to that page instead. A "You're signed in" message confirms it; signing out shows "You're signed out" and goes home.
 
-Seeded by `app/scripts/seed.py` and `app/scripts/seed_demo.py` (both safe to run again — they skip what exists):
+Seeded by `app/scripts/seed.py`, `app/scripts/seed_demo.py` and `app/scripts/seed_demo_activity.py` (all safe to run again — they skip what exists):
 
-- 8 verified providers (skills centre, state education trust, market traders, tailoring cooperative, health centre, tech hub, farmers' cooperative, schools bursary fund).
-- 20 listings across every category and 7 towns (Awgu, Nenwe, Mgbowo, Ugbo, Ihe, Enugu, Enugu North): 19 open plus 1 closed bursary to show "closed" states.
-- 4 approved support sessions (in person and online).
+- 18 demo providers plus the real organisations behind 9 public-announcement listings and the HackathonAfrica 4.0 sample (D31).
+- 61 listings across every category and Awgu's towns: 58 open, 2 waiting for review, 1 closed bursary to show "closed" states.
+- 8 approved support sessions (in person and online).
+- 40 synthetic applicants (emails ending `@demo.awgu.local`) with saves, applications and session sign-ups over the last eight weeks, so the **impact dashboard** (`/admin/impact`, staff only) has something to show. The dashboard labels its figures as including demo data while these accounts exist (D32).
 - **Always fresh:** each run moves the deadline of an open demo listing forward if it has passed, and moves a finished demo session to its future date (listings staff suspended are left alone). Deploys re-run it on start; locally, run `uv run python -m app.scripts.seed_demo` before a demo.
 
 One browser window holds one signed-in person. Use a second window in Incognito to act as two roles at once.
@@ -95,7 +96,7 @@ docker compose down -v && docker compose up -d
 Then restart the API: it recreates the tables and the demo data. To re-seed without wiping:
 
 ```bash
-cd backend && uv run python -m app.scripts.seed && uv run python -m app.scripts.seed_demo
+cd backend && uv run python -m app.scripts.seed && uv run python -m app.scripts.seed_demo && uv run python -m app.scripts.seed_demo_activity
 ```
 
 ## 7. Deploy the demo (Neon + Render + Vercel)
@@ -113,7 +114,7 @@ Free plans are enough. Use the same region for the database and API (Frankfurt i
 | Root directory | `backend` |
 | Runtime | Python 3 |
 | Build command | `pip install uv && uv sync --frozen --no-dev` |
-| Start command | `.venv/bin/alembic upgrade head && .venv/bin/python -m app.scripts.seed && .venv/bin/python -m app.scripts.seed_demo && .venv/bin/uvicorn app.main:app --host 0.0.0.0 --port $PORT --proxy-headers --forwarded-allow-ips "*"` |
+| Start command | `.venv/bin/alembic upgrade head && .venv/bin/python -m app.scripts.seed && .venv/bin/python -m app.scripts.seed_demo && .venv/bin/python -m app.scripts.seed_demo_activity && .venv/bin/uvicorn app.main:app --host 0.0.0.0 --port $PORT --proxy-headers --forwarded-allow-ips "*"` |
 | Health check path | `/healthz` |
 
 Environment:
