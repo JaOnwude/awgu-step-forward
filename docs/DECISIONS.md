@@ -182,3 +182,11 @@ Tests use `sqlite+aiosqlite` for speed. Production and local dev use PostgreSQL,
 - **Minimum wage:** every full-time demo job pays at least N70,000 a month, Nigeria's national minimum wage.
 - **Tests never send real email:** `tests/conftest.py` forces the console email and SMS adapters, whatever `backend/.env` says.
 
+### D32 — Tutor UI feedback and the staff impact dashboard
+**Status:** Adopted (2026-10-22)
+- **Left sidebar (VS Code style):** sits under the unchanged top navigation and goes one level deeper (each category, saved items, applications, help, providers, staff). Folds to an icon rail with the top-left button, its own button or Ctrl+B; the choice is kept in `localStorage` and applied by the layout script before first paint. On phones it is a slide-out drawer; the bottom tab bar stays.
+- **Hero slideshow:** five graduation photos cross-fade every 6 seconds with a slow zoom, under a dark overlay so the white text stays readable. A pause button meets WCAG 2.2.2; reduced-motion users get one still photo; it stops while the tab is hidden.
+- **Opportunities search:** one slim filter row; the plain-language assistant is folded behind a link instead of a large panel.
+- **Impact dashboard (`/admin/impact`, staff only):** `GET /api/v1/admin/impact` returns counts only (no names or contacts): live listings (Awgu, category, closing soon), applicants by town, saves, applications (status, in-app vs tracked, good outcomes, an eight-week trend), sessions, reminders and trust figures. It answers “how will you measure impact?” for partners and prints to PDF.
+- **Synthetic demo activity:** `scripts/seed_demo_activity.py` adds 40 made-up applicants (`@demo.awgu.local`) with saves, applications and session sign-ups, within session capacity. While they exist the dashboard says its figures include demo data, so they are never passed off as real use. Delete those accounts before the pilot.
+
