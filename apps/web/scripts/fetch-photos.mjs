@@ -20,16 +20,6 @@ const OUT = fileURLToPath(new URL("../public/images/", import.meta.url));
 // sits, from 0 (top edge) to 1 (bottom edge).
 const PHOTOS = [
   {
-    name: "hero",
-    id: 38956556,
-    width: 880,
-    height: 960,
-    // The featured listing card covers the top of the hero, so keep the face low.
-    top: 0,
-    credit: "Warshu Media concept",
-    url: "https://www.pexels.com/photo/smiling-woman-in-vibrant-orange-top-outdoors-38956556/",
-  },
-  {
     name: "sessions",
     id: 32326229,
     width: 1200,
@@ -168,6 +158,27 @@ const LISTING_PHOTOS = [
   { name: "women-farmers", id: 31537320, credit: "Ahmed Abubakar Bature", url: "https://www.pexels.com/photo/african-women-harvesting-tea-in-taraba-nigeria-31537320/" },
   { name: "workshop-group", id: 29328857, credit: "Chris Wade Ntezicimpa", url: "https://www.pexels.com/photo/young-woman-speaks-at-indoor-conference-event-29328857/" },
 ];
+
+// Home page hero background, cross-faded in turn (public/images/hero/).
+const HERO_SLIDES = [
+  { id: 30575961, credit: "Uncle Rich Education", url: "https://www.pexels.com/photo/joyful-graduation-celebration-in-winneba-ghana-30575961/" },
+  { id: 19579986, credit: "Deffo Manizo", url: "https://www.pexels.com/photo/students-sitting-at-graduation-ceremony-19579986/" },
+  { id: 10604068, credit: "Adedire Abiodun", url: "https://www.pexels.com/photo/happy-people-wearing-their-graduation-gown-10604068/" },
+  { id: 36106805, credit: "Khalifa Yahaya", url: "https://www.pexels.com/photo/graduating-chemical-engineers-in-academic-regalia-36106805/" },
+  { id: 35603044, credit: "Wings Panic", url: "https://www.pexels.com/photo/joyous-graduation-celebration-outdoors-35603044/" },
+];
+
+HERO_SLIDES.forEach((photo, index) => {
+  PHOTOS.push({
+    width: 1920,
+    height: 1080,
+    position: "attention",
+    ...photo,
+    name: `hero/slide-${index + 1}`,
+  });
+});
+
+await mkdir(`${OUT}hero`, { recursive: true });
 
 for (const photo of LISTING_PHOTOS) {
   PHOTOS.push({
