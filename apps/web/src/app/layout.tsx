@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Fraunces, Plus_Jakarta_Sans } from "next/font/google";
 
 import "./globals.css";
+import { AppSidebar } from "@/components/shared/app-sidebar";
 import { MobileTabBar } from "@/components/shared/primary-nav";
 import { SiteFooter } from "@/components/shared/site-footer";
 import { ServiceWorkerRegistration } from "@/components/shared/service-worker";
@@ -40,7 +41,7 @@ export const viewport: Viewport = {
   ],
 };
 
-const themeScript = `(function(){try{var m=localStorage.getItem('awgu-theme')||'system';var d=m==='dark'||(m==='system'&&window.matchMedia('(prefers-color-scheme: dark)').matches);var r=document.documentElement;r.classList.toggle('dark',d);r.dataset.theme=m;r.style.colorScheme=d?'dark':'light';}catch(e){}})();`;
+const themeScript = `(function(){try{var m=localStorage.getItem('awgu-theme')||'system';var d=m==='dark'||(m==='system'&&window.matchMedia('(prefers-color-scheme: dark)').matches);var r=document.documentElement;r.classList.toggle('dark',d);r.dataset.theme=m;r.style.colorScheme=d?'dark':'light';r.dataset.sidebar=localStorage.getItem('awgu-sidebar')==='collapsed'?'collapsed':'expanded';}catch(e){}})();`;
 
 export default function RootLayout({
   children,
@@ -67,10 +68,15 @@ export default function RootLayout({
             </a>
             <div className="flex min-h-dvh flex-col">
               <SiteHeader />
-              <main id="main" className="flex-1">
-                {children}
-              </main>
-              <SiteFooter />
+              <div className="flex flex-1">
+                <AppSidebar />
+                <div className="flex min-w-0 flex-1 flex-col">
+                  <main id="main" className="flex-1">
+                    {children}
+                  </main>
+                  <SiteFooter />
+                </div>
+              </div>
             </div>
             <MobileTabBar />
             <Toaster />
