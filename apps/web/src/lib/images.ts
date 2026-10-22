@@ -1,7 +1,7 @@
 /**
- * Illustrations in public/images. They are placeholders drawn by
- * scripts/make-illustrations.mjs; replace any file with a real photo of the
- * same name (and 3:2 shape) and nothing else needs to change.
+ * Photos in public/images, downloaded from Pexels by scripts/fetch-photos.mjs
+ * (credits are listed there). The people shown are models, not our users.
+ * To swap one, change its id in that script and run `bun run images`.
  */
 
 export interface Illustration {
