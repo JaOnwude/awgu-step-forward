@@ -68,7 +68,8 @@ async def search_public(
         select(func.count()).select_from(Opportunity).where(*conditions)
     )
 
-    # Awgu-first ranking, then the soonest still-open deadline.
+    # Staff-featured listings first, then Awgu-first ranking, then the
+    # soonest still-open deadline.
     awgu_first = case((Opportunity.location.ilike("%awgu%"), 0), else_=1)
     deadline_missing = Opportunity.deadline_at.is_(None)
     if sort == "newest":
@@ -86,6 +87,7 @@ async def search_public(
         ]
     else:
         order = [
+            Opportunity.is_featured.desc(),
             awgu_first,
             deadline_missing,
             Opportunity.deadline_at.asc(),
