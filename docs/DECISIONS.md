@@ -172,3 +172,13 @@ Tests use `sqlite+aiosqlite` for speed. Production and local dev use PostgreSQL,
 - **Install button:** uses `beforeinstallprompt` where available (Chrome/Edge/Android) and shows the Share → Add to Home Screen hint on iOS; hidden once installed. Next.js's guide cautions that the prompt API isn't cross-browser, hence the iOS fallback text.
 - **Demo data:** 8 providers, 20 listings across all categories and 7 towns, 4 sessions. Seeding is idempotent and now refreshes passed deadlines and finished sessions of demo items (never staff-suspended ones), so the deployed demo doesn't decay before the pitch.
 
+### D31 — Pitch data: real announcements, a featured slot and a photo per listing
+**Status:** Adopted (2026-10-22)
+- **More data, honestly labelled:** 61 listings (58 open, 2 waiting for review so moderation can be shown, 1 expired) and 8 sessions. 51 come from fictional demo providers. 9 are real programmes (NELFUND, Female Scholars Foundation, 3MTT, NiYA and five Enugu MSME & Startup Agency programmes) copied from their official pages on 2026-10-22. Programmes whose 2026 window could not be confirmed on an official page (MTN, Agbami, NLNG, Dangote, Jim Ovia) were left out.
+- **`source_url` on listings:** set on copied listings. The site then shows "Public announcement" instead of "Verified", explains that the team has not verified it with the provider, and links to the original. Those organisations stay `pending` and have no provider account, because no one at them has signed up. Staff (the seeded admin) own the listings.
+- **`is_featured` on listings:** staff-pinned listings rank first in the default sort, so they lead the home page. Seed-only for now; there is no admin control yet.
+- **`image_url` on listings:** a photo under `/images/listings/` per listing; anything else falls back to the category picture, so a provider can't point the site at an unknown host. Photos are Pexels stock, cropped by `apps/web/scripts/fetch-photos.mjs`, and favour Nigerian and West African scenes.
+- **HackathonAfrica 4.0 (featured):** a sample listing prepared for AfricaPlan Foundation, who run HackathonAfrica, following their cohort 3.0 call and using their own banner photo. Cohort 4.0 has not been announced; the listing says so and gives about July 2027 as the planned start. AfricaPlan is shown as verified because the team knows them directly. Get their written OK before the listing or photo is used beyond the pitch.
+- **Minimum wage:** every full-time demo job pays at least N70,000 a month, Nigeria's national minimum wage.
+- **Tests never send real email:** `tests/conftest.py` forces the console email and SMS adapters, whatever `backend/.env` says.
+

@@ -32,3 +32,18 @@ const CATEGORY_IMAGES: Record<string, Illustration> = {
 export function categoryImage(type: string): Illustration {
   return CATEGORY_IMAGES[type] ?? CATEGORY_IMAGES.employment;
 }
+
+/**
+ * A listing's own photo when it has one in public/images (all 3:2, like the
+ * category pictures), otherwise its category picture. Remote addresses are
+ * ignored so a provider can't point the site at an unknown host.
+ */
+export function listingImage(listing: {
+  image_url: string | null;
+  opportunity_type: string;
+}): Illustration {
+  if (listing.image_url?.startsWith("/images/")) {
+    return { src: listing.image_url, width: 1200, height: 800 };
+  }
+  return categoryImage(listing.opportunity_type);
+}

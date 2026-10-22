@@ -6,6 +6,7 @@ import {
   Clock,
   Eye,
   HardHat,
+  Megaphone,
   MessageSquareWarning,
   ShieldCheck,
   type LucideIcon,
@@ -140,6 +141,35 @@ export function ApplicationStatusBadge({ status }: { status: string }) {
 }
 
 /** Adults-only marker for work listings (spec R22a). */
+/**
+ * Trust badge for a listing: "From a public announcement" when our team copied
+ * it from the provider's own announcement, otherwise the provider's
+ * verification status. Never shows "Verified" for a copied listing.
+ */
+export function ListingTrustBadge({
+  listing,
+  verifiedLabel,
+}: {
+  listing: {
+    source_url: string | null;
+    provider: { verification_status: string } | null;
+  };
+  verifiedLabel?: string;
+}) {
+  if (listing.source_url) {
+    return (
+      <StatusBadge tone="neutral" icon={Megaphone}>
+        Public announcement
+      </StatusBadge>
+    );
+  }
+  if (!listing.provider) return null;
+  const status = listing.provider.verification_status;
+  return (
+    <VerificationBadge status={status} label={status === "verified" ? verifiedLabel : undefined} />
+  );
+}
+
 export function AdultsOnlyBadge({ short = false }: { short?: boolean }) {
   return (
     <StatusBadge tone="accent" icon={HardHat}>

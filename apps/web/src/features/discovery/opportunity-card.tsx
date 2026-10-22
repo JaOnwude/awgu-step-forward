@@ -6,13 +6,13 @@ import { CategoryIcon } from "@/components/shared/category-icon";
 import {
   AdultsOnlyBadge,
   ListingStatusBadge,
+  ListingTrustBadge,
   StatusBadge,
-  VerificationBadge,
 } from "@/components/shared/status-badge";
 import type { OpportunityCard } from "@/lib/api/discovery";
 import { ADULT_ONLY_TYPES } from "@/lib/api/opportunities";
 import { formatWatDate } from "@/lib/format";
-import { categoryImage } from "@/lib/images";
+import { listingImage } from "@/lib/images";
 import { deliveryModeLabel, opportunityTypeLabel } from "@/lib/opportunity-labels";
 
 function Fact({ label, value }: { label: string; value: string }) {
@@ -36,7 +36,7 @@ export function OpportunityCardView({
   const showsPay = isWork || Boolean(opportunity.pay_details);
   const moneyValue =
     (showsPay ? opportunity.pay_details : opportunity.cost_details) ?? "Not stated";
-  const image = categoryImage(opportunity.opportunity_type);
+  const image = listingImage(opportunity);
 
   return (
     <article className="group relative grid gap-4 overflow-hidden rounded-2xl border bg-card p-5 pt-0 shadow-xs transition-all duration-300 focus-within:ring-2 focus-within:ring-ring hover:-translate-y-1 hover:border-primary/30 hover:shadow-[var(--shadow-lift)]">
@@ -72,14 +72,7 @@ export function OpportunityCardView({
       </div>
 
       <div className="flex flex-wrap gap-1.5">
-        {opportunity.provider ? (
-          <VerificationBadge
-            status={opportunity.provider.verification_status}
-            label={
-              opportunity.provider.verification_status === "verified" ? "Verified" : undefined
-            }
-          />
-        ) : null}
+        <ListingTrustBadge listing={opportunity} verifiedLabel="Verified" />
         {isWork ? <AdultsOnlyBadge short /> : null}
         {opportunity.is_expired ? (
           <ListingStatusBadge status="expired" />

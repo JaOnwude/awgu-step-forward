@@ -258,6 +258,7 @@ The demo meets the week-1 plan (`IMPLEMENTATION_PLAN.md`) but deliberately stops
 - **Files:** no document uploads or object storage.
 - **Offline:** an offline page and cached app files only (§10); listings and account data need a connection, by design.
 - **Mobile app:** the web app installs to the home screen as an app (§10); a native Android app is not built (D13).
-- **Images:** illustrations are placeholders (D23); the example stories are fictional and labelled.
-- **Operations:** free plans (API sleeps, no SLA, single instance), no load testing, no penetration test, no privacy impact assessment. Data is synthetic and must stay that way.
+- **Images:** Pexels stock photos of models, not users (`apps/web/scripts/fetch-photos.mjs`, `bun run images`), plus AfricaPlan Foundation's own HackathonAfrica photo for the sample listing (ask their permission before wider use); the example stories are fictional and labelled.
+- **Operations:** free plans (API sleeps, no SLA, single instance), no load testing, no penetration test, no privacy impact assessment.
+- **Data:** demo providers and their listings are fictional. Nine listings are real programmes copied from official pages on 2026-10-22 and labelled "Public announcement" (D31); recheck their dates before the pitch. No real personal data, ever.
 - **Language:** English only (no Igbo yet).

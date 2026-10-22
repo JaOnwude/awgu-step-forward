@@ -19,12 +19,12 @@ import {
 
 import { DetailSkeleton } from "@/components/shared/detail-skeleton";
 import { CategoryIcon } from "@/components/shared/category-icon";
-import { categoryImage } from "@/lib/images";
+import { listingImage } from "@/lib/images";
 import {
   AdultsOnlyBadge,
   ListingStatusBadge,
+  ListingTrustBadge,
   StatusBadge,
-  VerificationBadge,
 } from "@/components/shared/status-badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { buttonVariants } from "@/components/ui/button";
@@ -180,12 +180,10 @@ async function OpportunityContent({ params }: { params: Params }) {
         <div className="grid gap-8">
           <header className="grid gap-4">
             <div className="flex flex-wrap gap-2">
-              {provider ? (
-                <VerificationBadge
-                  status={provider.verification_status}
-                  label={isWork && provider.verification_status === "verified" ? "Verified employer" : undefined}
-                />
-              ) : null}
+              <ListingTrustBadge
+                listing={opportunity}
+                verifiedLabel={isWork ? "Verified employer" : undefined}
+              />
               {isWork ? <AdultsOnlyBadge /> : null}
               {opportunity.is_expired ? (
                 <ListingStatusBadge status="expired" />
@@ -209,7 +207,7 @@ async function OpportunityContent({ params }: { params: Params }) {
           </header>
 
           <Image
-            src={categoryImage(opportunity.opportunity_type).src}
+            src={listingImage(opportunity).src}
             width={1200}
             height={800}
             alt=""
@@ -217,6 +215,26 @@ async function OpportunityContent({ params }: { params: Params }) {
             sizes="(min-width: 1024px) 44rem, 100vw"
             className="aspect-[5/2] w-full rounded-3xl object-cover"
           />
+
+          {opportunity.source_url ? (
+            <Alert>
+              <Info aria-hidden />
+              <AlertTitle>Copied from a public announcement</AlertTitle>
+              <AlertDescription>
+                Our team copied this from the provider&apos;s own announcement but has not yet
+                verified it with them. Check the{" "}
+                <a
+                  href={opportunity.source_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-semibold underline underline-offset-2"
+                >
+                  original announcement
+                </a>{" "}
+                and only apply through the provider&apos;s official link. Never pay anyone to apply.
+              </AlertDescription>
+            </Alert>
+          ) : null}
 
           {opportunity.is_expired ? (
             <Alert>

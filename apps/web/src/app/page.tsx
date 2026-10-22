@@ -14,7 +14,7 @@ import {
 
 import { CategoryIcon } from "@/components/shared/category-icon";
 import { Reveal } from "@/components/shared/reveal";
-import { StatusBadge } from "@/components/shared/status-badge";
+import { ListingTrustBadge, StatusBadge } from "@/components/shared/status-badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { OpportunityCardView } from "@/features/discovery/opportunity-card";
@@ -64,9 +64,7 @@ async function HeroListing() {
       className="relative ml-auto block w-[78%] rounded-2xl bg-card p-4 text-card-foreground shadow-[var(--shadow-lift)] transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sun"
     >
       <div className="flex items-center justify-between gap-2">
-        <StatusBadge tone="verified" icon={ShieldCheck}>
-          Verified
-        </StatusBadge>
+        <ListingTrustBadge listing={listing} verifiedLabel="Verified" />
         <span className="text-xs text-muted-foreground">Featured</span>
       </div>
       <p className="mt-2.5 font-display text-lg leading-snug font-semibold">{listing.title}</p>

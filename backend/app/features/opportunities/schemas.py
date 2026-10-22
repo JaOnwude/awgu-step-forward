@@ -198,6 +198,10 @@ class OpportunityCard(BaseModel):
     status: str
     is_expired: bool = False
     is_closing_soon: bool = False
+    image_url: str | None = None
+    is_featured: bool = False
+    # Set when the listing was copied from a public announcement.
+    source_url: str | None = None
     updated_at: datetime
     provider: ProviderRef | None = None
 

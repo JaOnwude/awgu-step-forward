@@ -72,6 +72,16 @@ class Opportunity(Base):
         String(16), default="platform", nullable=False
     )
     external_url: Mapped[str | None] = mapped_column(String(500))
+    # A photo for this listing (a path under the web app's /public or a full
+    # URL). Empty means the card falls back to its category picture.
+    image_url: Mapped[str | None] = mapped_column(String(500))
+    # Staff-pinned listing shown first on the home page and in default search.
+    is_featured: Mapped[bool] = mapped_column(
+        Boolean, default=False, server_default="false", nullable=False
+    )
+    # Where a listing copied from a public announcement was found. When set,
+    # the listing is labelled as such instead of as provider-submitted.
+    source_url: Mapped[str | None] = mapped_column(String(500))
     min_age: Mapped[int | None] = mapped_column(Integer)
     deadline_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     status: Mapped[str] = mapped_column(
