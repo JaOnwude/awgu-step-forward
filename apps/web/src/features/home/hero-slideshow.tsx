@@ -64,7 +64,7 @@ export function HeroSlideshow() {
           );
         })}
         {/* Keeps white text readable over any photo, in light and dark mode. */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#08201a]/92 via-[#08201a]/70 to-[#08201a]/25" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#08201a]/80 via-[#08201a]/55 to-[#08201a]/15" />
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#08201a]/70 to-transparent" />
       </div>
 
