@@ -79,23 +79,25 @@ export default async function OpportunitiesPage({
       : "Find your next step";
 
   return (
-    <section className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-12">
-      <header className="grid max-w-3xl gap-2">
+    <section className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
+      <header className="grid max-w-3xl gap-1.5">
         <p className="eyebrow text-highlight">Verified opportunities</p>
-        <h1 className="font-display text-4xl font-semibold sm:text-5xl">{heading}</h1>
-        <p className="text-muted-foreground">
+        <h1 className="font-display text-3xl font-semibold sm:text-4xl">{heading}</h1>
+        <p className="text-sm text-muted-foreground">
           Across Enugu State, with Awgu listings first. Browsing needs no account — sign in
           only to save or apply.
         </p>
       </header>
 
-      <div className="mt-8 grid gap-4">
-        <AssistantPanel />
+      <div className="mt-6 grid gap-3">
         <FilterForm query={query} />
-        <CategoryChips
-          query={query}
-          hrefFor={(category) => buildHref({ ...query, category, page: undefined })}
-        />
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <CategoryChips
+            query={query}
+            hrefFor={(category) => buildHref({ ...query, category, page: undefined })}
+          />
+        </div>
+        <AssistantPanel />
       </div>
 
       {failed ? (
