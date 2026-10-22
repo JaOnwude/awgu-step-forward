@@ -1,6 +1,12 @@
 from __future__ import annotations
 
+import os
 from datetime import UTC, datetime
+
+# Tests must never send real email or SMS, whatever backend/.env says.
+# Environment variables win over .env, and this runs before settings load.
+os.environ["EMAIL_PROVIDER"] = "console"
+os.environ["SMS_PROVIDER"] = "console"
 
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
