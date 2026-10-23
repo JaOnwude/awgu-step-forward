@@ -9,6 +9,9 @@ export interface UserPublic {
   created_at: string;
   /** Own profile picture (API-relative, versioned), or null. */
   avatar_url: string | null;
+  /** The email was proved with a code (password-only accounts start false). */
+  email_verified: boolean;
+  has_password: boolean;
 }
 
 export interface LoginResponse {
@@ -69,6 +72,33 @@ export function verifyOtp(
   return apiRequest<LoginResponse>("/api/v1/auth/otp/verify", {
     method: "POST",
     body: { channel, destination, code },
+  });
+}
+
+export function passwordSignUp(email: string, password: string): Promise<LoginResponse> {
+  return apiRequest<LoginResponse>("/api/v1/auth/password/sign-up", {
+    method: "POST",
+    body: { email, password },
+  });
+}
+
+export function passwordSignIn(email: string, password: string): Promise<LoginResponse> {
+  return apiRequest<LoginResponse>("/api/v1/auth/password/sign-in", {
+    method: "POST",
+    body: { email, password },
+  });
+}
+
+/** Add a password, or change one (the current one is needed unless this
+ *  session began with an email code). */
+export function setPassword(
+  newPassword: string,
+  currentPassword?: string,
+): Promise<UserPublic> {
+  return apiRequest<UserPublic>("/api/v1/auth/password", {
+    method: "PUT",
+    body: { new_password: newPassword, current_password: currentPassword || null },
+    csrf: true,
   });
 }
 
