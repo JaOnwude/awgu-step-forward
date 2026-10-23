@@ -8,14 +8,16 @@ import { ThemeToggle } from "@/theme/theme-toggle";
 export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur">
-      <div className="flex h-[4.5rem] w-full items-center justify-between gap-4 px-4 sm:px-6 lg:px-5">
-        <div className="flex items-center gap-3">
+      <div className="flex h-[4.5rem] w-full items-center justify-between gap-2 px-3 sm:gap-4 sm:px-6 lg:px-5">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
           <SidebarToggle />
-          <Logo />
+          {/* Under 360px (small Android phones) only the mark fits. */}
+          <Logo className="max-[359px]:[&>span:last-child]:hidden" />
         </div>
         <PrimaryNav />
-        <div className="flex items-center gap-2 sm:gap-3">
-          <ThemeToggle />
+        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+          {/* On phones the theme switch lives in the menu drawer instead. */}
+          <ThemeToggle className="hidden sm:grid" />
           <HeaderAccount />
         </div>
       </div>
