@@ -38,6 +38,16 @@ const PHOTOS = [
     url: "https://www.pexels.com/photo/casual-office-meeting-in-lagos-nigeria-30688593/",
   },
   {
+    // Beside the sign-in form; portrait, like the original.
+    name: "sign-in",
+    id: 36106808,
+    width: 1000,
+    height: 1180,
+    position: "centre",
+    credit: "Khalifa Yahaya",
+    url: "https://www.pexels.com/photo/graduation-ceremony-of-chemical-engineering-students-36106808/",
+  },
+  {
     name: "category-scholarship",
     id: 35531445,
     width: 1200,

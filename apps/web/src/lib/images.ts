@@ -24,6 +24,12 @@ export const HERO_SLIDES: Illustration[] = [1, 2, 3, 4, 5].map((n) => ({
 }));
 export const SESSIONS_IMAGE = scene("sessions");
 export const PROVIDERS_IMAGE = scene("providers");
+/** Beside the sign-in form (portrait). */
+export const SIGN_IN_IMAGE: Illustration = {
+  src: "/images/sign-in.webp",
+  width: 1000,
+  height: 1180,
+};
 
 const CATEGORY_IMAGES: Record<string, Illustration> = {
   scholarship: scene("category-scholarship"),
