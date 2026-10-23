@@ -18,6 +18,8 @@ class UserPublic(BaseModel):
     created_at: datetime
     # Own profile picture, versioned so browsers refetch after a change.
     avatar_url: str | None = None
+    email_verified: bool = False
+    has_password: bool = False
 
 
 class DevLoginRequest(BaseModel):
@@ -51,6 +53,17 @@ class OtpVerifyRequest(BaseModel):
     channel: Literal["email", "phone"]
     destination: str = Field(min_length=3, max_length=320)
     code: str = Field(min_length=4, max_length=12)
+
+
+class PasswordSignIn(BaseModel):
+    email: str = Field(min_length=3, max_length=320)
+    # Length rules are checked in the service, with friendlier messages.
+    password: str = Field(min_length=1, max_length=256)
+
+
+class SetPasswordRequest(BaseModel):
+    new_password: str = Field(min_length=1, max_length=256)
+    current_password: str | None = Field(default=None, max_length=256)
 
 
 class LoginResponse(BaseModel):
