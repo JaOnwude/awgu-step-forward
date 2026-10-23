@@ -89,14 +89,14 @@ export default async function OpportunitiesPage({
         </p>
       </header>
 
-      <div className="mt-6 grid gap-3">
+      {/* min-w-0 lets the chip row scroll inside its column on phones
+          instead of stretching the page wider than the screen. */}
+      <div className="mt-6 grid min-w-0 grid-cols-1 gap-3">
         <FilterForm query={query} />
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <CategoryChips
-            query={query}
-            hrefFor={(category) => buildHref({ ...query, category, page: undefined })}
-          />
-        </div>
+        <CategoryChips
+          query={query}
+          hrefFor={(category) => buildHref({ ...query, category, page: undefined })}
+        />
         <AssistantPanel />
       </div>
 
