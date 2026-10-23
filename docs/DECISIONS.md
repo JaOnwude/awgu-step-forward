@@ -190,3 +190,11 @@ Tests use `sqlite+aiosqlite` for speed. Production and local dev use PostgreSQL,
 - **Impact dashboard (`/admin/impact`, staff only):** `GET /api/v1/admin/impact` returns counts only (no names or contacts): live listings (Awgu, category, closing soon), applicants by town, saves, applications (status, in-app vs tracked, good outcomes, an eight-week trend), sessions, reminders and trust figures. It answers “how will you measure impact?” for partners and prints to PDF.
 - **Synthetic demo activity:** `scripts/seed_demo_activity.py` adds 40 made-up applicants (`@demo.awgu.local`) with saves, applications and session sign-ups, within session capacity. While they exist the dashboard says its figures include demo data, so they are never passed off as real use. Delete those accounts before the pilot.
 
+
+### D33 — Sign in with an email code or a password
+**Status:** Adopted (2026-10-23)
+- **Why:** the tutor asked for a choice, and password sign-in also works while email codes can't reach everyone (Resend sends only to the owner's address until a domain is verified).
+- **Either opens the same account:** the sign-in page has two tabs, Email code and Password. People who signed up with a code can add a password on their account page; people who signed up with a password can still use codes.
+- **Storage:** an optional `users.password_hash` (Argon2, via `argon2-cffi`), never the password itself. Sessions record how they began (`user_sessions.auth_method`).
+- **No email confirmation at sign-up (for now):** a password account starts with its email unconfirmed. To stop someone claiming another person's address, (1) a password is never added to an existing account at sign-up, and (2) when the real owner later signs in with a code, a password set before the address was confirmed is removed and its sessions are signed out. Once a domain is verified for Resend, sign-up can send a confirmation code too.
+- **Guessing:** the same message for an unknown email, a wrong password and a code-only account; five wrong passwords lock password sign-in for 15 minutes (a code still works). Changing a password needs the current one, unless the session began with an email code, which is how a forgotten password is reset.

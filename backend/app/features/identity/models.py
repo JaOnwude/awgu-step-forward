@@ -24,6 +24,15 @@ class User(Base):
     )
     email_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     phone_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # Optional: people sign in with an email code, a password, or either.
+    # An Argon2 hash, never the password itself.
+    password_hash: Mapped[str | None] = mapped_column(String(255))
+    password_failed_attempts: Mapped[int] = mapped_column(
+        Integer, default=0, server_default="0", nullable=False
+    )
+    password_locked_until: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True)
+    )
     # Set when a profile picture is stored (UserAvatar); doubles as its version.
     avatar_updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(
@@ -79,6 +88,8 @@ class UserSession(Base):
         String(128), unique=True, index=True, nullable=False
     )
     csrf_token_hash: Mapped[str] = mapped_column(String(128), nullable=False)
+    # "code", "password" or "dev". Null for sessions made before passwords.
+    auth_method: Mapped[str | None] = mapped_column(String(16))
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=utcnow, nullable=False
     )

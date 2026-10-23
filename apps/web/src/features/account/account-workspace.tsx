@@ -17,6 +17,7 @@ import { UserAvatar } from "@/components/shared/user-avatar";
 
 import { ApplicationsList } from "./applications-list";
 import { MySessions } from "./my-sessions";
+import { PasswordCard } from "./password-card";
 import { ProfilePhotoCard } from "./profile-photo";
 import { ProfileForm } from "./profile-form";
 import { useApplications, useCurrentUser, useProfile, useSavedListings, useSignOut } from "./queries";
@@ -153,6 +154,7 @@ export function AccountWorkspace() {
         </div>
         <div id="profile" className="grid scroll-mt-24 gap-6">
           <ProfilePhotoCard user={user} />
+          <PasswordCard user={user} />
           {profileQuery.isPending ? (
             <SectionSkeleton label="Loading your profile…" />
           ) : profileQuery.isError ? (

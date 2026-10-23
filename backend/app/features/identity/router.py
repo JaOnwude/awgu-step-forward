@@ -15,6 +15,8 @@ from app.features.identity.schemas import (
     OtpRequest,
     OtpRequestResponse,
     OtpVerifyRequest,
+    PasswordSignIn,
+    SetPasswordRequest,
     UserPublic,
 )
 from app.integrations.messaging import email_delivers, sms_delivers
@@ -96,6 +98,47 @@ async def verify_otp(
     )
     _set_auth_cookies(response, raw_token, raw_csrf)
     return LoginResponse(user=user, csrf_token=raw_csrf)
+
+
+@router.post("/password/sign-up", response_model=LoginResponse, status_code=201)
+async def password_sign_up(
+    payload: PasswordSignIn,
+    response: Response,
+    db: AsyncSession = Depends(get_db),
+) -> LoginResponse:
+    user, raw_token, raw_csrf = await service.password_sign_up(
+        db, email=payload.email, password=payload.password
+    )
+    _set_auth_cookies(response, raw_token, raw_csrf)
+    return LoginResponse(user=user, csrf_token=raw_csrf)
+
+
+@router.post("/password/sign-in", response_model=LoginResponse)
+async def password_sign_in(
+    payload: PasswordSignIn,
+    response: Response,
+    db: AsyncSession = Depends(get_db),
+) -> LoginResponse:
+    user, raw_token, raw_csrf = await service.password_sign_in(
+        db, email=payload.email, password=payload.password
+    )
+    _set_auth_cookies(response, raw_token, raw_csrf)
+    return LoginResponse(user=user, csrf_token=raw_csrf)
+
+
+@router.put("/password", response_model=UserPublic)
+async def set_password(
+    payload: SetPasswordRequest,
+    ctx: AuthContext = Depends(verify_csrf),
+    db: AsyncSession = Depends(get_db),
+) -> UserPublic:
+    return await service.set_password(
+        db,
+        user=ctx.user,
+        session=ctx.session,
+        new_password=payload.new_password,
+        current_password=payload.current_password,
+    )
 
 
 @router.get("/me", response_model=UserPublic)

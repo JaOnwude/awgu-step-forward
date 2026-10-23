@@ -3,7 +3,7 @@ from __future__ import annotations
 import uuid
 from datetime import UTC, datetime
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.features.identity.models import OtpChallenge, User, UserRole, UserSession
@@ -68,12 +68,14 @@ async def create_session(
     token_hash: str,
     csrf_token_hash: str,
     expires_at: datetime,
+    auth_method: str | None = None,
 ) -> UserSession:
     session = UserSession(
         user_id=user_id,
         token_hash=token_hash,
         csrf_token_hash=csrf_token_hash,
         expires_at=expires_at,
+        auth_method=auth_method,
     )
     db.add(session)
     await db.flush()
@@ -91,6 +93,19 @@ async def get_session_by_token_hash(
 
 async def revoke_session(db: AsyncSession, session: UserSession) -> None:
     session.revoked_at = datetime.now(UTC)
+    await db.flush()
+
+
+async def revoke_other_sessions(
+    db: AsyncSession, user_id: uuid.UUID, *, keep: uuid.UUID | None = None
+) -> None:
+    """Sign a user out everywhere, except the session `keep` if given."""
+    query = update(UserSession).where(
+        UserSession.user_id == user_id, UserSession.revoked_at.is_(None)
+    )
+    if keep is not None:
+        query = query.where(UserSession.id != keep)
+    await db.execute(query.values(revoked_at=datetime.now(UTC)))
     await db.flush()
 
 
