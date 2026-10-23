@@ -10,6 +10,7 @@ import { Logo } from "@/components/shared/logo";
 import { useCurrentUser } from "@/features/account/queries";
 import { isActive, sidebarGroups, type SidebarItem } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/theme/theme-toggle";
 
 const STORAGE_KEY = "awgu-sidebar";
 const CHANGE_EVENT = "awgu-sidebar-change";
@@ -235,6 +236,11 @@ export function SidebarToggle() {
             </DialogPrimitive.Description>
             <div className="flex-1 overflow-y-auto px-3 py-5">
               <Links rail={false} onNavigate={() => setOpen(false)} />
+            </div>
+            {/* The top bar hides its theme switch on phones; it lives here. */}
+            <div className="flex items-center justify-between border-t px-5 py-4 sm:hidden">
+              <span className="text-sm font-medium text-muted-foreground">Light or dark</span>
+              <ThemeToggle />
             </div>
           </DialogPrimitive.Content>
         </DialogPrimitive.Portal>
