@@ -124,6 +124,18 @@ export function removeAvatar(): Promise<UserPublic> {
   return apiRequest<UserPublic>("/api/v1/me/avatar", { method: "DELETE", csrf: true });
 }
 
+/** Where "Download my data" points: a JSON file of everything we store. */
+export const MY_DATA_EXPORT_PATH = "/api/v1/me/export";
+
+/** Permanently delete the signed-in account and its data. */
+export function deleteAccount(): Promise<{ detail: string }> {
+  return apiRequest<{ detail: string }>("/api/v1/me", {
+    method: "DELETE",
+    body: { confirm: "DELETE" },
+    csrf: true,
+  });
+}
+
 export function adminPing(): Promise<AdminPingResponse> {
   return apiRequest<AdminPingResponse>("/api/v1/admin/ping");
 }
