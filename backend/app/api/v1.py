@@ -10,6 +10,7 @@ from app.features.applications.router import router as applications_router
 from app.features.assistant.router import router as assistant_router
 from app.features.audit.service import record_event
 from app.features.identity.avatar import router as avatar_router
+from app.features.identity.my_data import router as my_data_router
 from app.features.identity.router import router as identity_router
 from app.features.impact.router import router as impact_router
 from app.features.moderation.router import router as moderation_router
@@ -25,6 +26,7 @@ from app.jobs.router import router as scheduled_jobs_router
 api_router = APIRouter()
 api_router.include_router(identity_router)
 api_router.include_router(avatar_router)
+api_router.include_router(my_data_router)
 api_router.include_router(providers_router)
 api_router.include_router(opportunities_router)
 api_router.include_router(moderation_router)
