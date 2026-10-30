@@ -116,6 +116,7 @@ export const footerGroups: { title: string; items: NavItem[] }[] = [
     items: [
       { label: "How verification works", href: "/#verification" },
       { label: "How it works", href: "/#how-it-works" },
+      { label: "Privacy notice", href: "/privacy" },
       { label: "Staff workspace", href: "/admin" },
     ],
   },

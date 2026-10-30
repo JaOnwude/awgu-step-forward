@@ -18,6 +18,7 @@ import { UserAvatar } from "@/components/shared/user-avatar";
 import { ApplicationsList } from "./applications-list";
 import { MySessions } from "./my-sessions";
 import { PasswordCard } from "./password-card";
+import { YourDataCard } from "./your-data-card";
 import { ProfilePhotoCard } from "./profile-photo";
 import { ProfileForm } from "./profile-form";
 import { useApplications, useCurrentUser, useProfile, useSavedListings, useSignOut } from "./queries";
@@ -165,6 +166,7 @@ export function AccountWorkspace() {
             <ProfileForm key={profile ? "existing" : "new"} profile={profile} />
           )}
           <NotificationPreferencesCard />
+          <YourDataCard />
           <div className="grid gap-2 rounded-2xl border border-dashed p-5 text-sm">
             <p className="font-bold">Looking for something new?</p>
             <p className="text-muted-foreground">
