@@ -25,7 +25,7 @@ import {
   withdrawApplication,
   type TrackingStatus,
 } from "@/lib/api/applications";
-import { fetchCurrentUser, logout, type UserPublic } from "@/lib/api/auth";
+import { deleteAccount, fetchCurrentUser, logout, type UserPublic } from "@/lib/api/auth";
 import { isUnauthorized } from "@/lib/api/errors";
 import { queryKeys } from "@/lib/query/keys";
 
@@ -109,6 +109,23 @@ export function useSignOut({ redirectTo = "/" }: { redirectTo?: string | null } 
       switchUser(queryClient, null);
       toast("You're signed out", { description: "See you next time." });
       if (redirectTo) router.replace(redirectTo);
+    },
+  });
+}
+
+/** Delete the account, then leave the app signed out on the home page. */
+export function useDeleteAccount() {
+  const queryClient = useQueryClient();
+  const router = useRouter();
+  return useMutation({
+    mutationFn: deleteAccount,
+    onSuccess: () => {
+      signedOutAt = Date.now();
+      switchUser(queryClient, null);
+      toast("Your account has been deleted", {
+        description: "Your profile, applications and saved listings are gone.",
+      });
+      router.replace("/");
     },
   });
 }
