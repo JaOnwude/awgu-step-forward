@@ -38,6 +38,8 @@ FORM_QUESTIONS: tuple[dict, ...] = (
         "required": True,
     },
     {
+        # The web form answers this with its consent checkbox (apply-flow.tsx)
+        # instead of showing it as a separate question.
         "key": "confirm_accuracy",
         "label": "I confirm the information I provide is accurate.",
         "type": "yes_no",
