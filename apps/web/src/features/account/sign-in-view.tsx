@@ -75,7 +75,10 @@ export function SignInView() {
     <div className="grid gap-4">
       <SignInCard onSignedIn={onSignedIn} />
       <p className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-        <Lock aria-hidden className="size-3.5" /> Your profile is never public.
+        <Lock aria-hidden className="size-3.5" /> Your profile is never public.{" "}
+        <Link href="/privacy" className="font-semibold text-primary hover:underline">
+          Privacy notice
+        </Link>
       </p>
     </div>
   );
