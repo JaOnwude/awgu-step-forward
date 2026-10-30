@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   ErrorState,
@@ -32,6 +32,9 @@ import {
 import { ApiError } from "@/lib/api/client";
 import { isUnauthorized, toApiErrorInfo } from "@/lib/api/errors";
 import { queryKeys } from "@/lib/query/keys";
+
+// Answered by the review checkbox (backend/app/features/applications/form.py).
+const CONSENT_QUESTION_KEY = "confirm_accuracy";
 
 const SHARED_PROFILE_FIELDS = [
   "Preferred name",
@@ -73,10 +76,14 @@ export function ApplyFlow({
     queryFn: () => fetchApplicationForm(opportunityId),
   });
   const questions = formQuery.data?.questions ?? [];
+  // The consent checkbox answers the server's accuracy question, so it isn't
+  // asked twice.
+  const shownQuestions = questions.filter((q) => q.key !== CONSENT_QUESTION_KEY);
 
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [confirmed, setConfirmed] = useState(false);
   const [missing, setMissing] = useState<string[]>([]);
+  const receiptHeading = useRef<HTMLHeadingElement>(null);
 
   // One draft and one idempotency key per visit: retries of the same submit
   // reuse the key, so the server creates exactly one application.
@@ -92,7 +99,12 @@ export function ApplyFlow({
       draftIdRef.current,
       questions.map((q) => ({
         question_key: q.key,
-        answer_value: (answers[q.key] ?? "").trim() || null,
+        answer_value:
+          q.key === CONSENT_QUESTION_KEY
+            ? confirmed
+              ? "yes"
+              : null
+            : (answers[q.key] ?? "").trim() || null,
       })),
     );
     return draftIdRef.current;
@@ -126,8 +138,17 @@ export function ApplyFlow({
   const fieldErrors = error ? toApiErrorInfo(error).fieldErrors : {};
   const busy = submit.isPending || saveDraft.isPending;
 
+  // The receipt replaces a long form; on a phone the page would otherwise stay
+  // scrolled down at the footer. Focusing it also announces it to screen readers.
+  const submitted = Boolean(submit.data);
+  useEffect(() => {
+    if (!submitted) return;
+    window.scrollTo({ top: 0 });
+    receiptHeading.current?.focus({ preventScroll: true });
+  }, [submitted]);
+
   function handleSubmit() {
-    const unanswered = questions
+    const unanswered = shownQuestions
       .filter((q) => q.required && !(answers[q.key] ?? "").trim())
       .map((q) => q.label);
     setMissing(unanswered);
@@ -163,7 +184,9 @@ export function ApplyFlow({
     return (
       <Card className="border-verified/40 bg-verified/5">
         <CardHeader>
-          <h2 className="text-lg font-bold">Application submitted</h2>
+          <h2 ref={receiptHeading} tabIndex={-1} className="text-lg font-bold outline-none">
+            Application submitted
+          </h2>
           <CardDescription>{receipt.message} Keep this reference safe:</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
@@ -198,7 +221,7 @@ export function ApplyFlow({
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-5">
-          {questions.map((question) => {
+          {shownQuestions.map((question) => {
             const id = `answer-${question.key}`;
             const value = answers[question.key] ?? "";
             const invalid = Boolean(fieldErrors[question.key]);
@@ -260,7 +283,7 @@ export function ApplyFlow({
           <div>
             <p className="text-sm font-medium">Your answers</p>
             <dl className="mt-2 grid gap-3">
-              {questions.map((question) => (
+              {shownQuestions.map((question) => (
                 <div key={question.key}>
                   <dt className="text-xs text-muted-foreground">{question.label}</dt>
                   <dd className="text-sm whitespace-pre-line">
